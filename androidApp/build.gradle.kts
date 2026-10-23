@@ -30,6 +30,19 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
+    // Release signing comes from ~/.gradle/gradle.properties (prolens.storeFile, .storePassword, .keyAlias,
+    // .keyPassword), never from the repo. Without them the release builds unsigned.
+    val releaseStore = providers.gradleProperty("prolens.storeFile").orNull
+    signingConfigs {
+        if (releaseStore != null) {
+            create("release") {
+                storeFile = file(releaseStore)
+                storePassword = providers.gradleProperty("prolens.storePassword").get()
+                keyAlias = providers.gradleProperty("prolens.keyAlias").get()
+                keyPassword = providers.gradleProperty("prolens.keyPassword").get()
+            }
+        }
+    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -37,6 +50,7 @@ android {
     }
     buildTypes {
         release {
+            signingConfigs.findByName("release")?.let { signingConfig = it }
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

@@ -1,5 +1,7 @@
 package `in`.venkat.prolens.features.calculators
 
+import `in`.venkat.prolens.core.designsystem.ProBadge
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,7 +42,7 @@ fun BlurTab(state: AppState, gear: GearState, calc: CalcState) {
                     Text(title, style = MaterialTheme.typography.labelMedium)
                     BlurPreview(p, "Preview of background blur at ${PhotoFormat.aperture(ap)}")
                     Stat(formatPct(p), "Blur disc, % of frame width")
-                    Badge(blurVerdict(p).label)
+                    ProBadge(blurVerdict(p).label)
                 }
             }
         }

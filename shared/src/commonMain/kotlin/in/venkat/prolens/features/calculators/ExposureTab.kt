@@ -1,5 +1,7 @@
 package `in`.venkat.prolens.features.calculators
 
+import `in`.venkat.prolens.core.designsystem.ProSelect
+
 import androidx.compose.runtime.Composable
 import `in`.venkat.prolens.app.AppState
 import `in`.venkat.prolens.core.designsystem.ProCard

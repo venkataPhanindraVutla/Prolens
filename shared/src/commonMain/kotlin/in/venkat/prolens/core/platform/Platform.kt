@@ -28,6 +28,8 @@ enum class AppPermission { Camera, Location }
 
 interface PermissionHandle {
     val granted: Boolean
+    /** True once the user has turned down the request in this session. */
+    val denied: Boolean
     fun request()
 }
 

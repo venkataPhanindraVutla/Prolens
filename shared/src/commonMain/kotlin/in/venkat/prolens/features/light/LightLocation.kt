@@ -1,5 +1,7 @@
 package `in`.venkat.prolens.features.light
 
+import `in`.venkat.prolens.core.designsystem.ProTextField
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,25 +11,20 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import `in`.venkat.prolens.core.designsystem.ButtonVariant
 import `in`.venkat.prolens.core.designsystem.Pro
@@ -40,7 +37,6 @@ import `in`.venkat.prolens.core.photomath.PhotoFormat
 import `in`.venkat.prolens.core.platform.AppPermission
 import `in`.venkat.prolens.core.platform.rememberLocationRequester
 import `in`.venkat.prolens.core.platform.rememberPermission
-import kotlinx.coroutines.delay
 
 val LightPresets = listOf(
     Location("London", 51.5074, -0.1278, "Europe/London"),
@@ -93,7 +89,7 @@ fun LocationSection(loc: Location, onLocation: (Location) -> Unit) {
     }
     // Permission can arrive after the system dialog, so continue once it is granted.
     LaunchedEffect(permission.granted, waiting) { if (waiting && permission.granted) locate() }
-    LaunchedEffect(waiting) { if (waiting) { delay(20_000); if (waiting) message = BLOCKED } }
+    LaunchedEffect(permission.denied, waiting) { if (waiting && permission.denied) { waiting = false; message = BLOCKED } }
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -120,8 +116,8 @@ fun LocationSection(loc: Location, onLocation: (Location) -> Unit) {
                     variant = ButtonVariant.Outline, icon = ProIcons.MapPin, small = true,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    LightTextField(latText, { latText = it }, "Latitude", Modifier.weight(1f))
-                    LightTextField(lonText, { lonText = it }, "Longitude", Modifier.weight(1f))
+                    ProTextField(latText, { latText = it }, "Latitude", Modifier.weight(1f))
+                    ProTextField(lonText, { lonText = it }, "Longitude", Modifier.weight(1f))
                 }
                 ProButton(
                     "Save coordinates",
@@ -155,33 +151,3 @@ private fun Chip(text: String, selected: Boolean, onClick: () -> Unit) {
     )
 }
 
-/** A labelled single-line field in the app's input style. */
-@Composable
-fun LightTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    modifier: Modifier = Modifier,
-    suffix: String? = null,
-    keyboardType: KeyboardType = KeyboardType.Text,
-) {
-    val c = Pro.colors
-    val shape = RoundedCornerShape(Pro.shapes.radius)
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(label, style = MaterialTheme.typography.labelMedium)
-        Row(
-            Modifier.fillMaxWidth().height(40.dp).clip(shape).background(c.background).border(1.dp, c.input, shape).padding(horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            BasicTextField(
-                value, onValueChange,
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                textStyle = MaterialTheme.typography.bodyMedium.tabular,
-                cursorBrush = SolidColor(c.foreground),
-                keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            )
-            suffix?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
-        }
-    }
-}

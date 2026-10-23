@@ -1,5 +1,7 @@
 package `in`.venkat.prolens.features.light
 
+import `in`.venkat.prolens.core.designsystem.ProTextField
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -158,7 +160,7 @@ private fun NowCard(state: AppState, nowMs: Long, tz: kotlinx.datetime.TimeZone)
 private fun ShadowCard(heightText: String, onHeight: (String) -> Unit, altitude: Double, isToday: Boolean) {
     val height = parseCoordinate(heightText)?.takeIf { it > 0 } ?: 1.8
     ProCard(title = "Shadow length") {
-        LightTextField(heightText, onHeight, "Subject height", suffix = "m", keyboardType = KeyboardType.Decimal)
+        ProTextField(heightText, onHeight, "Subject height", suffix = "m", keyboardType = KeyboardType.Decimal)
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             if (altitude <= 0) {
                 Text("No shadow", style = MaterialTheme.typography.titleLarge)

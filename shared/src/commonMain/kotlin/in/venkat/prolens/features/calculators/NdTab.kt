@@ -1,5 +1,7 @@
 package `in`.venkat.prolens.features.calculators
 
+import `in`.venkat.prolens.core.designsystem.ProSelect
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row

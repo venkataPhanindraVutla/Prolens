@@ -84,10 +84,12 @@ actual fun rememberPermission(permission: AppPermission): PermissionHandle {
         AppPermission.Location -> Manifest.permission.ACCESS_COARSE_LOCATION
     }
     var granted by remember { mutableStateOf(ContextCompat.checkSelfPermission(context, name) == PackageManager.PERMISSION_GRANTED) }
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted = it }
-    return remember(granted) {
+    var denied by remember { mutableStateOf(false) }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted = it; denied = !it }
+    return remember(granted, denied) {
         object : PermissionHandle {
             override val granted: Boolean = granted
+            override val denied: Boolean = denied
             override fun request() = launcher.launch(name)
         }
     }

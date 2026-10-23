@@ -58,6 +58,8 @@ import `in`.venkat.prolens.core.designsystem.ProSwitchRow
 import `in`.venkat.prolens.core.grids.GridGroup
 import `in`.venkat.prolens.core.grids.Grids
 import `in`.venkat.prolens.core.grids.drawGrid
+import `in`.venkat.prolens.app.Tab
+import `in`.venkat.prolens.core.designsystem.ProListRow
 import `in`.venkat.prolens.core.model.AspectRatio
 import `in`.venkat.prolens.core.model.ExposureSettings
 import `in`.venkat.prolens.core.model.PeakingSensitivity
@@ -259,7 +261,7 @@ private fun TileRow(group: GridGroup, selectedId: String, onPick: (String) -> Un
 }
 
 @Composable
-internal fun GridSheet(settings: ViewfinderSettings, onChange: ((ViewfinderSettings) -> ViewfinderSettings) -> Unit, onDismiss: () -> Unit) {
+internal fun GridSheet(settings: ViewfinderSettings, landscape: Boolean, onChange: ((ViewfinderSettings) -> ViewfinderSettings) -> Unit, onDismiss: () -> Unit) {
     var group by rememberSaveable { mutableIntStateOf(Grids.spec(settings.grid)?.group?.ordinal ?: 0) }
     val family = GridGroup.entries[group]
     val asymmetric = Grids.spec(settings.grid)?.asymmetric == true || Grids.spec(settings.grid2)?.asymmetric == true
@@ -281,7 +283,7 @@ internal fun GridSheet(settings: ViewfinderSettings, onChange: ((ViewfinderSetti
         SectionLabel("Aspect ratio")
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             AspectRatio.entries.forEach { a ->
-                ProButton(a.label, { onChange { it.copy(aspect = a) } },
+                ProButton(a.label(landscape), { onChange { it.copy(aspect = a) } },
                     variant = if (a == settings.aspect) ButtonVariant.Primary else ButtonVariant.Outline, small = true)
             }
         }
@@ -339,6 +341,18 @@ internal fun ToolsSheet(settings: ViewfinderSettings, onChange: ((ViewfinderSett
                     }
                 }
             }
+        }
+    }
+}
+
+/* ---------- Other screens ---------- */
+
+/** The tab bar hides on the full-screen viewfinder; this sheet reaches the other screens. */
+@Composable
+internal fun ScreensSheet(onPick: (Tab) -> Unit, onDismiss: () -> Unit) {
+    ProSheet("Go to", onDismiss) {
+        listOf(Tab.Calculators, Tab.Light, Tab.Coach, Tab.Gear).forEach { t ->
+            ProListRow(t.label, onClick = { onPick(t) })
         }
     }
 }

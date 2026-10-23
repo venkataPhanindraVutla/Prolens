@@ -22,6 +22,14 @@ data class DeviceOrientation(
 @Composable
 expect fun rememberDeviceOrientation(enabled: Boolean = true): State<DeviceOrientation>
 
+/** How the phone is held ([Hold]: 0, 90, 180 or 270), from the accelerometer. Works while the screen stays portrait. */
+@Composable
+expect fun rememberHold(): State<Int>
+
+/** While in composition, hides the status and navigation bars. A swipe from the edge shows them briefly. */
+@Composable
+expect fun ImmersiveMode()
+
 /* ---------- Permissions ---------- */
 
 enum class AppPermission { Camera, Location }
@@ -90,6 +98,10 @@ interface CameraController {
     fun apply(exposure: ExposureSettings)
     /** Receives downsampled luma frames (~8 fps) while non-null. */
     fun setAnalyzer(analyzer: ((LumaFrame) -> Unit)?)
+    /** Turns the saved photo to match how the phone is held ([Hold]). */
+    fun setHold(hold: Int)
+    /** Crops preview, analysis frames and photos to [sensorRatio] (long / short side); null keeps the whole sensor. */
+    fun setAspect(sensorRatio: Double?)
     /** Saves a full-resolution photo. The callback gets a user-visible location, or an error. */
     fun capture(onResult: (Result<String>) -> Unit)
 }

@@ -11,7 +11,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.plus
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import `in`.venkat.prolens.core.platform.Hold
+import `in`.venkat.prolens.core.platform.ImmersiveMode
+import `in`.venkat.prolens.core.platform.rememberHold
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -58,6 +69,7 @@ private sealed interface Sheet {
     data object Grid : Sheet
     data object Tools : Sheet
     data class Value(val field: HudField) : Sheet
+    data object Screens : Sheet
 }
 
 @Composable
@@ -89,6 +101,12 @@ private fun Viewfinder(state: AppState) {
     val caps by controller.capabilities.collectAsStateWithLifecycle()
     val readout by controller.readout.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+
+    val hold by rememberHold()
+    val angle = rememberUiAngle(hold)
+    ImmersiveMode()
+    LaunchedEffect(hold) { controller.setHold(hold) }
+    LaunchedEffect(settings.aspect) { controller.setAspect(settings.aspect.sensorRatio) }
 
     val needsSensors = settings.level || settings.angleLabel || settings.sunPath || settings.groundGrid || settings.steadyShot
     val orientation = rememberDeviceOrientation(needsSensors)
@@ -168,54 +186,85 @@ private fun Viewfinder(state: AppState) {
 
     var sheet by remember { mutableStateOf<Sheet?>(null) }
 
-    Column(Modifier.fillMaxSize().statusBarsPadding()) {
+    /* Full screen: the preview is cropped to the chosen ratio and centred; the controls float on translucent strips.
+       The layout never moves with the phone; icons, values and the held layer turn instead. */
+    val density = LocalDensity.current
+    var topStrip by remember { mutableIntStateOf(0) }
+    var bottomStrip by remember { mutableIntStateOf(0) }
+    BoxWithConstraints(Modifier.fillMaxSize().background(Color.Black)) {
+        val aspect = (settings.aspect.portraitRatio?.toFloat() ?: caps.previewAspect).coerceIn(0.2f, 5f)
+        var w = maxWidth
+        var h = w / aspect
+        if (h > maxHeight) { h = maxHeight; w = h * aspect }
+        val gap = (maxHeight - h) / 2
+        val coverTop = (with(density) { topStrip.toDp() } - gap).coerceAtLeast(0.dp)
+        val coverBottom = (with(density) { bottomStrip.toDp() } - gap).coerceAtLeast(0.dp)
+
+        Box(Modifier.align(Alignment.Center).size(w, h).clipToBounds()) {
+            CameraPreview(controller, Modifier.fillMaxSize())
+            PreviewOverlay(settings, analysis, blink, orientation, lens, fov, sunPoints, sunNow, hold, Modifier.fillMaxSize())
+            Box(Modifier.fillMaxSize().padding(top = coverTop, bottom = coverBottom)) {
+                HeldLayer(hold, angle, Modifier.fillMaxSize()) {
+                    if (settings.histogram) HistogramPanel(analysis, Modifier.align(Alignment.TopStart))
+                    OverlayChips(settings, orientation, lens, phase == Phase.Holding, hold, Modifier.align(Alignment.TopEnd).padding(8.dp))
+                    if (settings.waveform) WaveformPanel(analysis, Modifier.align(Alignment.BottomStart))
+                    if (settings.falseColor) FalseColorLegend(Modifier.align(Alignment.BottomEnd).padding(8.dp))
+                    if (countdown > 0) {
+                        Text(
+                            "$countdown", Modifier.align(Alignment.Center),
+                            style = MaterialTheme.typography.headlineSmall.copy(fontSize = 96.sp, lineHeight = 100.sp).tabular,
+                        )
+                    }
+                }
+            }
+            if (flashAlpha > 0f) Box(Modifier.fillMaxSize().background(Color.White.copy(alpha = flashAlpha)))
+        }
+
         ToolRow(
             gridOn = settings.grid != "none" || settings.grid2 != "none",
             level = settings.level, histogram = settings.histogram, peaking = settings.peaking, zebras = settings.zebras,
+            angle = angle,
+            onApps = { sheet = Sheet.Screens },
             onGrid = { sheet = Sheet.Grid },
             onLevel = { state.updateViewfinder { it.copy(level = !it.level) } },
             onHistogram = { state.updateViewfinder { it.copy(histogram = !it.histogram) } },
             onPeaking = { state.updateViewfinder { it.copy(peaking = !it.peaking) } },
             onZebras = { state.updateViewfinder { it.copy(zebras = !it.zebras) } },
             onTools = { sheet = Sheet.Tools },
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .onSizeChanged { topStrip = it.height }
+                .background(Strip)
+                .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)),
         )
 
-        BoxWithConstraints(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-            val aspect = caps.previewAspect.coerceIn(0.2f, 5f)
-            var w = maxWidth
-            var h = w / aspect
-            if (h > maxHeight) { h = maxHeight; w = h * aspect }
-            Box(Modifier.size(w, h).clipToBounds()) {
-                CameraPreview(controller, Modifier.fillMaxSize())
-                PreviewOverlay(settings, analysis, blink, orientation, lens, fov, sunPoints, sunNow, Modifier.fillMaxSize())
-                OverlayChips(settings, orientation, lens, phase == Phase.Holding, Modifier.align(Alignment.TopEnd).padding(8.dp))
-                if (settings.falseColor) FalseColorLegend(Modifier.align(Alignment.BottomEnd).padding(8.dp))
-                if (countdown > 0) {
-                    Text(
-                        "$countdown", Modifier.align(Alignment.Center),
-                        style = MaterialTheme.typography.headlineSmall.copy(fontSize = 96.sp, lineHeight = 100.sp).tabular,
-                    )
-                }
-                if (flashAlpha > 0f) Box(Modifier.fillMaxSize().background(Color.White.copy(alpha = flashAlpha)))
-            }
+        Column(
+            Modifier
+                .align(Alignment.BottomCenter)
+                .onSizeChanged { bottomStrip = it.height }
+                .background(Strip)
+                .navigationBarsPadding(),
+        ) {
+            HudRow(settings.exposure, readout, caps, angle) { sheet = Sheet.Value(it) }
+            CaptureRow(
+                timerSeconds = settings.timerSeconds, active = phase != Phase.Idle, saved = saved, angle = angle,
+                onShutter = ::shoot,
+                onTimer = { state.updateViewfinder { it.copy(timerSeconds = when (it.timerSeconds) { 0 -> 2; 2 -> 10; else -> 0 }) } },
+                onLast = { state.showToast(if (saved > 0) "$saved saved this session" else "No captures yet") },
+            )
         }
-
-        HudRow(settings.exposure, readout, caps) { sheet = Sheet.Value(it) }
-        CaptureRow(
-            timerSeconds = settings.timerSeconds, active = phase != Phase.Idle, saved = saved,
-            onShutter = ::shoot,
-            onTimer = { state.updateViewfinder { it.copy(timerSeconds = when (it.timerSeconds) { 0 -> 2; 2 -> 10; else -> 0 }) } },
-            onLast = { state.showToast(if (saved > 0) "$saved saved this session" else "No captures yet") },
-        )
     }
 
     when (val s = sheet) {
         null -> {}
-        Sheet.Grid -> GridSheet(settings, { f -> state.updateViewfinder(f) }) { sheet = null }
+        Sheet.Grid -> GridSheet(settings, Hold.isLandscape(hold), { f -> state.updateViewfinder(f) }) { sheet = null }
+        Sheet.Screens -> ScreensSheet({ sheet = null; state.select(it) }) { sheet = null }
         Sheet.Tools -> ToolsSheet(settings, { f -> state.updateViewfinder(f) }) { sheet = null }
         is Sheet.Value -> ValueSheet(s.field, settings.exposure, caps, { f -> state.updateViewfinder { it.copy(exposure = f(it.exposure)) } }) { sheet = null }
     }
 }
+
+private val Strip = Color.Black.copy(alpha = 0.35f)
 
 /** Returns once the phone has been still for 300 ms. Without a gyro it just waits a moment. */
 internal suspend fun awaitSteady(read: () -> DeviceOrientation) {

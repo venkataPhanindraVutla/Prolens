@@ -45,7 +45,7 @@ import androidx.compose.ui.unit.sp
 import `in`.venkat.prolens.core.designsystem.OverlayChip
 import `in`.venkat.prolens.core.designsystem.Pro
 import `in`.venkat.prolens.core.grids.drawGrid
-import `in`.venkat.prolens.core.grids.fitAspect
+import `in`.venkat.prolens.core.platform.Hold
 import `in`.venkat.prolens.core.model.GearState
 import `in`.venkat.prolens.core.model.ViewfinderSettings
 import `in`.venkat.prolens.core.photomath.PhotoMath
@@ -88,6 +88,7 @@ internal fun PreviewOverlay(
     fov: Fov,
     sunPoints: List<SunPoint>,
     sunNow: State<SkyPosition?>,
+    hold: Int,
     modifier: Modifier = Modifier,
 ) {
     val success = Pro.colors.success
@@ -108,9 +109,8 @@ internal fun PreviewOverlay(
             if (settings.clipping && blink.value) an.clipping?.let { drawScaled(it, full, smooth = false) }
         }
 
-        val fr = fitAspect(0f, 0f, size.width, size.height, settings.aspect.portraitRatio)
-        val frame = Rect(fr[0], fr[1], fr[0] + fr[2], fr[1] + fr[3])
-        if (settings.aspect.portraitRatio != null) dimOutside(full, frame, 0.55f)
+        // The camera already crops the preview to the chosen ratio, so the frame is the whole canvas.
+        val frame = full
 
         if (settings.grid != "none") drawGrid(settings.grid, frame, Color(settings.gridColor), settings.gridOpacity, 1.dp.toPx(), settings.gridOrient)
         if (settings.grid2 != "none") drawGrid(settings.grid2, frame, Color(settings.gridColor), settings.gridOpacity * 0.8f, 1.dp.toPx(), settings.gridOrient)
@@ -118,11 +118,19 @@ internal fun PreviewOverlay(
         if (settings.groundGrid && o.available) drawGroundGrid(full, o, fov)
         if (settings.lensFrame && lens.ratio != null) drawLensFrame(full, lens.ratio.toFloat(), lensLayout)
         if (settings.sunPath && o.available) drawSun(full, o, fov, sunPoints, sunNow.value, hourLayouts)
-        if (settings.level && o.available) drawLevel(frame, o, success)
-
-        if (settings.histogram && an != null) drawHistogram(an.histogram)
-        if (settings.waveform) an?.waveform?.let { drawWaveform(it) }
+        if (settings.level && o.available) drawLevel(frame, o, success, hold)
     }
+}
+
+/** Histogram and waveform panels. They sit in the held layer so they read upright in landscape. */
+@Composable
+internal fun HistogramPanel(analysis: State<AnalysisResult?>, modifier: Modifier = Modifier) {
+    Canvas(modifier.size(112.dp, 64.dp)) { analysis.value?.let { drawHistogram(it.histogram) } }
+}
+
+@Composable
+internal fun WaveformPanel(analysis: State<AnalysisResult?>, modifier: Modifier = Modifier) {
+    Canvas(modifier.size(136.dp, 80.dp)) { analysis.value?.waveform?.let { drawWaveform(it) } }
 }
 
 private fun DrawScope.drawScaled(img: ImageBitmap, to: Rect, smooth: Boolean) {
@@ -153,7 +161,7 @@ private fun DrawScope.ring(color: Color, c: Offset, r: Float, w: Float) {
     drawCircle(color, r, c, style = Stroke(w))
 }
 
-private fun DrawScope.drawLevel(frame: Rect, o: DeviceOrientation, success: Color) {
+private fun DrawScope.drawLevel(frame: Rect, o: DeviceOrientation, success: Color, hold: Int) {
     val c = frame.center
     val dp = 1.dp.toPx()
     if (abs(o.pitch) > 70) {
@@ -179,24 +187,30 @@ private fun DrawScope.drawLevel(frame: Rect, o: DeviceOrientation, success: Colo
         edge(col, Offset(bubble.x, bubble.y - r - 8 * dp), Offset(bubble.x, bubble.y + r + 8 * dp), 2 * dp)
         return
     }
-    val len = min(frame.width * 0.3f, 110 * dp)
-    val col = if (abs(o.roll) < 0.5f) success else Color.White
+    // Drawn in the frame as the photographer holds it: turned for the hold, then tilted by the roll from that hold.
+    val rel = Hold.rollFromHold(o.roll, hold)
+    val sideways = Hold.isLandscape(hold)
+    val heldWidth = if (sideways) frame.height else frame.width
+    val len = min(heldWidth * 0.3f, 110 * dp)
+    val col = if (abs(rel) < 0.5f) success else Color.White
     val ref = Color.White.copy(alpha = 0.55f)
-    edge(ref, Offset(c.x - len - 26 * dp, c.y), Offset(c.x - len - 10 * dp, c.y), 1.5f * dp)
-    edge(ref, Offset(c.x + len + 10 * dp, c.y), Offset(c.x + len + 26 * dp, c.y), 1.5f * dp)
-    rotate(-o.roll, c) {
-        edge(col, Offset(c.x - len, c.y), Offset(c.x - 12 * dp, c.y), 2 * dp)
-        edge(col, Offset(c.x + 12 * dp, c.y), Offset(c.x + len, c.y), 2 * dp)
-        drawCircle(col, 2 * dp, c)
+    rotate(Hold.uiRotation(hold), c) {
+        edge(ref, Offset(c.x - len - 26 * dp, c.y), Offset(c.x - len - 10 * dp, c.y), 1.5f * dp)
+        edge(ref, Offset(c.x + len + 10 * dp, c.y), Offset(c.x + len + 26 * dp, c.y), 1.5f * dp)
+        rotate(-rel, c) {
+            edge(col, Offset(c.x - len, c.y), Offset(c.x - 12 * dp, c.y), 2 * dp)
+            edge(col, Offset(c.x + 12 * dp, c.y), Offset(c.x + len, c.y), 2 * dp)
+            drawCircle(col, 2 * dp, c)
+        }
+        val px = c.x + heldWidth / 2 - 16 * dp
+        val span = 48 * dp
+        val track = Color.White.copy(alpha = 0.4f)
+        edge(track, Offset(px, c.y - span), Offset(px, c.y + span), 1.5f * dp)
+        edge(track, Offset(px - 6 * dp, c.y), Offset(px + 6 * dp, c.y), 1.5f * dp)
+        val my = c.y - o.pitch.coerceIn(-30f, 30f) / 30f * span
+        drawCircle(Shadow, 5.5f * dp, Offset(px, my))
+        drawCircle(if (abs(o.pitch) < 1f) success else Color.White, 4 * dp, Offset(px, my))
     }
-    val px = frame.right - 16 * dp
-    val span = 48 * dp
-    val track = Color.White.copy(alpha = 0.4f)
-    edge(track, Offset(px, c.y - span), Offset(px, c.y + span), 1.5f * dp)
-    edge(track, Offset(px - 6 * dp, c.y), Offset(px + 6 * dp, c.y), 1.5f * dp)
-    val my = c.y - o.pitch.coerceIn(-30f, 30f) / 30f * span
-    drawCircle(Shadow, 5.5f * dp, Offset(px, my))
-    drawCircle(if (abs(o.pitch) < 1f) success else Color.White, 4 * dp, Offset(px, my))
 }
 
 private fun DrawScope.drawHistogram(bins: IntArray) {
@@ -354,9 +368,11 @@ internal fun OverlayChips(
     orientation: State<DeviceOrientation>,
     lens: LensInfo,
     holding: Boolean,
+    hold: Int,
     modifier: Modifier = Modifier,
 ) {
     val o by orientation
+    val roll = Hold.rollFromHold(o.roll, hold)
     val c = Pro.colors
     val needsSensors = settings.level || settings.angleLabel || settings.sunPath || settings.groundGrid
     Column(modifier, horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -366,13 +382,13 @@ internal fun OverlayChips(
         } else {
             if (settings.level) {
                 OverlayChip(
-                    "Roll ${signed(o.roll.toDouble(), 1)}° · Pitch ${signed(o.pitch.toDouble())}°",
-                    if (abs(o.roll) < 0.5f) c.success else null,
+                    "Roll ${signed(roll.toDouble(), 1)}° · Pitch ${signed(o.pitch.toDouble())}°",
+                    if (abs(roll) < 0.5f) c.success else null,
                 )
             }
             if (settings.angleLabel) {
                 OverlayChip(angleName(o.pitch))
-                if (abs(o.roll) > 8f) OverlayChip("Dutch tilt")
+                if (abs(roll) > 8f) OverlayChip("Dutch tilt")
             }
         }
         if (holding) OverlayChip("Hold steady")

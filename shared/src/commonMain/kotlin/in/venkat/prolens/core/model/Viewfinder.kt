@@ -14,18 +14,30 @@ data class ExposureSettings(
     val focusAuto: Boolean = true,
 )
 
-enum class AspectRatio(val label: String, val ratio: Double?) {
-    Full("Full", null),
-    Square("1:1", 1.0),
-    FourFive("4:5", 4.0 / 5),
-    ThreeTwo("3:2", 3.0 / 2),
-    FourThree("4:3", 4.0 / 3),
-    SixteenNine("16:9", 16.0 / 9),
-    NineSixteen("9:16", 9.0 / 16),
-    Cinema("2.39:1", 2.39);
+/**
+ * A crop of the sensor, described by its long and short sides. The camera screen is locked portrait, so the
+ * crop is drawn upright on screen, and the saved photo comes out landscape when the phone is held sideways.
+ */
+enum class AspectRatio(private val long: String?, private val short: String?) {
+    Full(null, null),
+    Square("1", "1"),
+    FourFive("5", "4"),
+    ThreeTwo("3", "2"),
+    SixteenNine("16", "9"),
+    Cinema("2.39", "1");
 
-    /** Width / height for a portrait screen: landscape ratios are turned upright. */
-    val portraitRatio: Double? get() = ratio?.let { if (it > 1) 1 / it else it }
+    /** Long side / short side; null keeps the whole sensor. */
+    val sensorRatio: Double? get() = long?.let { it.toDouble() / short!!.toDouble() }
+
+    /** Width / height on the portrait screen. */
+    val portraitRatio: Double? get() = sensorRatio?.let { 1 / it }
+
+    /** The ratio as the photographer sees it: 2:3 held upright, 3:2 held sideways. Cinema always reads 2.39:1. */
+    fun label(landscape: Boolean): String = when {
+        long == null -> "Full"
+        this == Cinema || landscape || long == short -> "$long:$short"
+        else -> "$short:$long"
+    }
 }
 
 enum class PeakingSensitivity { Low, Medium, High }

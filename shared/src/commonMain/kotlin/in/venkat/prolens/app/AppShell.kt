@@ -60,8 +60,8 @@ fun AppShell(state: AppState = viewModel { AppState() }) {
                 Text(
                     msg,
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 16.dp)
+                        .align(if (tab == Tab.Viewfinder) Alignment.TopCenter else Alignment.BottomCenter)
+                        .padding(top = 96.dp, bottom = 16.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(Pro.colors.card)
                         .border(1.dp, Pro.colors.border, RoundedCornerShape(8.dp))
@@ -70,7 +70,8 @@ fun AppShell(state: AppState = viewModel { AppState() }) {
                 )
             }
         }
-        TabBar(tab, state::select)
+        // The viewfinder is full screen; it has its own button for the other screens.
+        if (tab != Tab.Viewfinder) TabBar(tab, state::select)
     }
 }
 

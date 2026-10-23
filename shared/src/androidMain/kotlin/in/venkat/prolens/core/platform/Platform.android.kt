@@ -1,6 +1,12 @@
 package `in`.venkat.prolens.core.platform
 
 import android.Manifest
+import android.app.Activity
+import android.content.ContextWrapper
+import android.view.OrientationEventListener
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
@@ -73,6 +79,40 @@ actual fun rememberDeviceOrientation(enabled: Boolean): State<DeviceOrientation>
 
 private fun deg(rad: Float) = (rad * 180.0 / PI).toFloat()
 private fun wrap180(d: Float) = ((d + 540f) % 360f) - 180f
+
+@Composable
+actual fun rememberHold(): State<Int> {
+    val context = LocalContext.current
+    val hold = remember { mutableStateOf(0) }
+    DisposableEffect(Unit) {
+        val listener = object : OrientationEventListener(context, SensorManager.SENSOR_DELAY_UI) {
+            override fun onOrientationChanged(orientation: Int) {
+                val next = Hold.snap(orientation, hold.value)
+                if (next != hold.value) hold.value = next
+            }
+        }
+        if (listener.canDetectOrientation()) listener.enable()
+        onDispose { listener.disable() }
+    }
+    return hold
+}
+
+@Composable
+actual fun ImmersiveMode() {
+    val activity = LocalContext.current.findActivity() ?: return
+    DisposableEffect(activity) {
+        val controller = WindowCompat.getInsetsController(activity.window, activity.window.decorView)
+        controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        controller.hide(WindowInsetsCompat.Type.systemBars())
+        onDispose { controller.show(WindowInsetsCompat.Type.systemBars()) }
+    }
+}
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
 
 /* ---------- Permissions ---------- */
 

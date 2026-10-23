@@ -25,6 +25,10 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
+import androidx.camera.core.UseCaseGroup
+import androidx.camera.core.ViewPort
+import android.util.Rational
+import android.view.Surface
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.runtime.Composable
@@ -85,6 +89,8 @@ class AndroidCameraController(private val context: Context) : CameraController {
     private var aeOn = true
     private var lastSceneEv: Double? = null
     private var lastReadoutAt = 0L
+    private var hold = 0
+    private var sensorRatio: Double? = null
     @Volatile private var analyzer: ((LumaFrame) -> Unit)? = null
     @Volatile private var lastFrameAt = 0L
 
@@ -121,9 +127,15 @@ class AndroidCameraController(private val context: Context) : CameraController {
             .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
             .build()
         analysis.setAnalyzer(executor ?: return) { proxy -> analyze(proxy) }
-        val capture = ImageCapture.Builder().setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY).build()
+        val capture = ImageCapture.Builder()
+            .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+            .setTargetRotation(surfaceRotation(hold))
+            .build()
         imageCapture = capture
-        val cam = runCatching { p.bindToLifecycle(owner, CameraSelector.DEFAULT_BACK_CAMERA, preview, analysis, capture) }.getOrNull() ?: return
+        // The screen is locked portrait, so the crop is set upright; a sideways hold only turns the saved photo.
+        val group = UseCaseGroup.Builder().addUseCase(preview).addUseCase(analysis).addUseCase(capture)
+        sensorRatio?.let { r -> group.setViewPort(ViewPort.Builder(Rational(1000, (1000 * r).roundToInt()), Surface.ROTATION_0).build()) }
+        val cam = runCatching { p.bindToLifecycle(owner, CameraSelector.DEFAULT_BACK_CAMERA, group.build()) }.getOrNull() ?: return
         camera = cam
         _capabilities.value = readCapabilities(cam)
         apply(pending)
@@ -219,7 +231,26 @@ class AndroidCameraController(private val context: Context) : CameraController {
 
     override fun setAnalyzer(analyzer: ((LumaFrame) -> Unit)?) { this.analyzer = analyzer }
 
-    /** Downsamples the Y plane to ~160 px wide, rotated upright like the preview, at most ~8 fps. */
+    override fun setHold(hold: Int) {
+        this.hold = hold
+        imageCapture?.targetRotation = surfaceRotation(hold)
+    }
+
+    override fun setAspect(sensorRatio: Double?) {
+        if (sensorRatio == this.sensorRatio) return
+        this.sensorRatio = sensorRatio
+        provider?.let { rebind(it) }
+    }
+
+    /** CameraX's target rotation for a hold: turning the phone clockwise is a counter-clockwise display rotation. */
+    private fun surfaceRotation(hold: Int) = when (hold) {
+        90 -> Surface.ROTATION_270
+        180 -> Surface.ROTATION_180
+        270 -> Surface.ROTATION_90
+        else -> Surface.ROTATION_0
+    }
+
+    /** Downsamples the cropped Y plane to ~160 px wide, rotated upright like the preview, at most ~8 fps. */
     private fun analyze(proxy: ImageProxy) {
         try {
             val a = analyzer ?: return
@@ -229,7 +260,9 @@ class AndroidCameraController(private val context: Context) : CameraController {
             val plane = proxy.planes[0]
             val buf = plane.buffer
             val rs = plane.rowStride; val ps = plane.pixelStride
-            val sw = proxy.width; val sh = proxy.height
+            val crop = proxy.cropRect
+            val cx = crop.left; val cy = crop.top
+            val sw = crop.width(); val sh = crop.height()
             val rot = proxy.imageInfo.rotationDegrees
             val upW = if (rot % 180 == 0) sw else sh
             val upH = if (rot % 180 == 0) sh else sw
@@ -245,7 +278,7 @@ class AndroidCameraController(private val context: Context) : CameraController {
                     270 -> { sx = sw - 1 - uy; sy = ux }
                     else -> { sx = ux; sy = uy }
                 }
-                out[oy * ow + ox] = buf.get(sy * rs + sx * ps)
+                out[oy * ow + ox] = buf.get((cy + sy) * rs + (cx + sx) * ps)
             }
             a(LumaFrame(ow, oh, out))
         } finally {

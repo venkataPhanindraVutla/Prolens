@@ -1,0 +1,53 @@
+/* Light screen. Selectors are prefixed .light- */
+.light-sub { font-size: 13px; color: var(--muted-foreground); }
+.light-locrow { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.light-locname { font-weight: 500; }
+.light-coords { font-size: 12px; color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
+.light-msg { font-size: 12px; color: var(--muted-foreground); min-height: 0; }
+.light-msg:empty { display: none; }
+.light-daterow { display: flex; align-items: center; gap: 8px; }
+.light-daterow .input { flex: 1; min-width: 0; }
+
+.light-now-value { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; }
+.light-now-count { font-size: 14px; color: var(--muted-foreground); }
+
+.light-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.light-svg text { font-family: var(--font); font-size: 10px; fill: var(--muted-foreground); font-variant-numeric: tabular-nums; }
+.light-svg .light-axis { stroke: var(--border); stroke-width: 1; }
+.light-svg .light-horizon { stroke: var(--muted-foreground); stroke-width: 1; stroke-dasharray: 3 3; }
+.light-svg .light-curve { fill: none; stroke: var(--foreground); stroke-width: 1.75; stroke-linejoin: round; }
+.light-svg .light-dot { fill: var(--foreground); stroke: var(--background); stroke-width: 2; }
+.light-svg .light-nowline { stroke: var(--foreground); stroke-width: 1.5; }
+.light-svg .light-ring { fill: none; stroke: var(--border); stroke-width: 1.5; }
+.light-svg .light-arrow { stroke: #f59e0b; stroke-width: 2.5; stroke-linecap: round; }
+.light-svg .light-arrow-off { stroke: var(--muted-foreground); stroke-dasharray: 3 3; }
+.light-svg .light-mark { fill: var(--background); stroke: var(--foreground); stroke-width: 1.5; }
+.light-svg .light-card { fill: var(--foreground); font-weight: 600; font-size: 11px; }
+
+.light-seg-night { fill: #09090b; }
+.light-seg-astro { fill: #1f1f23; }
+.light-seg-nautical { fill: #34343a; }
+.light-seg-blue { fill: rgb(59 130 246 / 0.45); }
+.light-seg-golden { fill: rgb(245 158 11 / 0.55); }
+.light-seg-day { fill: #d4d4d8; }
+.light-band-golden { fill: rgb(245 158 11 / 0.18); }
+.light-band-blue { fill: rgb(59 130 246 / 0.22); }
+.light-bar-frame { fill: none; stroke: var(--border); }
+
+.light-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted-foreground); margin-top: 8px; }
+.light-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.light-swatch { width: 10px; height: 10px; border-radius: 3px; border: 1px solid var(--border); display: inline-block; }
+.light-sw-night { background: #09090b; }
+.light-sw-astro { background: #1f1f23; }
+.light-sw-nautical { background: #34343a; }
+.light-sw-blue { background: rgb(59 130 246 / 0.45); }
+.light-sw-golden { background: rgb(245 158 11 / 0.55); }
+.light-sw-day { background: #d4d4d8; }
+
+.light-times { margin-top: 12px; }
+.light-caption { font-size: 13px; margin-top: 8px; }
+.light-shadow-out { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.light-moon { display: grid; grid-template-columns: 72px 1fr; gap: 16px; align-items: center; }
+.light-moon .light-svg { width: 72px; }
+.light-note { font-size: 13px; color: var(--muted-foreground); display: flex; gap: 8px; align-items: flex-start; }
+.light-note .badge { flex-shrink: 0; margin-top: 1px; }

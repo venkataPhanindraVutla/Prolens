@@ -40,7 +40,7 @@ export default function Download() {
         <div className={css.card} data-reveal="up" data-reveal-delay={0.1}>
           <CropMarks />
           <ShutterButton variant="primary" href={info.url} className={css.cta}>
-            Download Prolens {info.version} for Android
+            Download <span className={css.brand}>Prolens</span> {info.version} for Android
           </ShutterButton>
           <p className={`mono ${css.meta}`}>
             <span>{formatSize(info.sizeBytes)}</span>

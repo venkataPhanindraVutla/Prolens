@@ -150,7 +150,7 @@
     aspect-ratio: 4 / 5;
   }
 
-  .layer figcaption a {
+  .layer figcaption {
     display: none;
   }
 }

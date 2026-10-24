@@ -84,13 +84,13 @@ export default function Story() {
               </>
             ) : (
               <>
+                <p className={css.body}>{c.body}</p>
                 <div className={css.cardPhone}>
                   <AppPhone statusBar={c.statusBar} className={css.phone}>
                     {c.phone}
                   </AppPhone>
                 </div>
                 <div className={css.cardControls}>{c.controls}</div>
-                <p className={css.body}>{c.body}</p>
               </>
             )}
             {c.photoId && <Caption id={c.photoId} />}

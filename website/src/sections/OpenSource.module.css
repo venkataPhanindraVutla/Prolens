@@ -48,3 +48,14 @@
   margin: 8px 0 0;
   color: var(--grey-4);
 }
+
+@media (max-width: 760px) {
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .actions > :first-child {
+    grid-column: 1 / -1;
+  }
+}

@@ -151,6 +151,8 @@
   flex-wrap: nowrap;
   overflow-x: auto;
   scroll-snap-type: x proximity;
+  /* Snap to the text column, not the screen edge. */
+  scroll-padding-inline: var(--gutter);
   margin: 0 calc(var(--gutter) * -1);
   padding: 2px var(--gutter);
   scrollbar-width: none;

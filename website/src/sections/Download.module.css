@@ -117,3 +117,18 @@
     padding: 0 16px;
   }
 }
+
+@media (max-width: 760px) {
+  /* "Download v1.0 for Android" fits one line on a phone; the section already says it's Prolens. */
+  .brand {
+    display: none;
+  }
+
+  .cta {
+    justify-self: stretch;
+    min-height: 56px;
+    padding: 0 1em;
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+}

@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import `in`.venkat.prolens.core.designsystem.Pro
 import `in`.venkat.prolens.core.designsystem.ProIcons
+import `in`.venkat.prolens.core.platform.rememberKeyValueStore
 import `in`.venkat.prolens.features.calculators.CalculatorsScreen
 import `in`.venkat.prolens.features.coach.CoachScreen
 import `in`.venkat.prolens.features.gear.GearScreen
@@ -39,7 +40,9 @@ import `in`.venkat.prolens.features.viewfinder.ViewfinderScreen
 import kotlinx.coroutines.delay
 
 @Composable
-fun AppShell(state: AppState = viewModel { AppState() }) {
+fun AppShell() {
+    val store = rememberKeyValueStore()
+    val state: AppState = viewModel { AppState(store) }
     val tab by state.tab.collectAsStateWithLifecycle()
     val toast by state.toast.collectAsStateWithLifecycle()
     val saveable = rememberSaveableStateHolder()

@@ -114,6 +114,18 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
     else -> null
 }
 
+@Composable
+actual fun rememberKeyValueStore(): KeyValueStore {
+    val context = LocalContext.current.applicationContext
+    return remember {
+        val prefs = context.getSharedPreferences("prolens", Context.MODE_PRIVATE)
+        object : KeyValueStore {
+            override fun get(key: String): String? = prefs.getString(key, null)
+            override fun put(key: String, value: String) = prefs.edit().putString(key, value).apply()
+        }
+    }
+}
+
 /* ---------- Permissions ---------- */
 
 @Composable

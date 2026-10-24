@@ -1,6 +1,20 @@
 package `in`.venkat.prolens.core.platform
 
 import android.content.ContentValues
+import android.graphics.Bitmap
+import android.graphics.Matrix
+import android.util.Range
+import androidx.camera.core.DynamicRange
+import androidx.camera.extensions.ExtensionMode
+import androidx.camera.extensions.ExtensionsManager
+import androidx.camera.video.HighSpeedVideoSessionConfig
+import androidx.camera.video.MediaStoreOutputOptions
+import androidx.camera.video.Quality
+import androidx.camera.video.QualitySelector
+import androidx.camera.video.Recorder
+import androidx.camera.video.VideoCapture
+import androidx.camera.video.VideoRecordEvent
+import `in`.venkat.prolens.core.model.CaptureMode
 import android.content.Context
 import android.hardware.camera2.CameraCaptureSession
 import android.hardware.camera2.CameraCharacteristics
@@ -76,6 +90,9 @@ actual fun CameraPreview(controller: CameraController, modifier: Modifier) {
 /**
  * CameraX for the session, Camera2 interop for manual ISO, shutter, focus and white balance.
  * Camera2 has no half-auto mode, so shutter or ISO priority solves the auto half from the last auto meter reading.
+ *
+ * Lenses and modes adapt to the phone: [CameraInventory] lists what the phone exposes, and each rebind opens
+ * the camera the current mode and zoom need, falling back to the primary camera if a lens can't be opened.
  */
 @OptIn(ExperimentalCamera2Interop::class)
 class AndroidCameraController(private val context: Context) : CameraController {
@@ -85,6 +102,25 @@ class AndroidCameraController(private val context: Context) : CameraController {
     override val readout: StateFlow<CameraReadout> = _readout
     private val _zoom = MutableStateFlow(ZoomState())
     override val zoom: StateFlow<ZoomState> = _zoom
+    private val _features = MutableStateFlow(CameraFeatures())
+    override val features: StateFlow<CameraFeatures> = _features
+    private val _recording = MutableStateFlow<Recording?>(null)
+    override val recording: StateFlow<Recording?> = _recording
+
+    private var inventory: CameraInventory? = null
+    private var extensions: ExtensionsManager? = null
+    private var front = false
+    private var mode = CaptureMode.Photo
+    private var slowFps = 0
+    private var boundLensId: String? = null
+    /** Field of view of the bound lens against the main back lens, so zoom can be shown relative to the main lens. */
+    private var boundRel = 1f
+    /** The zoom the photographer asked for, relative to the main back lens. */
+    private var wantZoom = 1f
+    private var recorder: Recorder? = null
+    private var videoCapture: VideoCapture<Recorder>? = null
+    private var activeRecording: androidx.camera.video.Recording? = null
+    private val main get() = ContextCompat.getMainExecutor(context)
 
     private var view: PreviewView? = null
     private var provider: ProcessCameraProvider? = null
@@ -113,61 +149,172 @@ class AndroidCameraController(private val context: Context) : CameraController {
             val p = future.get()
             provider = p
             this.owner = owner
-            rebind(p)
-        }, ContextCompat.getMainExecutor(context))
+            inventory = CameraInventory.read(context)
+            val ext = ExtensionsManager.getInstanceAsync(context, p)
+            ext.addListener({
+                extensions = runCatching { ext.get() }.getOrNull()
+                _features.value = readFeatures(p)
+                rebind(p)
+            }, main)
+        }, main)
     }
 
     private var owner: LifecycleOwner? = null
 
+    private val photoLike get() = mode != CaptureMode.SloMo && mode != CaptureMode.Night && mode != CaptureMode.Macro && mode != CaptureMode.Micro
+
+    /** The lens this mode and zoom need. */
+    private fun targetLens(): String? {
+        val inv = inventory ?: return null
+        return when {
+            front -> inv.frontId
+            mode == CaptureMode.Macro || mode == CaptureMode.Micro -> inv.closeFocusLensId ?: inv.primaryBackId
+            !photoLike -> inv.primaryBackId
+            else -> inv.ultraWide?.takeIf { it.id in inv.separate && wantZoom < inv.primaryZoom.start - 0.02f }?.id ?: inv.primaryBackId
+        }
+    }
+
+    private fun relOf(lensId: String?): Float {
+        val inv = inventory ?: return 1f
+        if (lensId == null || lensId == inv.primaryBackId || lensId == inv.frontId) return 1f
+        return inv.lenses.firstOrNull { it.id == lensId }?.relativeZoom ?: 1f
+    }
+
+    private fun selectorFor(p: ProcessCameraProvider, lensId: String?): CameraSelector {
+        val inv = inventory
+        fun byId(id: String) = p.availableCameraInfos.firstOrNull { Camera2CameraInfo.from(it).cameraId == id }?.cameraSelector
+        if (front) return inv?.frontId?.let(::byId) ?: CameraSelector.DEFAULT_FRONT_CAMERA
+        val id = lensId ?: return CameraSelector.DEFAULT_BACK_CAMERA
+        val open = inv?.openAs(id)
+        return when {
+            open == null -> byId(id) ?: CameraSelector.DEFAULT_BACK_CAMERA
+            open.physicalOf != null -> CameraSelector.Builder()
+                .addCameraFilter { infos -> infos.filter { Camera2CameraInfo.from(it).cameraId == open.physicalOf } }
+                .setPhysicalCameraId(open.cameraId)
+                .build()
+            else -> byId(open.cameraId) ?: CameraSelector.DEFAULT_BACK_CAMERA
+        }
+    }
+
     private fun rebind(p: ProcessCameraProvider) {
         val owner = owner ?: return
         val pv = view ?: return
+        stopRecording()
         p.unbindAll()
+        imageCapture = null
+        videoCapture = null
         val previewBuilder = Preview.Builder()
         Camera2Interop.Extender(previewBuilder).setSessionCaptureCallback(object : CameraCaptureSession.CaptureCallback() {
             override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) = onResult(result)
         })
         val preview = previewBuilder.build().also { it.surfaceProvider = pv.surfaceProvider }
-        val analysis = ImageAnalysis.Builder()
-            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
-            .build()
-        analysis.setAnalyzer(executor ?: return) { proxy -> analyze(proxy) }
+
+        var lensId = targetLens()
+        var cam = if (mode == CaptureMode.SloMo && !front && slowFps > 0) bindSlowMotion(p, owner, selectorFor(p, lensId), preview)
+            else bindPhoto(p, owner, selectorFor(p, lensId), preview)
+        if (cam == null && lensId != inventory?.primaryBackId && !front) {
+            // Some phones list a lens but won't open it for apps: fall back to the primary camera.
+            Log.w("Prolens", "Couldn't open lens $lensId, using the primary camera")
+            lensId = inventory?.primaryBackId
+            cam = bindPhoto(p, owner, selectorFor(p, lensId), preview)
+        }
+        cam ?: return
+        boundLensId = lensId
+        boundRel = relOf(lensId)
+        camera?.cameraInfo?.zoomState?.removeObservers(owner)
+        camera = cam
+        _capabilities.value = readCapabilities(cam)
+        cam.cameraInfo.zoomState.observe(owner) { z -> publishZoom(z.minZoomRatio, z.maxZoomRatio, z.zoomRatio) }
+        val z = cam.cameraInfo.zoomState.value
+        cam.cameraControl.setZoomRatio((wantZoom / boundRel).coerceIn(z?.minZoomRatio ?: 1f, z?.maxZoomRatio ?: 1f))
+        apply(pending)
+    }
+
+    private fun bindPhoto(p: ProcessCameraProvider, owner: LifecycleOwner, base: CameraSelector, preview: Preview): Camera? {
+        var selector = base
+        var withAnalysis = true
+        val ext = extensions
+        if (mode == CaptureMode.Night && !front && ext != null && runCatching { ext.isExtensionAvailable(base, ExtensionMode.NIGHT) }.getOrDefault(false)) {
+            selector = ext.getExtensionEnabledCameraSelector(base, ExtensionMode.NIGHT)
+            withAnalysis = runCatching { ext.isImageAnalysisSupported(base, ExtensionMode.NIGHT) }.getOrDefault(false)
+        }
         val capture = ImageCapture.Builder()
             .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
             .setTargetRotation(surfaceRotation(hold))
             .build()
-        imageCapture = capture
         // The screen is locked portrait, so the crop is set upright; a sideways hold only turns the saved photo.
-        val group = UseCaseGroup.Builder().addUseCase(preview).addUseCase(analysis).addUseCase(capture)
+        val group = UseCaseGroup.Builder().addUseCase(preview).addUseCase(capture)
+        if (withAnalysis) {
+            val analysis = ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
+                .build()
+            executor?.let { e -> analysis.setAnalyzer(e) { proxy -> analyze(proxy) } }
+            group.addUseCase(analysis)
+        }
         sensorRatio?.let { r -> group.setViewPort(ViewPort.Builder(Rational(1000, (1000 * r).roundToInt()), Surface.ROTATION_0).build()) }
-        val cam = runCatching { p.bindToLifecycle(owner, backCamera(p), group.build()) }.getOrNull() ?: return
-        camera?.cameraInfo?.zoomState?.removeObservers(owner)
-        camera = cam
-        _capabilities.value = readCapabilities(cam)
-        cam.cameraInfo.zoomState.observe(owner) { z -> _zoom.value = ZoomState(z.minZoomRatio, z.maxZoomRatio, z.zoomRatio) }
-        cam.cameraControl.setZoomRatio(_zoom.value.ratio.coerceAtLeast(cam.cameraInfo.zoomState.value?.minZoomRatio ?: 1f))
-        apply(pending)
+        val cam = runCatching { p.bindToLifecycle(owner, selector, group.build()) }
+            .onFailure { Log.w("Prolens", "Photo session failed", it) }.getOrNull()
+        if (cam != null) imageCapture = capture
+        return cam
     }
 
-    /**
-     * The back camera with the widest zoom range. On multi-camera phones that's the logical camera that
-     * includes the ultra-wide (0.6×), which the default back camera (main lens only, from 1×) leaves out.
-     */
-    private fun backCamera(p: ProcessCameraProvider): CameraSelector {
-        fun range(info: CameraInfo): android.util.Range<Float>? =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                runCatching { Camera2CameraInfo.from(info).getCameraCharacteristic(CameraCharacteristics.CONTROL_ZOOM_RATIO_RANGE) }.getOrNull()
-            } else null
-        val best = p.availableCameraInfos
-            .filter { it.lensFacing == CameraSelector.LENS_FACING_BACK }
-            .sortedWith(compareBy<CameraInfo> { range(it)?.lower ?: 1f }.thenByDescending { range(it)?.upper ?: 1f })
-            .firstOrNull() ?: return CameraSelector.DEFAULT_BACK_CAMERA
-        Log.i("Prolens", "Back camera ${Camera2CameraInfo.from(best).cameraId}, zoom ${range(best)}")
-        return best.cameraSelector
+    /** High-speed video for slo-mo. No audio, so no microphone permission is needed. */
+    private fun bindSlowMotion(p: ProcessCameraProvider, owner: LifecycleOwner, selector: CameraSelector, preview: Preview): Camera? = runCatching {
+        val info = p.getCameraInfo(selector)
+        val qualities = Recorder.getHighSpeedVideoCapabilities(info)?.getSupportedQualities(DynamicRange.SDR).orEmpty()
+        val quality = qualities.firstOrNull { it == Quality.HD } ?: qualities.first()
+        val rec = Recorder.Builder().setQualitySelector(QualitySelector.from(quality)).build()
+        val vc = VideoCapture.withOutput(rec).also { it.targetRotation = surfaceRotation(hold) }
+        val config = HighSpeedVideoSessionConfig.Builder(vc)
+            .setPreview(preview)
+            .setSlowMotionEnabled(true)
+            .setFrameRateRange(Range(slowFps, slowFps))
+            .build()
+        val cam = p.bindToLifecycle(owner, selector, config)
+        recorder = rec
+        videoCapture = vc
+        cam
+    }.onFailure { Log.w("Prolens", "Slo-mo session failed", it) }.getOrNull()
+
+    /** Publishes zoom relative to the main back lens, spanning the ultra-wide when it's a separate camera. */
+    private fun publishZoom(min: Float, max: Float, ratio: Float) {
+        val inv = inventory
+        if (front || inv == null || !photoLike) {
+            _zoom.value = ZoomState(min * boundRel, max * boundRel, ratio * boundRel)
+            return
+        }
+        val uwRel = inv.ultraWide?.takeIf { it.id in inv.separate }?.relativeZoom
+        val lo = minOf(inv.primaryZoom.start, uwRel ?: inv.primaryZoom.start)
+        _zoom.value = ZoomState(lo, inv.primaryZoom.endInclusive, ratio * boundRel)
+    }
+
+    private fun readFeatures(p: ProcessCameraProvider): CameraFeatures {
+        val inv = inventory ?: return CameraFeatures()
+        val base = selectorFor(p, inv.primaryBackId)
+        val ext = extensions
+        fun has(m: Int) = ext != null && runCatching { ext.isExtensionAvailable(base, m) }.getOrDefault(false)
+        val fps = runCatching {
+            val info = p.getCameraInfo(base)
+            val q = Recorder.getHighSpeedVideoCapabilities(info)?.getSupportedQualities(DynamicRange.SDR)?.firstOrNull()
+                ?: return@runCatching emptyList<Int>()
+            val vc = VideoCapture.withOutput(Recorder.Builder().setQualitySelector(QualitySelector.from(q)).build())
+            info.getSupportedFrameRateRanges(HighSpeedVideoSessionConfig(vc, Preview.Builder().build()))
+                .map { it.upper }.filter { it >= 120 }.distinct().sorted()
+        }.getOrDefault(emptyList())
+        Log.i("Prolens", "Lenses ${inv.lenses.map { "${it.role}:${it.id}@${it.relativeZoom}" }}, slo-mo $fps, night ${has(ExtensionMode.NIGHT)}")
+        return CameraFeatures(
+            lenses = inv.lenses,
+            nightExtension = has(ExtensionMode.NIGHT),
+            hdrExtension = has(ExtensionMode.HDR),
+            bokehExtension = has(ExtensionMode.BOKEH),
+            slowMotionFps = fps,
+            closeFocusLensId = inv.closeFocusLensId,
+        )
     }
 
     fun unbind() {
+        stopRecording()
         provider?.unbindAll()
         camera = null
         executor?.shutdown()
@@ -256,7 +403,113 @@ class AndroidCameraController(private val context: Context) : CameraController {
     override fun setZoom(ratio: Float) {
         val cam = camera ?: return
         val z = _zoom.value
-        cam.cameraControl.setZoomRatio(ratio.coerceIn(z.min, z.max))
+        wantZoom = ratio.coerceIn(z.min, z.max)
+        if (photoLike && !front && targetLens() != boundLensId) {
+            provider?.let { rebind(it) }
+            return
+        }
+        val own = cam.cameraInfo.zoomState.value
+        cam.cameraControl.setZoomRatio((wantZoom / boundRel).coerceIn(own?.minZoomRatio ?: 1f, own?.maxZoomRatio ?: 1f))
+    }
+
+    override fun setFront(front: Boolean) {
+        if (front == this.front) return
+        this.front = front
+        wantZoom = 1f
+        provider?.let { rebind(it) }
+    }
+
+    override fun setMode(mode: CaptureMode, slowMotionFps: Int) {
+        if (mode == this.mode && slowMotionFps == slowFps) return
+        val lensChanges = (mode == CaptureMode.Macro || mode == CaptureMode.Micro) != (this.mode == CaptureMode.Macro || this.mode == CaptureMode.Micro)
+        this.mode = mode
+        slowFps = slowMotionFps
+        if (lensChanges) wantZoom = 1f
+        provider?.let { rebind(it) }
+    }
+
+    override fun captureFrame(maxLongSide: Int, onResult: (Result<RgbImage>) -> Unit) {
+        val ic = imageCapture ?: return onResult(Result.failure(IllegalStateException("The camera isn't ready yet.")))
+        val ex = executor ?: return onResult(Result.failure(IllegalStateException("The camera isn't ready yet.")))
+        ic.takePicture(ex, object : ImageCapture.OnImageCapturedCallback() {
+            override fun onCaptureSuccess(image: ImageProxy) {
+                val result = runCatching {
+                    val crop = image.cropRect
+                    var bmp = image.toBitmap()
+                    if (bmp.width == image.width && bmp.height == image.height && (crop.width() != bmp.width || crop.height() != bmp.height)) {
+                        bmp = Bitmap.createBitmap(bmp, crop.left, crop.top, crop.width(), crop.height())
+                    }
+                    val scale = minOf(1f, maxLongSide.toFloat() / maxOf(bmp.width, bmp.height))
+                    val m = Matrix().apply { postScale(scale, scale); postRotate(image.imageInfo.rotationDegrees.toFloat()) }
+                    val out = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, m, true)
+                    val px = IntArray(out.width * out.height)
+                    out.getPixels(px, 0, out.width, 0, 0, out.width, out.height)
+                    RgbImage(out.width, out.height, px)
+                }
+                image.close()
+                main.execute { onResult(result) }
+            }
+            override fun onError(exception: ImageCaptureException) { main.execute { onResult(Result.failure(exception)) } }
+        })
+    }
+
+    override fun saveImage(image: RgbImage, name: String, onResult: (Result<String>) -> Unit) {
+        val ex = executor ?: return onResult(Result.failure(IllegalStateException("The camera isn't ready yet.")))
+        ex.execute {
+            val result = runCatching {
+                val bmp = Bitmap.createBitmap(image.argb, image.width, image.height, Bitmap.Config.ARGB_8888)
+                val file = "${name}_${System.currentTimeMillis()}"
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    val values = ContentValues().apply {
+                        put(MediaStore.MediaColumns.DISPLAY_NAME, file)
+                        put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+                        put(MediaStore.MediaColumns.RELATIVE_PATH, "Pictures/Prolens")
+                    }
+                    val uri = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+                        ?: error("The photo library refused the file.")
+                    context.contentResolver.openOutputStream(uri)?.use { bmp.compress(Bitmap.CompressFormat.JPEG, 92, it) }
+                    "Pictures/Prolens/$file.jpg"
+                } else {
+                    val dir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES) ?: context.filesDir
+                    val f = File(dir, "$file.jpg")
+                    f.outputStream().use { bmp.compress(Bitmap.CompressFormat.JPEG, 92, it) }
+                    f.absolutePath
+                }
+            }
+            main.execute { onResult(result) }
+        }
+    }
+
+    override fun startRecording(onSaved: (Result<String>) -> Unit) {
+        val rec = recorder ?: return onSaved(Result.failure(IllegalStateException("Slo-mo isn't ready on this camera.")))
+        if (activeRecording != null) return
+        val name = "Prolens_slomo_${System.currentTimeMillis()}"
+        val values = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, name)
+            put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) put(MediaStore.MediaColumns.RELATIVE_PATH, "Movies/Prolens")
+        }
+        val output = MediaStoreOutputOptions.Builder(context.contentResolver, MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
+            .setContentValues(values).build()
+        val fps = slowFps
+        activeRecording = rec.prepareRecording(context, output).start(main) { e ->
+            when (e) {
+                is VideoRecordEvent.Status -> _recording.value = Recording(e.recordingStats.recordedDurationNanos / 1_000_000, fps)
+                is VideoRecordEvent.Finalize -> {
+                    activeRecording = null
+                    _recording.value = null
+                    if (e.hasError()) onSaved(Result.failure(IllegalStateException("The video couldn't be saved (error ${e.error}).")))
+                    else onSaved(Result.success("Movies/Prolens/$name.mp4"))
+                }
+                else -> {}
+            }
+        }
+        _recording.value = Recording(0, fps)
+    }
+
+    override fun stopRecording() {
+        activeRecording?.stop()
+        activeRecording = null
     }
 
     override fun focusAt(x: Float, y: Float, lock: Boolean) {
@@ -282,6 +535,7 @@ class AndroidCameraController(private val context: Context) : CameraController {
     override fun setHold(hold: Int) {
         this.hold = hold
         imageCapture?.targetRotation = surfaceRotation(hold)
+        videoCapture?.targetRotation = surfaceRotation(hold)
     }
 
     override fun setAspect(sensorRatio: Double?) {

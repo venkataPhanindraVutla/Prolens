@@ -1,6 +1,9 @@
 package `in`.venkat.prolens.core.model
 
+import kotlinx.serialization.Serializable
+
 /** Exposure on the phone camera. Shutter in seconds. Auto values are solved by the camera. */
+@Serializable
 data class ExposureSettings(
     val iso: Int = 100,
     val isoAuto: Boolean = true,
@@ -18,6 +21,7 @@ data class ExposureSettings(
  * A crop of the sensor, described by its long and short sides. The camera screen is locked portrait, so the
  * crop is drawn upright on screen, and the saved photo comes out landscape when the phone is held sideways.
  */
+@Serializable
 enum class AspectRatio(private val long: String?, private val short: String?) {
     Full(null, null),
     Square("1", "1"),
@@ -40,8 +44,10 @@ enum class AspectRatio(private val long: String?, private val short: String?) {
     }
 }
 
+@Serializable
 enum class PeakingSensitivity { Low, Medium, High }
 
+@Serializable
 data class ViewfinderSettings(
     val grid: String = "thirds",          // a GridSpec id, or "none"
     val grid2: String = "none",
@@ -66,6 +72,11 @@ data class ViewfinderSettings(
     val steadyShot: Boolean = false,
     val timerSeconds: Int = 0,
     val exposure: ExposureSettings = ExposureSettings(),
+    val mode: CaptureMode = CaptureMode.Photo,
+    val frontCamera: Boolean = false,
+    val slowMotionFps: Int = 0,
+    val templateId: String? = null,
 )
 
+@Serializable
 data class Location(val name: String, val lat: Double, val lon: Double, val timeZoneId: String?)

@@ -1,6 +1,23 @@
 package `in`.venkat.prolens.features.viewfinder
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.platform.LocalDensity
+import `in`.venkat.prolens.core.model.CaptureMode
+import `in`.venkat.prolens.features.viewfinder.modes.ShutterStyle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -31,7 +48,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
-import `in`.venkat.prolens.app.Tab
 import `in`.venkat.prolens.core.designsystem.ButtonVariant
 import `in`.venkat.prolens.core.designsystem.Pro
 import `in`.venkat.prolens.core.designsystem.ProButton
@@ -63,8 +79,9 @@ internal fun ToolToggle(icon: ImageVector, label: String, on: Boolean, angle: St
 
 @Composable
 internal fun ToolRow(
-    gridOn: Boolean, level: Boolean, histogram: Boolean, peaking: Boolean, zebras: Boolean, angle: State<Float>,
-    onGrid: () -> Unit, onLevel: () -> Unit, onHistogram: () -> Unit, onPeaking: () -> Unit, onZebras: () -> Unit, onTools: () -> Unit,
+    gridOn: Boolean, level: Boolean, histogram: Boolean, peaking: Boolean, zebras: Boolean, timerSeconds: Int, angle: State<Float>,
+    onGrid: () -> Unit, onLevel: () -> Unit, onHistogram: () -> Unit, onPeaking: () -> Unit, onZebras: () -> Unit,
+    onTimer: () -> Unit, onTools: () -> Unit, onToolkit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -74,7 +91,34 @@ internal fun ToolRow(
         ToolToggle(ProIcons.Focus, "Focus peaking", peaking, angle, onPeaking)
         ToolToggle(ProIcons.Zebra, "Zebras", zebras, angle, onZebras)
         Box(Modifier.weight(1f))
-        ToolToggle(ProIcons.Sliders, "Tools", false, angle, onTools)
+        TimerToggle(timerSeconds, angle, onTimer)
+        ToolToggle(ProIcons.Sliders, "Overlays and tools", false, angle, onTools)
+        ToolToggle(ProIcons.Apps, "Toolkit", false, angle, onToolkit)
+    }
+}
+
+/** Off, 2 s, 10 s: the number sits on the icon while it's on. */
+@Composable
+private fun TimerToggle(seconds: Int, angle: State<Float>, onClick: () -> Unit) {
+    val c = Pro.colors
+    Box(
+        Modifier
+            .size(40.dp)
+            .clip(RoundedCornerShape(Pro.shapes.radius))
+            .background(if (seconds > 0) c.muted else Color.Transparent)
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = if (seconds == 0) "Timer off" else "Timer $seconds seconds" },
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(Modifier.turned(angle), contentAlignment = Alignment.Center) {
+            Icon(ProIcons.Timer, null, tint = if (seconds > 0) c.foreground else c.mutedForeground, modifier = Modifier.size(20.dp))
+            if (seconds > 0) {
+                Text(
+                    "$seconds", Modifier.align(Alignment.BottomEnd).offset(x = 6.dp, y = 4.dp),
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFFFACC15)).tabular,
+                )
+            }
+        }
     }
 }
 
@@ -128,11 +172,14 @@ internal fun HudRow(
 }
 
 @Composable
-internal fun CaptureRow(timerSeconds: Int, active: Boolean, saved: Int, angle: State<Float>, onShutter: () -> Unit, onTimer: () -> Unit, onLast: () -> Unit) {
+internal fun CaptureRow(
+    shutter: ShutterStyle, active: Boolean, saved: Int, canFlip: Boolean, front: Boolean, recordingMs: Long?, angle: State<Float>,
+    onShutter: () -> Unit, onFlip: () -> Unit, onLast: () -> Unit,
+) {
     val c = Pro.colors
+    val shape = RoundedCornerShape(Pro.shapes.radius)
     Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
-            val shape = RoundedCornerShape(Pro.shapes.radius)
             Box(
                 Modifier.size(48.dp).clip(shape).background(c.card).border(1.dp, c.border, shape)
                     .clickable(role = Role.Button, onClick = onLast).semantics { contentDescription = "Last capture" },
@@ -148,64 +195,103 @@ internal fun CaptureRow(timerSeconds: Int, active: Boolean, saved: Int, angle: S
                 }
             }
         }
-        ShutterButton(active, onShutter)
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            ShutterButton(shutter, active, onShutter)
+            recordingMs?.let {
+                Text(
+                    fmtClock(it), Modifier.padding(top = 4.dp),
+                    style = MaterialTheme.typography.labelMedium.copy(color = c.destructive).tabular,
+                )
+            }
+        }
         Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
-            ProButton(
-                if (timerSeconds == 0) "Off" else "$timerSeconds s", onTimer,
-                variant = if (timerSeconds == 0) ButtonVariant.Outline else ButtonVariant.Secondary,
-                icon = ProIcons.Timer, small = true, modifier = Modifier.turned(angle),
-            )
+            if (canFlip) {
+                Box(
+                    Modifier.size(48.dp).clip(CircleShape).background(c.card).border(1.dp, c.border, CircleShape)
+                        .clickable(role = Role.Button, onClick = onFlip)
+                        .semantics { contentDescription = if (front) "Use the back camera" else "Use the front camera" },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(ProIcons.Flip, null, tint = c.foreground, modifier = Modifier.size(20.dp).turned(angle))
+                }
+            }
         }
     }
 }
 
+internal fun fmtClock(ms: Long): String {
+    val s = ms / 1000
+    return "${s / 60}:${(s % 60).toString().padStart(2, '0')}"
+}
+
 @Composable
-private fun ShutterButton(active: Boolean, onClick: () -> Unit) {
+private fun ShutterButton(style: ShutterStyle, active: Boolean, onClick: () -> Unit) {
     val c = Pro.colors
+    val label = when {
+        style == ShutterStyle.Recording -> "Stop recording"
+        style == ShutterStyle.Record -> "Start recording"
+        active -> "Cancel"
+        else -> "Take photo"
+    }
     Box(
         Modifier
             .size(72.dp)
             .clip(CircleShape)
             .border(3.dp, Color.White, CircleShape)
-            .clickable(role = Role.Button, onClick = onClick)
-            .semantics { contentDescription = if (active) "Cancel" else "Take photo" }
+            .clickable(enabled = style != ShutterStyle.Busy, role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = label }
             .padding(6.dp),
         contentAlignment = Alignment.Center,
     ) {
         Canvas(Modifier.size(54.dp)) {
-            if (active) {
-                val s = size.width * 0.42f
-                drawRoundRect(c.destructive, topLeft = androidx.compose.ui.geometry.Offset((size.width - s) / 2, (size.height - s) / 2),
-                    size = androidx.compose.ui.geometry.Size(s, s), cornerRadius = androidx.compose.ui.geometry.CornerRadius(6.dp.toPx()))
-            } else {
-                drawCircle(Color.White)
+            val square = { colour: Color ->
+                val sq = size.width * 0.42f
+                drawRoundRect(colour, topLeft = androidx.compose.ui.geometry.Offset((size.width - sq) / 2, (size.height - sq) / 2),
+                    size = androidx.compose.ui.geometry.Size(sq, sq), cornerRadius = androidx.compose.ui.geometry.CornerRadius(6.dp.toPx()))
+            }
+            when {
+                style == ShutterStyle.Recording || active -> square(c.destructive)
+                style == ShutterStyle.Record -> drawCircle(c.destructive)
+                style == ShutterStyle.Busy -> drawCircle(Color.White.copy(alpha = 0.4f))
+                else -> drawCircle(Color.White)
             }
         }
     }
 }
 
 /**
- * The camera-style mode strip above the shutter: the other screens as words, Viewfinder in the middle.
- * Tap a name, or swipe sideways on the preview, to switch.
+ * The camera-style mode strip above the shutter: Night · Micro · Macro · Photo · Slo-mo · Pano · Templates,
+ * only the ones this phone can do, scrolled so the current mode sits in the middle.
  */
-internal val ModeOrder = listOf(Tab.Calculators, Tab.Light, Tab.Viewfinder, Tab.Coach, Tab.Gear)
-
 @Composable
-internal fun ModeStrip(onSelect: (Tab) -> Unit, modifier: Modifier = Modifier) {
+internal fun ModeStrip(modes: List<CaptureMode>, current: CaptureMode, onSelect: (CaptureMode) -> Unit, modifier: Modifier = Modifier) {
     val c = Pro.colors
+    val scroll = rememberScrollState()
+    val centres = remember { mutableStateMapOf<CaptureMode, Int>() }
+    var width by remember { mutableIntStateOf(0) }
+    LaunchedEffect(current, width, centres[current]) {
+        val x = centres[current] ?: return@LaunchedEffect
+        scroll.animateScrollTo((x - width / 2).coerceAtLeast(0))
+    }
     Row(
-        modifier.fillMaxWidth().padding(vertical = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterHorizontally),
+        modifier
+            .fillMaxWidth()
+            .onSizeChanged { width = it.width }
+            .horizontalScroll(scroll)
+            .padding(vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        ModeOrder.forEach { t ->
-            val on = t == Tab.Viewfinder
+        Spacer(Modifier.width(with(LocalDensity.current) { (width / 2).toDp() }))
+        modes.forEach { m ->
+            val on = m == current
             Text(
-                t.label,
+                m.label,
                 modifier = Modifier
+                    .onGloballyPositioned { centres[m] = (it.positionInParent().x + it.size.width / 2).toInt() }
                     .clip(RoundedCornerShape(Pro.shapes.radius))
-                    .clickable(enabled = !on, role = Role.Tab) { onSelect(t) }
-                    .padding(horizontal = 4.dp, vertical = 6.dp),
+                    .clickable(enabled = !on, role = Role.Tab) { onSelect(m) }
+                    .padding(horizontal = 6.dp, vertical = 6.dp),
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontSize = 13.sp,
                     fontWeight = if (on) FontWeight.SemiBold else FontWeight.Medium,
@@ -213,5 +299,6 @@ internal fun ModeStrip(onSelect: (Tab) -> Unit, modifier: Modifier = Modifier) {
                 ),
             )
         }
+        Spacer(Modifier.width(with(LocalDensity.current) { (width / 2).toDp() }))
     }
 }

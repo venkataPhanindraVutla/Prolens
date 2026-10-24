@@ -1,6 +1,9 @@
 package `in`.venkat.prolens.core.model
 
+import kotlinx.serialization.Serializable
+
 /** A camera body. Sensor size in mm. Crop factor, CoC and pixel pitch are derived in PhotoMath. */
+@Serializable
 data class Body(
     val id: String,
     val name: String,
@@ -13,6 +16,7 @@ data class Body(
 )
 
 /** A lens. Focal lengths are real mm, not equivalent. */
+@Serializable
 data class Lens(
     val id: String,
     val name: String,
@@ -25,6 +29,7 @@ data class Lens(
     val isZoom: Boolean get() = maxF > minF
 }
 
+@Serializable
 data class GearState(
     val bodies: List<Body> = Presets.bodies,
     val lenses: List<Lens> = Presets.lenses,

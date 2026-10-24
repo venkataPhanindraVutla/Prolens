@@ -25,6 +25,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import `in`.venkat.prolens.app.Tab
+import `in`.venkat.prolens.core.model.CaptureMode
+import `in`.venkat.prolens.features.viewfinder.modes.ModeContext
+import `in`.venkat.prolens.features.viewfinder.modes.availableModes
+import `in`.venkat.prolens.features.viewfinder.modes.modeUi
+import androidx.compose.runtime.rememberUpdatedState
 import `in`.venkat.prolens.core.designsystem.OverlayChip
 import androidx.compose.ui.platform.LocalDensity
 import `in`.venkat.prolens.core.platform.Hold
@@ -158,6 +163,27 @@ private fun Viewfinder(state: AppState) {
     }
 
     val zoom by controller.zoom.collectAsStateWithLifecycle()
+    val features by controller.features.collectAsStateWithLifecycle()
+    val recording by controller.recording.collectAsStateWithLifecycle()
+    val modes = remember(features) { availableModes(features) }
+    val mode = if (settings.mode in modes) settings.mode else CaptureMode.Photo
+    val ui = modeUi(mode)
+    val ctx = ModeContext(state, controller, settings, features, caps, zoom, orientation, hold, angle, scope)
+    val currentCtx by rememberUpdatedState(ctx)
+    var toolkit by remember { mutableStateOf(false) }
+
+    /* Binding: front or back, then the session the mode needs. Leaving a mode undoes what entering it set. */
+    LaunchedEffect(settings.frontCamera) { controller.setFront(settings.frontCamera) }
+    var entered by remember { mutableStateOf<CaptureMode?>(null) }
+    LaunchedEffect(mode, settings.slowMotionFps, features.slowMotionFps) {
+        val fps = settings.slowMotionFps.takeIf { it in features.slowMotionFps } ?: features.slowMotionFps.firstOrNull() ?: 0
+        controller.setMode(mode, if (mode == CaptureMode.SloMo) fps else 0)
+        if (entered != mode) {
+            entered?.let { modeUi(it).onExit(currentCtx) }
+            modeUi(mode).onEnter(currentCtx)
+            entered = mode
+        }
+    }
     val lens = remember(gear, caps, zoom.ratio) { lensInfo(gear, caps, zoom.ratio) }
     val fov = remember(caps, zoom.ratio, settings.aspect) { zoomedFov(fieldOfView(caps), zoom.ratio, settings.aspect.sensorRatio) }
     var pinchZoom by remember { mutableFloatStateOf(1f) }
@@ -174,6 +200,7 @@ private fun Viewfinder(state: AppState) {
     val flashAlpha by animateFloatAsState(if (flash) 0.9f else 0f, tween(if (flash) 30 else 120))
 
     fun shoot() {
+        if (phase == Phase.Idle && ui.onShutter(ctx)) return
         when (phase) {
             Phase.Saving -> return
             Phase.Idle -> {}
@@ -203,7 +230,10 @@ private fun Viewfinder(state: AppState) {
     var topStrip by remember { mutableIntStateOf(0) }
     var bottomStrip by remember { mutableIntStateOf(0) }
     BoxWithConstraints(Modifier.fillMaxSize().background(Color.Black)) {
-        val aspect = (settings.aspect.portraitRatio?.toFloat() ?: caps.previewAspect).coerceIn(0.2f, 5f)
+        val aspect = when (mode) {
+            CaptureMode.SloMo -> 9f / 16f
+            else -> settings.aspect.portraitRatio?.toFloat() ?: caps.previewAspect
+        }.coerceIn(0.2f, 5f)
         var w = maxWidth
         var h = w / aspect
         if (h > maxHeight) { h = maxHeight; w = h * aspect }
@@ -233,8 +263,8 @@ private fun Viewfinder(state: AppState) {
                         controller.setZoom(pinchZoom)
                     },
                     onSwipeSideways = { next ->
-                        val i = ModeOrder.indexOf(Tab.Viewfinder) + if (next) 1 else -1
-                        ModeOrder.getOrNull(i)?.let(state::select)
+                        val i = modes.indexOf(mode) + if (next) 1 else -1
+                        modes.getOrNull(i)?.let { m -> state.updateViewfinder { it.copy(mode = m) } }
                     },
                     onSwipeUpDown = {
                         hudVisible = !hudVisible
@@ -244,6 +274,7 @@ private fun Viewfinder(state: AppState) {
         ) {
             CameraPreview(controller, Modifier.fillMaxSize())
             PreviewOverlay(settings, analysis, blink, orientation, lens, fov, sunPoints, sunNow, hold, Modifier.fillMaxSize())
+            ui.PreviewLayer(ctx, Modifier.fillMaxSize())
             Box(Modifier.fillMaxSize().padding(top = coverTop, bottom = coverBottom)) {
                 HeldLayer(hold, angle, Modifier.fillMaxSize()) {
                     if (hudVisible) {
@@ -275,13 +306,15 @@ private fun Viewfinder(state: AppState) {
             ToolRow(
                 gridOn = settings.grid != "none" || settings.grid2 != "none",
                 level = settings.level, histogram = settings.histogram, peaking = settings.peaking, zebras = settings.zebras,
-                angle = angle,
+                timerSeconds = settings.timerSeconds, angle = angle,
                 onGrid = { sheet = Sheet.Grid },
                 onLevel = { state.updateViewfinder { it.copy(level = !it.level) } },
                 onHistogram = { state.updateViewfinder { it.copy(histogram = !it.histogram) } },
                 onPeaking = { state.updateViewfinder { it.copy(peaking = !it.peaking) } },
                 onZebras = { state.updateViewfinder { it.copy(zebras = !it.zebras) } },
+                onTimer = { state.updateViewfinder { it.copy(timerSeconds = when (it.timerSeconds) { 0 -> 2; 2 -> 10; else -> 0 }) } },
                 onTools = { sheet = Sheet.Tools },
+                onToolkit = { toolkit = true },
                 modifier = Modifier
                     .background(Strip)
                     .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)),
@@ -290,21 +323,25 @@ private fun Viewfinder(state: AppState) {
 
         /* Bottom: lens chips float over the preview; HUD, mode strip and shutter sit on the strip. */
         Column(Modifier.align(Alignment.BottomCenter).onSizeChanged { bottomStrip = it.height }) {
+            ui.Controls(ctx)
             ZoomBar(zoom, angle, controller::setZoom)
             Column(Modifier.background(Strip).navigationBarsPadding()) {
                 AnimatedVisibility(hudVisible, enter = fadeIn(), exit = fadeOut()) {
                     HudRow(settings.exposure, readout, caps, zoom.ratio, angle) { sheet = Sheet.Value(it) }
                 }
-                ModeStrip(state::select)
+                ModeStrip(modes, mode, { m -> state.updateViewfinder { it.copy(mode = m) } })
                 CaptureRow(
-                    timerSeconds = settings.timerSeconds, active = phase != Phase.Idle, saved = saved, angle = angle,
+                    shutter = ui.shutterStyle(ctx), active = phase != Phase.Idle, saved = saved,
+                    canFlip = features.hasFront, front = settings.frontCamera, recordingMs = recording?.elapsedMs, angle = angle,
                     onShutter = ::shoot,
-                    onTimer = { state.updateViewfinder { it.copy(timerSeconds = when (it.timerSeconds) { 0 -> 2; 2 -> 10; else -> 0 }) } },
+                    onFlip = { state.updateViewfinder { it.copy(frontCamera = !it.frontCamera) } },
                     onLast = { state.showToast(if (saved > 0) "$saved saved this session" else "No captures yet") },
                 )
             }
         }
     }
+
+    if (toolkit) ToolkitPage(onOpen = { toolkit = false; state.select(it) }, onClose = { toolkit = false })
 
     when (val s = sheet) {
         null -> {}

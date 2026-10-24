@@ -1,0 +1,103 @@
+.controls {
+  display: grid;
+  gap: 18px;
+  max-width: 520px;
+}
+
+.where {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: end;
+}
+
+.city {
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--grey-4);
+}
+
+.city select {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--grey-2);
+  border-radius: 999px;
+  background: var(--grey-1);
+}
+
+.status {
+  color: var(--pink);
+  font-size: 0.92rem;
+}
+
+.timeline {
+  display: grid;
+  gap: 6px;
+}
+
+.bar {
+  position: relative;
+  height: 14px;
+  border-radius: 3px;
+}
+
+.now {
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  width: 2px;
+  background: var(--pink);
+}
+
+.hours {
+  display: flex;
+  justify-content: space-between;
+  color: var(--grey-3);
+  font-size: 0.7rem;
+}
+
+.bands {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.bands li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--grey-2);
+  color: var(--grey-4);
+}
+
+.bands b {
+  color: var(--lime);
+  font-weight: 600;
+  text-align: right;
+}
+
+.credit {
+  color: var(--grey-3);
+  font-size: 0.78rem;
+}
+
+.screenBar {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 7%;
+  height: 8px;
+  border-radius: 2px;
+  z-index: 2;
+}
+
+.screenBar span {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: var(--pink);
+}

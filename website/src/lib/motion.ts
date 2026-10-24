@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 
-function useMedia(query: string): boolean {
+export function useMedia(query: string): boolean {
   return useSyncExternalStore(
     (onChange) => {
       if (typeof window.matchMedia !== 'function') return () => {}

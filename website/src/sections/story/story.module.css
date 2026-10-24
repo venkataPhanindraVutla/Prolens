@@ -1,0 +1,122 @@
+.story {
+  position: relative;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.wide {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: clamp(32px, 6vw, 96px);
+}
+
+.pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pin > div {
+  --phone-w: clamp(240px, 21vw, 310px);
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 250ms var(--ease-out);
+}
+
+.layer.on {
+  opacity: 1;
+}
+
+.chapter {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 22px;
+  padding: 72px 0;
+}
+
+.wide .chapter {
+  min-height: 100svh;
+  opacity: 0.3;
+  transition: opacity 300ms var(--ease-out);
+}
+
+.wide .chapter.active {
+  opacity: 1;
+}
+
+.chapter h2 {
+  font-size: clamp(2.2rem, 4.6vw, 4.2rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.body {
+  max-width: 46ch;
+  color: var(--grey-4);
+  font-size: 1.1rem;
+}
+
+.inlinePhone {
+  --phone-w: min(220px, 58vw);
+  align-self: center;
+  margin-bottom: 8px;
+}
+
+/* Shared controls */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--grey-2);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: background-color 150ms, color 150ms, border-color 150ms;
+}
+
+.chip:hover {
+  border-color: var(--grey-3);
+}
+
+.chip[aria-checked='true'],
+.chip[aria-pressed='true'] {
+  background: var(--paper);
+  border-color: var(--paper);
+  color: var(--ink);
+}
+
+.note {
+  max-width: 52ch;
+  color: var(--grey-3);
+  font-size: 0.95rem;
+  min-height: 3em;
+}
+
+.screenTag {
+  position: absolute;
+  left: 50%;
+  top: 9%;
+  transform: translateX(-50%);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.55);
+  color: var(--lime);
+  font-size: 0.66rem;
+  white-space: nowrap;
+  z-index: 3;
+}

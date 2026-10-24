@@ -1,0 +1,32 @@
+.strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 17%;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  font-size: 0.56rem;
+  color: rgb(244 244 239 / 0.7);
+  z-index: 2;
+  white-space: nowrap;
+}
+
+.current {
+  color: var(--lime);
+  font-weight: 600;
+}
+
+.shutter {
+  position: absolute;
+  left: 50%;
+  bottom: 5.5%;
+  width: 54px;
+  height: 54px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  border: 3px solid var(--paper);
+  box-shadow: inset 0 0 0 4px rgb(0 0 0 / 0.4);
+  background: rgb(244 244 239 / 0.9);
+  z-index: 2;
+}

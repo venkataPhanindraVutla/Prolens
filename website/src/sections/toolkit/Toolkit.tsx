@@ -16,16 +16,17 @@ const MORE = [
 
 export default function Toolkit() {
   return (
-    <section className={`section ${tk.toolkit}`} aria-labelledby="toolkit-title">
+    <section className={`section ${tk.toolkit}`} aria-labelledby="toolkit-title" data-stage>
       <SectionHeading id="toolkit-title" className="display">
         The toolkit, <span className="pink">live</span>.
       </SectionHeading>
-      <p className="lede">The same maths the app runs, working right here on real photographs. Move a slider.</p>
+      <p className="lede" data-reveal="up">
+        The same maths the app runs, working right here on real photographs. Move a slider.</p>
       <div className={tk.grid}>
         <DofCalc />
         <GridLibrary />
         <GoldenClock />
-        <div className={`${tk.tool} ${tk.more}`}>
+        <div className={`${tk.tool} ${tk.more}`} data-reveal="up" data-reveal-delay={0.1}>
           <h3 className={tk.title}>Also in the app</h3>
           <dl>
             {MORE.map(([k, v]) => (

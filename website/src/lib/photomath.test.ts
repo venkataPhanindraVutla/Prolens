@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { APERTURES, SENSORS, coc, dof, hyperfocal, nearest } from './photomath'
+import { APERTURES, SENSORS, coc, diffractionN, dof, hyperfocal, nearest, pixelPitchUm } from './photomath'
 
 const ff = SENSORS.find((s) => s.id === 'ff')!
 
@@ -23,4 +23,9 @@ test('far limit is infinite past the hyperfocal distance', () => {
 test('nearest aperture is judged in stops', () => {
   expect(nearest(APERTURES, 7.5)).toBe(7.1)
   expect(nearest(APERTURES, 7.7)).toBe(8)
+})
+
+test('pixel pitch and diffraction limit match the app for the Sony A7 IV', () => {
+  expect(Math.abs(pixelPitchUm(ff) - 5.1)).toBeLessThan(0.05)
+  expect(Math.abs(diffractionN(ff) - 7.6)).toBeLessThan(0.1)
 })

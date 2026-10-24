@@ -24,6 +24,9 @@ const diag = (s: Sensor) => Math.hypot(s.w, s.h)
 export const cropFactor = (s: Sensor) => FF_DIAG / diag(s)
 /** Circle of confusion, mm. */
 export const coc = (s: Sensor) => diag(s) / 1500
+export const pixelPitchUm = (s: Sensor) => (s.w * 1000) / Math.sqrt((s.mp * 1e6 * s.w) / s.h)
+/** Rough f-number where diffraction softening starts. */
+export const diffractionN = (s: Sensor) => 1.5 * pixelPitchUm(s)
 
 export const hyperfocal = (f: number, n: number, c: number) => (f * f) / (n * c) + f
 

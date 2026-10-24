@@ -72,7 +72,9 @@ export default function Story() {
             aria-labelledby={`chapter-${c.id}`}
           >
             <SectionHeading id={`chapter-${c.id}`}>{c.title}</SectionHeading>
-            <p className={css.body}>{c.body}</p>
+            <p className={css.body} data-reveal="up">
+              {c.body}
+            </p>
             {c.controls}
             {c.photoId && <Caption id={c.photoId} />}
           </article>

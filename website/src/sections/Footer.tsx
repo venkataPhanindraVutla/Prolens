@@ -5,7 +5,9 @@ import css from './Footer.module.css'
 export default function Footer() {
   return (
     <footer className={css.footer}>
-      <p className={css.signoff}>Shoot like you mean it.</p>
+      <p className={css.signoff} data-reveal="up">
+        Shoot like you mean it.
+      </p>
       <div className={css.meta}>
         <div>
           <p>

@@ -13,11 +13,11 @@ const STATS: [string, string][] = [
 
 export default function OpenSource() {
   return (
-    <section className={`section ${css.open}`} aria-labelledby="open-title">
+    <section className={`section ${css.open}`} aria-labelledby="open-title" data-stage>
       <SectionHeading id="open-title" className="display">
         Built in the open. <span className="pink">Shaped by you.</span>
       </SectionHeading>
-      <div className={css.body}>
+      <div className={css.body} data-reveal="up">
         <p className="lede">
           Every line of Prolens is on GitHub under the Apache-2.0 licence: the Kotlin Multiplatform app, the exposure and
           depth-of-field maths, the sun tracker and all 23 grids.
@@ -30,14 +30,14 @@ export default function OpenSource() {
         </a>
       </div>
       <dl className={css.stats}>
-        {STATS.map(([n, label]) => (
-          <div key={label}>
+        {STATS.map(([n, label], i) => (
+          <div key={label} data-reveal="up" data-reveal-delay={i * 0.08}>
             <dt className="mono">{n}</dt>
             <dd>{label}</dd>
           </div>
         ))}
       </dl>
-      <div className={css.actions}>
+      <div className={css.actions} data-reveal="up" data-reveal-delay={0.2}>
         <ShutterButton variant="primary" href={issueUrl('feature')} external>
           Request a feature
         </ShutterButton>

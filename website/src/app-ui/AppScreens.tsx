@@ -4,7 +4,7 @@ import ui from './app.module.css'
 
 /* Building blocks from core/designsystem/Components.kt */
 
-function Screen({ title, trailing, children, tab }: { title: string; trailing?: ReactNode; children: ReactNode; tab?: Tab }) {
+export function Screen({ title, trailing, children, tab }: { title: string; trailing?: ReactNode; children: ReactNode; tab?: Tab }) {
   return (
     <div className={ui.screen}>
       <div className={ui.screenBody}>
@@ -19,7 +19,7 @@ function Screen({ title, trailing, children, tab }: { title: string; trailing?: 
   )
 }
 
-function Card({ title, desc, children }: { title?: string; desc?: string; children: ReactNode }) {
+export function Card({ title, desc, children }: { title?: string; desc?: string; children: ReactNode }) {
   return (
     <section className={ui.card}>
       {(title || desc) && (
@@ -33,7 +33,7 @@ function Card({ title, desc, children }: { title?: string; desc?: string; childr
   )
 }
 
-const StatGrid = ({ stats }: { stats: [string, string][] }) => (
+export const StatGrid = ({ stats }: { stats: [string, string][] }) => (
   <div className={ui.statGrid}>
     {stats.map(([v, l]) => (
       <div key={l}>
@@ -44,7 +44,7 @@ const StatGrid = ({ stats }: { stats: [string, string][] }) => (
   </div>
 )
 
-const KvList = ({ rows }: { rows: [string, string][] }) => (
+export const KvList = ({ rows }: { rows: [string, string][] }) => (
   <dl className={ui.kv}>
     {rows.map(([k, v]) => (
       <div key={k}>
@@ -55,7 +55,7 @@ const KvList = ({ rows }: { rows: [string, string][] }) => (
   </dl>
 )
 
-const Segmented = ({ items, selected }: { items: string[]; selected: string }) => (
+export const Segmented = ({ items, selected }: { items: string[]; selected: string }) => (
   <div className={ui.segmented}>
     {items.map((i) => (
       <span key={i} className={i === selected ? ui.segOn : ''}>
@@ -65,14 +65,14 @@ const Segmented = ({ items, selected }: { items: string[]; selected: string }) =
   </div>
 )
 
-const Button = ({ children, variant = 'outline', small, icon }: { children: ReactNode; variant?: 'primary' | 'outline' | 'ghost'; small?: boolean; icon?: IconName }) => (
+export const Button = ({ children, variant = 'outline', small, icon }: { children: ReactNode; variant?: 'primary' | 'outline' | 'ghost'; small?: boolean; icon?: IconName }) => (
   <span className={[ui.button, ui[variant], small ? ui.buttonSmall : ''].join(' ')}>
     {icon && <Icon name={icon} size={16} />}
     {children}
   </span>
 )
 
-const Slider = ({ label, value, at }: { label: string; value: string; at: number }) => (
+export const Slider = ({ label, value, at }: { label: string; value: string; at: number }) => (
   <div className={ui.slider}>
     <div className={ui.sliderHead}>
       <span>{label}</span>
@@ -84,7 +84,7 @@ const Slider = ({ label, value, at }: { label: string; value: string; at: number
   </div>
 )
 
-const Select = ({ label, value, hint }: { label: string; value: string; hint?: string }) => (
+export const Select = ({ label, value, hint }: { label: string; value: string; hint?: string }) => (
   <div className={ui.field}>
     <span className={ui.fieldLabel}>{label}</span>
     <span className={ui.select}>
@@ -95,7 +95,7 @@ const Select = ({ label, value, hint }: { label: string; value: string; hint?: s
   </div>
 )
 
-type Tab = 'Viewfinder' | 'Calculators' | 'Light' | 'Coach' | 'Gear'
+export type Tab = 'Viewfinder' | 'Calculators' | 'Light' | 'Coach' | 'Gear'
 const TABS: [Tab, IconName][] = [
   ['Viewfinder', 'camera'],
   ['Calculators', 'calculator'],
@@ -104,7 +104,7 @@ const TABS: [Tab, IconName][] = [
   ['Gear', 'aperture'],
 ]
 
-function TabBar({ active }: { active: Tab }) {
+export function TabBar({ active }: { active: Tab }) {
   return (
     <nav className={ui.tabBar} aria-hidden="true">
       {TABS.map(([t, icon]) => (
@@ -184,7 +184,7 @@ export function AppCalculators() {
 }
 
 /** The Light tab's day timeline: phases across 24 h, in the app's chart colours. */
-export function AppLightScreen({ place = 'London', coords = '51.5074° N, 0.1278° W', date = 'Sat, 21 Jun', phase = 'Golden hour', next = 'Golden hour ends at 21:12', timeline, rows }: {
+export function AppLightScreen({ place = 'London', coords = '51.5074° N, 0.1278° W', date = 'Sat, 21 Jun', phase = 'Golden hour', next = 'Golden hour ends at 21:12', timeline, rows, picker }: {
   place?: string
   coords?: string
   date?: string
@@ -192,6 +192,8 @@ export function AppLightScreen({ place = 'London', coords = '51.5074° N, 0.1278
   next?: string
   timeline?: string
   rows?: [string, string][]
+  /** The city chips the app shows under "Change". */
+  picker?: ReactNode
 }) {
   return (
     <Screen title="Light" tab="Light">
@@ -204,6 +206,7 @@ export function AppLightScreen({ place = 'London', coords = '51.5074° N, 0.1278
           Change
         </Button>
       </div>
+      {picker}
       <div className={ui.dateRow}>
         <Button small icon="chevronLeft">
           Previous

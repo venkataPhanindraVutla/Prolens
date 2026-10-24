@@ -31,7 +31,7 @@ export default function DofCalc() {
   const mask = `linear-gradient(to bottom, #000 0%, #000 ${Math.max(0, band.top - SOFT)}%, transparent ${band.top}%, transparent ${band.bottom}%, #000 ${Math.min(100, band.bottom + SOFT)}%, #000 100%)`
 
   return (
-    <div className={`${tk.tool} ${tk.dof}`}>
+    <div className={`${tk.tool} ${tk.dof}`} data-reveal="up">
       <figure className={tk.dofPhoto}>
         <div className={tk.frame}>
           <Photo id="dof" sizes="(min-width: 980px) 55vw, 100vw" />

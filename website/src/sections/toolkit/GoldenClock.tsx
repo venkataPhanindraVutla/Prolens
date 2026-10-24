@@ -30,7 +30,7 @@ export default function GoldenClock() {
   const [hx, hy] = point(frac, R - 22)
   const phase = lightPhase(sunPosition(now, place.lat, place.lon).altitude)
   return (
-    <div className={tk.tool}>
+    <div className={tk.tool} data-reveal="up">
       <h3 className={tk.title}>Golden-hour clock</h3>
       <svg className={tk.clock} viewBox="0 0 240 240" role="img" aria-label={`24-hour light dial for ${place.name}`}>
         {ready ? (

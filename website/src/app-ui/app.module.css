@@ -712,3 +712,110 @@
 .tabBar .tabOn {
   color: var(--fg);
 }
+
+/* Live screens: real buttons and sliders inside the drawn app. */
+.tap {
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  width: 100%;
+}
+
+.zoomChip.tap,
+.modes .tap {
+  width: auto;
+}
+
+.modes .tap {
+  width: 100%;
+  padding: 0;
+  color: inherit;
+  font-weight: inherit;
+}
+
+.toolkitCard.tap {
+  text-align: left;
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+
+.toolkitCard.tap:hover {
+  border-color: var(--input);
+}
+
+.listRow.tap {
+  border-top: 1px solid var(--border);
+}
+
+.listRow.tap:first-child {
+  border-top: 0;
+}
+
+.livePreview {
+  position: absolute;
+  inset: 0;
+  transition: transform 400ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.range {
+  width: 100%;
+  height: 20px;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--muted);
+}
+
+.range::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -8px;
+  border-radius: 50%;
+  background: var(--fg);
+}
+
+.range::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--muted);
+}
+
+.range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--fg);
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cityChip {
+  width: auto;
+  padding: 6px 12px;
+  border: 1px solid var(--input);
+  border-radius: 999px;
+  background: var(--bg);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.cityChip.cityOn {
+  background: var(--fg);
+  border-color: var(--fg);
+  color: var(--card);
+}

@@ -30,12 +30,12 @@ export default function EveryPhone() {
   ]
 
   return (
-    <section className={`section ${css.every}`} aria-labelledby="every-title">
+    <section className={`section ${css.every}`} aria-labelledby="every-title" data-stage>
       <div className={css.head}>
         <SectionHeading id="every-title" className="display">
           Built for <span className="pink">every</span> phone.
         </SectionHeading>
-        <p className="lede">
+        <p className="lede" data-reveal="up">
           Prolens asks each phone what its cameras can really do, then shows only that: the lenses apps may use, the
           closest focus, real slow-motion frame rates, and whose night mode runs.
         </p>
@@ -48,7 +48,7 @@ export default function EveryPhone() {
         </div>
       </div>
 
-      <figure className={css.view}>
+      <figure className={css.view} data-reveal="photo">
         <div className={css.zoomBox}>
           <div data-zoom className={css.zoom} style={{ transform: `scale(${zoomScale(shown, widest)})`, transformOrigin: PHOTO.focus }}>
             <Photo id="lenses" sizes="(min-width: 980px) 60vw, 100vw" />
@@ -79,7 +79,7 @@ export default function EveryPhone() {
         </figcaption>
       </figure>
 
-      <div className={css.card}>
+      <div className={css.card} data-reveal="up" data-reveal-delay={0.15}>
         <h3>This phone</h3>
         <p className={css.desc}>Lenses and modes Prolens can use here. Other phones show their own.</p>
         <dl className={css.rows}>

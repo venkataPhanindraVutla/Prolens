@@ -103,7 +103,7 @@ const PAIRS: Pair[] = [
   },
 ]
 
-function Compare({ pair }: { pair: Pair }) {
+function Compare({ pair, delay }: { pair: Pair; delay: number }) {
   const [at, setAt] = useState(50)
   const box = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
@@ -133,7 +133,7 @@ function Compare({ pair }: { pair: Pair }) {
   }
 
   return (
-    <article className={css.pair} aria-labelledby={`ba-${pair.id}`}>
+    <article className={css.pair} aria-labelledby={`ba-${pair.id}`} data-reveal="up" data-reveal-delay={delay}>
       <div
         ref={box}
         className={`${css.frame} focusable`}
@@ -174,14 +174,16 @@ function Compare({ pair }: { pair: Pair }) {
 
 export default function BeforeAfter() {
   return (
-    <section className={`section ${css.section}`} aria-labelledby="ba-title">
+    <section className={`section ${css.section}`} aria-labelledby="ba-title" data-stage>
       <SectionHeading id="ba-title" className="display">
         One tool. <span className="pink">One better frame.</span>
       </SectionHeading>
-      <p className="lede">Drag across each photo to see what the tool caught.</p>
+      <p className="lede" data-reveal="up">
+        Drag across each photo to see what the tool caught.
+      </p>
       <div className={css.track}>
-        {PAIRS.map((p) => (
-          <Compare key={p.id} pair={p} />
+        {PAIRS.map((p, i) => (
+          <Compare key={p.id} pair={p} delay={i * 0.12} />
         ))}
       </div>
     </section>

@@ -47,18 +47,23 @@ test('with reduced motion the parallax layers do not move', () => {
   for (const el of container.querySelectorAll<HTMLElement>('[data-depth]')) expect(el.style.transform).toBe('')
 })
 
-test('the exploded view names each real layer of the viewfinder', async () => {
+test('the exploded phone names its real layers, and touching a name lifts that layer', async () => {
   mockMedia()
-  const { default: ExplodedPhone } = await import('./ExplodedPhone')
-  render(<ExplodedPhone />)
-  const list = screen.getByRole('list', { name: 'Layers of the viewfinder' })
-  expect(within(list).getAllByRole('listitem').map((li) => li.querySelector('b')?.textContent)).toEqual([
-    'Controls',
-    'Exposure readouts',
-    'Composition grid',
-    'Live preview',
-    'Phone',
-  ])
+  render(<AppTour />)
+  const layers = screen.getByRole('group', { name: 'Layers of the viewfinder' })
+  const names = within(layers).getAllByRole('button').map((b) => b.textContent)
+  expect(names).toEqual(['Controls', 'Exposure readouts', 'Composition grid', 'Live preview', 'Phone'])
+  await userEvent.click(within(layers).getByRole('button', { name: 'Composition grid' }))
+  expect(within(layers).getByRole('button', { name: 'Composition grid' })).toHaveAttribute('aria-pressed', 'true')
+  expect(document.querySelector('[data-layer="Composition grid"]')).toHaveAttribute('data-lifted', 'true')
+})
+
+test('the tour’s screens are live: the toolkit opens the coach', async () => {
+  // Flat layout (reduced motion), where every phone takes taps; in 3D only the centred phone does.
+  mockMedia('reduce')
+  render(<AppTour />)
+  await userEvent.click(screen.getByRole('button', { name: 'Open Coach' }))
+  expect(within(screen.getByRole('tablist', { name: 'App screens' })).getByRole('tab', { name: 'Coach' })).toHaveAttribute('aria-selected', 'true')
 })
 
 test('with reduced motion the gallery spreads and tour phones stay flat', () => {

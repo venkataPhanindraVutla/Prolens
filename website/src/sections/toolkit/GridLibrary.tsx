@@ -11,7 +11,7 @@ export default function GridLibrary() {
   const [id, setId] = useState('spiralTrue')
   const spec = gridSpec(id)!
   return (
-    <div className={`${tk.tool} ${tk.library}`}>
+    <div className={`${tk.tool} ${tk.library}`} data-reveal="up">
       <figure className={tk.libraryPhoto}>
         <div className={tk.frame}>
           <Photo id="hero" sizes="(min-width: 980px) 50vw, 100vw" />

@@ -34,9 +34,10 @@ export default function Download() {
         <SectionHeading id="download-title" className="display">
           Take it out <span className="pink">tonight</span>.
         </SectionHeading>
-        <p className="lede">Free, no account, no ads. Install the APK, point it at something, and tell us what's missing.</p>
+        <p className="lede" data-reveal="up">
+          Free, no account, no ads. Install the APK, point it at something, and tell us what's missing.</p>
 
-        <div className={css.card}>
+        <div className={css.card} data-reveal="up" data-reveal-delay={0.1}>
           <CropMarks />
           <ShutterButton variant="primary" href={info.url} className={css.cta}>
             Download Prolens {info.version} for Android

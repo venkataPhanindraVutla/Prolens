@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { AppLightScreen } from '../../app-ui/AppScreens'
 import { CITIES } from '../../lib/cities'
-import { bandText, dayFraction, daylight, phaseGradient, sunText, type Daylight } from '../../lib/daylight'
+import { bandText, dayFraction, daylight, phaseGradient, sunText } from '../../lib/daylight'
+import { appGradient, coordText, dateText } from '../../lib/lightView'
 import { useLocation } from '../../lib/location'
 import { lightPhase, sunPosition } from '../../lib/suncalc'
 import { useNow } from '../../lib/time'
@@ -10,16 +11,6 @@ import css from './story.module.css'
 import lt from './Light.module.css'
 
 const PHASE_NAMES = { Night: 'Night', Astro: 'Astronomical twilight', Nautical: 'Nautical twilight', Blue: 'Blue hour', Golden: 'Golden hour', Day: 'Daylight' }
-
-const coordText = (lat: number, lon: number) => `${Math.abs(lat).toFixed(4)}° ${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lon).toFixed(4)}° ${lon >= 0 ? 'E' : 'W'}`
-const dateText = (ms: number, tz: string) => new Intl.DateTimeFormat('en-GB', { timeZone: tz, weekday: 'short', day: 'numeric', month: 'short' }).format(ms)
-
-/** The app's own chart colours (features/light/LightCharts.kt). */
-const APP_PHASE: Record<string, string> = { Night: '#0c0c0e', Astro: '#1f1f23', Nautical: '#3f3f46', Blue: '#2c4a7a', Golden: '#8a6a2a', Day: '#d4d4d8' }
-function appGradient(d: Daylight): string {
-  const n = d.phases.length
-  return `linear-gradient(90deg, ${d.phases.map((p, i) => `${APP_PHASE[p]} ${(i / n) * 100}% ${((i + 1) / n) * 100}%`).join(', ')})`
-}
 
 export function useLight(): Chapter {
   const { place, setCity, locate } = useLocation()

@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import Deferred from './components/Deferred'
+import MotionDirector from './components/MotionDirector'
 import { LocationProvider } from './lib/location'
 import Download from './sections/Download'
 import EveryPhone from './sections/EveryPhone'
@@ -32,8 +33,8 @@ export default function App() {
             <Gallery />
           </Suspense>
         </Deferred>
-        <Deferred minHeight="220svh">
-          <Suspense fallback={<div style={{ minHeight: '220svh' }} />}>
+        <Deferred minHeight="640svh">
+          <Suspense fallback={<div style={{ minHeight: '640svh' }} />}>
             <AppTour />
           </Suspense>
         </Deferred>
@@ -47,6 +48,7 @@ export default function App() {
         <Download />
       </main>
       <Footer />
+      <MotionDirector />
     </LocationProvider>
   )
 }

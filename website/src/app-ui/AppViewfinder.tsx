@@ -49,12 +49,16 @@ interface Props {
   zoom?: { presets: number[]; active: number }
   /** Draw one layer alone, on a transparent screen, for the exploded 3D view. */
   layer?: 'all' | 'preview' | 'overlay' | 'chrome'
+  /** Make the mode strip and zoom pill tappable. */
+  onMode?: (mode: string) => void
+  onZoom?: (zoom: number) => void
 }
 
 const fmtZoom = (z: number) => String(z)
 
 /** The Prolens viewfinder, portrait, as ViewfinderScreen.kt lays it out. */
-export default function AppViewfinder({ preview, overlay, mode = 'Photo', tools, chips = [], histogram, hud = DEFAULT_HUD, zoom = { presets: [0.6, 1, 2, 5], active: 1 }, layer = 'all' }: Props) {
+export default function AppViewfinder({ preview, overlay, mode = 'Photo', tools, chips = [], histogram, hud = DEFAULT_HUD, zoom = { presets: [0.6, 1, 2, 5], active: 1 }, layer = 'all', onMode, onZoom }: Props) {
+  const live = !!(onMode || onZoom)
   const show = (part: 'preview' | 'overlay' | 'chrome') => layer === 'all' || layer === part
   const on = { ...DEFAULT_TOOLS, ...tools }
   const max = histogram ? Math.max(1, ...histogram) : 1
@@ -94,19 +98,21 @@ export default function AppViewfinder({ preview, overlay, mode = 'Photo', tools,
             {RIGHT.map(tool)}
           </div>
 
-          <div className={ui.bottom} aria-hidden="true">
+          <div className={ui.bottom} aria-hidden={live ? undefined : true}>
             <div className={ui.zoomPill}>
-              {zoom.presets.map((z) =>
-                z === zoom.active ? (
-                  <span key={z} className={`${ui.zoomChip} ${ui.zoomActive}`}>
-                    {fmtZoom(z)}×
-                  </span>
+              {zoom.presets.map((z) => {
+                const on = z === zoom.active
+                const label = on ? `${fmtZoom(z)}×` : fmtZoom(z)
+                return onZoom ? (
+                  <button key={z} type="button" className={[ui.zoomChip, on ? ui.zoomActive : '', ui.tap].join(' ')} aria-label={`${fmtZoom(z)}× zoom`} aria-pressed={on} onClick={() => onZoom(z)}>
+                    {label}
+                  </button>
                 ) : (
-                  <span key={z} className={ui.zoomChip}>
-                    {fmtZoom(z)}
+                  <span key={z} className={[ui.zoomChip, on ? ui.zoomActive : ''].join(' ')}>
+                    {label}
                   </span>
-                ),
-              )}
+                )
+              })}
             </div>
             <div className={ui.strip}>
               <div className={ui.hud} data-testid="app-hud">
@@ -120,7 +126,13 @@ export default function AppViewfinder({ preview, overlay, mode = 'Photo', tools,
               <ul className={ui.modes} data-testid="app-modes" style={{ ['--i' as string]: MODE_LABELS.indexOf(mode) }}>
                 {MODE_LABELS.map((m) => (
                   <li key={m} data-selected={m === mode} className={m === mode ? ui.modeOn : ''}>
-                    {m}
+                    {onMode ? (
+                      <button type="button" className={ui.tap} aria-label={`${m} mode`} aria-pressed={m === mode} onClick={() => onMode(m)}>
+                        {m}
+                      </button>
+                    ) : (
+                      m
+                    )}
                   </li>
                 ))}
               </ul>

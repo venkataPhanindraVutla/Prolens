@@ -14,8 +14,8 @@
 /* Pano: the sweep guide the app shows while stitching. */
 .pano {
   position: absolute;
-  left: 8%;
-  right: 20%;
+  left: 10%;
+  right: 10%;
   top: 50%;
   height: 2px;
   background: linear-gradient(90deg, var(--lime) 0 40%, rgb(244 244 239 / 0.5) 40%);

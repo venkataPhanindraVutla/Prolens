@@ -1,22 +1,43 @@
 .story {
   position: relative;
-  max-width: 1600px;
+  max-width: 1440px;
   margin: 0 auto;
   padding: 0 var(--gutter);
 }
 
 .wide {
   display: grid;
-  grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
-  gap: clamp(40px, 5vw, 88px);
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+  gap: clamp(40px, 6vw, 110px);
 }
 
 .pin {
   position: sticky;
   top: 0;
-  height: 100svh;
+  z-index: 2;
   display: flex;
   align-items: center;
+  justify-content: center;
+}
+
+.wide .pin {
+  height: 100svh;
+}
+
+.phone {
+  --phone-w: min(360px, calc(86svh * 0.445));
+}
+
+/* Phones: the app pinned across the top, chapters sliding up beneath it. */
+.narrow .pin {
+  height: 58svh;
+  margin: 0 calc(var(--gutter) * -1);
+  padding-top: 10px;
+  background: linear-gradient(var(--ink) 82%, transparent);
+}
+
+.narrow .phone {
+  --phone-w: calc((58svh - 24px) * 0.445);
 }
 
 .layer {
@@ -31,6 +52,7 @@
 }
 
 .chapter {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -39,15 +61,20 @@
 }
 
 .wide .chapter {
-  position: relative;
   min-height: 100svh;
+}
+
+.narrow .chapter {
+  min-height: 72svh;
+  padding: 28px 0 48px;
+  justify-content: flex-start;
 }
 
 /* The chapter on screen gets a lime edge, like a selected frame on a contact sheet. */
 .wide .chapter::before {
   content: '';
   position: absolute;
-  left: calc(clamp(40px, 5vw, 88px) * -0.5);
+  left: calc(clamp(40px, 6vw, 110px) * -0.5);
   top: 50%;
   height: 0;
   width: 2px;
@@ -60,6 +87,10 @@
   height: 140px;
 }
 
+.narrow .chapter h2 {
+  font-size: clamp(1.9rem, 8vw, 2.6rem);
+}
+
 .chapter h2 {
   font-size: clamp(2.3rem, 4.4vw, 4.4rem);
   line-height: 0.95;
@@ -70,10 +101,6 @@
   max-width: 44ch;
   color: var(--grey-4);
   font-size: 1.1rem;
-}
-
-.inline {
-  margin: 0 calc(var(--gutter) * -1) 8px;
 }
 
 .caption {
@@ -105,6 +132,21 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+/* On phones the chips become one swipeable row at thumb height. */
+.narrow .chips {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  margin: 0 calc(var(--gutter) * -1);
+  padding: 2px var(--gutter);
+  scrollbar-width: none;
+}
+
+.narrow .chips > * {
+  flex: none;
+  scroll-snap-align: start;
 }
 
 .chip {

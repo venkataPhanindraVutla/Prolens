@@ -8,7 +8,7 @@ import tk from './Toolkit.module.css'
 const HERO = photo('hero')
 
 export default function GridLibrary() {
-  const [id, setId] = useState('spiral')
+  const [id, setId] = useState('spiralTrue')
   const spec = gridSpec(id)!
   return (
     <div className={`${tk.tool} ${tk.library}`}>

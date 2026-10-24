@@ -70,7 +70,7 @@ export default function Hero() {
   return (
     <header ref={root} className={css.hero}>
       <div className={css.photo}>
-        <Photo id="hero" sizes="100vw" priority />
+        <Photo id="hero" sizes="100vw" priority fetchPriority="low" />
       </div>
       <div className={css.shade} aria-hidden="true" />
       <GridOverlay id="thirds" width={1600} height={900} className={css.grid} color="rgb(244 244 239 / 0.55)" />

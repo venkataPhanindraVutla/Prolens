@@ -11,10 +11,12 @@ interface Props {
   style?: CSSProperties
   /** Decorative copies (a second layer of the same photo) hide from assistive tech. */
   decorative?: boolean
+  /** 'low' for a full-screen backdrop: it loads at once but lets text and fonts go first. */
+  fetchPriority?: 'high' | 'low' | 'auto'
 }
 
 /** A responsive photograph that fills its box, cropped around its subject. */
-export default function Photo({ id, sizes, priority, className, style, decorative }: Props) {
+export default function Photo({ id, sizes, priority, className, style, decorative, fetchPriority }: Props) {
   const p = photo(id)
   return (
     <img
@@ -27,6 +29,7 @@ export default function Photo({ id, sizes, priority, className, style, decorativ
       width={p.width}
       height={p.height}
       loading={priority ? 'eager' : 'lazy'}
+      fetchPriority={fetchPriority}
       decoding="async"
       style={{
         position: 'absolute',

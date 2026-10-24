@@ -1,16 +1,25 @@
 import { useEffect, useState } from 'react'
-import Photo from '../../components/Photo'
+import { AppLightScreen } from '../../app-ui/AppScreens'
 import { CITIES } from '../../lib/cities'
-import { bandText, dayFraction, daylight, phaseGradient, sunText } from '../../lib/daylight'
+import { bandText, dayFraction, daylight, phaseGradient, sunText, type Daylight } from '../../lib/daylight'
 import { useLocation } from '../../lib/location'
 import { lightPhase, sunPosition } from '../../lib/suncalc'
-import { formatTime, useNow } from '../../lib/time'
+import { useNow } from '../../lib/time'
 import type { Chapter } from './chapter'
 import css from './story.module.css'
-import vf from './Viewfinder.module.css'
 import lt from './Light.module.css'
 
 const PHASE_NAMES = { Night: 'Night', Astro: 'Astronomical twilight', Nautical: 'Nautical twilight', Blue: 'Blue hour', Golden: 'Golden hour', Day: 'Daylight' }
+
+const coordText = (lat: number, lon: number) => `${Math.abs(lat).toFixed(4)}° ${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lon).toFixed(4)}° ${lon >= 0 ? 'E' : 'W'}`
+const dateText = (ms: number, tz: string) => new Intl.DateTimeFormat('en-GB', { timeZone: tz, weekday: 'short', day: 'numeric', month: 'short' }).format(ms)
+
+/** The app's own chart colours (features/light/LightCharts.kt). */
+const APP_PHASE: Record<string, string> = { Night: '#0c0c0e', Astro: '#1f1f23', Nautical: '#3f3f46', Blue: '#2c4a7a', Golden: '#8a6a2a', Day: '#d4d4d8' }
+function appGradient(d: Daylight): string {
+  const n = d.phases.length
+  return `linear-gradient(90deg, ${d.phases.map((p, i) => `${APP_PHASE[p]} ${(i / n) * 100}% ${((i + 1) / n) * 100}%`).join(', ')})`
+}
 
 export function useLight(): Chapter {
   const { place, setCity, locate } = useLocation()
@@ -43,29 +52,29 @@ export function useLight(): Chapter {
 
   return {
     id: 'light',
-    photoId: 'library',
-    hud: ready ? `PHOTO · ${PHASE_NAMES[phaseNow].toUpperCase()} · ${place.name.toUpperCase()} ${formatTime(now, place.tz)}` : 'PHOTO · READING THE SKY',
+    statusBar: true,
     title: (
       <>
         Know when the <span className="pink">light is good</span>.
       </>
     ),
     body: 'Golden hour, blue hour and the sun’s path for wherever you’re standing, worked out on the phone with no signal needed.',
-    screen: () => (
-      <>
-        <Photo id="library" sizes="(min-width: 980px) 56vw, 100vw" />
-        <div className={lt.grade} data-phase={ready ? phaseNow : 'Golden'} aria-hidden="true" />
-        {ready && (
-          <>
-            <span className={`${vf.tag} mono`}>
-              {PHASE_NAMES[phaseNow]} · {formatTime(now, place.tz)}
-            </span>
-            <div className={lt.screenBar} style={{ background: phaseGradient(d.phases) }} aria-hidden="true">
-              <span style={{ left: `${dayFraction(d, now) * 100}%` }} />
-            </div>
-          </>
-        )}
-      </>
+    phone: (
+      <AppLightScreen
+        place={place.name}
+        coords={coordText(place.lat, place.lon)}
+        date={ready ? dateText(now, place.tz) : '—'}
+        phase={ready ? PHASE_NAMES[phaseNow] : 'Reading the sky'}
+        next={ready ? `Times in ${place.name} time` : ' '}
+        timeline={ready ? appGradient(d) : undefined}
+        rows={[
+          ['Blue hour morning', show(() => bandText(d, t.blueMorningStart, t.blueMorningEnd, place.tz, 'blue'))],
+          ['Golden hour morning', show(() => bandText(d, t.goldenMorningStart, t.goldenMorningEnd, place.tz))],
+          ['Sunrise to sunset', show(() => sunText(d, place.tz))],
+          ['Golden hour evening', show(() => bandText(d, t.goldenEveningStart, t.goldenEveningEnd, place.tz))],
+          ['Blue hour evening', show(() => bandText(d, t.blueEveningStart, t.blueEveningEnd, place.tz, 'blue'))],
+        ]}
+      />
     ),
     controls: (
       <div className={lt.controls}>

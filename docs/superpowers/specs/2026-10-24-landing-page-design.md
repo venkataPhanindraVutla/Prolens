@@ -163,3 +163,41 @@ Get photographers to download the APK, try it, and help shape it in the open.
 - Component structure, the animation library (or none), styling approach and how fonts are loaded.
 - The copy beyond the hero line and section headings above, in the same voice: plain, confident, photographer-literate, sentence case.
 - Exact breakpoints and how the pinned story collapses on small screens. Suggested: the phone sits above each chapter, not pinned.
+
+## Round 3 changes (user feedback, 2026-10-24)
+
+The user asked for more layers after the hero, more and better photos, a golden spiral that doesn't look stretched, a mobile revamp, and phone screens that look like the real app.
+
+**Order after the hero:**
+1. Parallax prints
+2. The story
+3. Before and after
+4. Genre gallery
+5. App tour
+6. Built for every phone
+7. Toolkit
+8. Open source
+9. Download
+
+**What changed:**
+- **App screens:** rebuilt from the Compose code in `website/src/app-ui/`.
+  - Drawn at the device's real 412×892 dp and scaled to fit.
+  - Zinc tokens, Geist, the yellow accent, and the app's exact viewfinder layout, HUD values and mode strip.
+  - The other screens: Toolkit, Calculators, Light, Coach and Gear.
+  - The phone is portrait, like the app.
+- **Golden spiral:** always drawn at its true 1.618 ratio, in the app's grid style (white at 70% over a soft shadow line).
+- **New layers:**
+  - Parallax prints at different depths.
+  - Three before/after comparisons (level, exposure with real zebras, the spiral reframe).
+  - A seven-genre gallery carrying the Coach tab's real recipes.
+  - A swipeable tour of every app screen.
+- **Phones:**
+  - The app stays pinned at the top while chapter controls scroll beneath it.
+  - Chip rows swipe.
+  - The gallery and the tour snap as you swipe.
+  - The before/after comparisons stack, so dragging never fights a swipe.
+- **Photos:** 20 in total, all credited in the footer.
+- **Performance:**
+  - Heavy sections lower down mount when you scroll near them.
+  - CSS is inlined.
+  - Five font files: Space Grotesk 400/700, JetBrains Mono 400, Geist 400/600.

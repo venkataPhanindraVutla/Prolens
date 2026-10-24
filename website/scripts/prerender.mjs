@@ -7,6 +7,8 @@ const { render } = await import(new URL('entry-server.js', ssr).href)
 const page = readFileSync(new URL('index.html', dist), 'utf8')
 const marker = '<div id="root"></div>'
 if (!page.includes(marker)) throw new Error('dist/index.html has no empty #root to fill')
-writeFileSync(new URL('index.html', dist), page.replace(marker, `<div id="root">${render()}</div>`))
+// Inline the stylesheet (about 11 KB gzipped): on a slow phone connection a separate request delays first paint by a round trip.
+const inlined = page.replace(/<link rel="stylesheet"[^>]*href="\/Prolens\/assets\/([^"]+\.css)"[^>]*>/, (_tag, file) => `<style>${readFileSync(new URL(`assets/${file}`, dist), 'utf8')}</style>`)
+writeFileSync(new URL('index.html', dist), inlined.replace(marker, `<div id="root">${render()}</div>`))
 rmSync(ssr, { recursive: true, force: true })
 console.log('pre-rendered dist/index.html')

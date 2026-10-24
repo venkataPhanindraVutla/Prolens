@@ -271,5 +271,152 @@
    "FocalLength": "350/10",
    "FocalLengthIn35mmFilm": 35
   }
+ },
+ {
+  "id": "street",
+  "alt": "A fishmonger laughing at his stall in a Maracaibo street market, in black and white",
+  "focus": "50% 35%",
+  "place": "Maracaibo, Venezuela",
+  "title": "Fishmonger smiling, Maracaibo street market, Venezuela.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Fishmonger_smiling,_Maracaibo_street_market,_Venezuela.jpg",
+  "source": "https://upload.wikimedia.org/wikipedia/commons/b/b4/Fishmonger_smiling%2C_Maracaibo_street_market%2C_Venezuela.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+  "artist": "Wilfredor",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "exif": {
+   "Make": "NIKON CORPORATION",
+   "Model": "NIKON D300",
+   "FNumber": "56/10",
+   "ExposureTime": "1/125",
+   "ISOSpeedRatings": 100,
+   "FocalLength": "500/10",
+   "FocalLengthIn35mmFilm": 75
+  }
+ },
+ {
+  "id": "portrait",
+  "alt": "A woman in a black headwrap and gold hoop earring, in profile",
+  "focus": "55% 40%",
+  "place": "Québec City, Canada",
+  "title": "Woman in a headwrap in Quebec City.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Woman_in_a_headwrap_in_Quebec_City.jpg",
+  "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Woman_in_a_headwrap_in_Quebec_City.jpg/3840px-Woman_in_a_headwrap_in_Quebec_City.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "artist": "Wilfredor",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "exif": {
+   "Make": "NIKON CORPORATION",
+   "Model": "NIKON Z 7_2",
+   "FNumber": "53/10",
+   "ExposureTime": "1/100",
+   "ISOSpeedRatings": 2500,
+   "FocalLength": "320/1",
+   "FocalLengthIn35mmFilm": 320
+  }
+ },
+ {
+  "id": "portrait2",
+  "alt": "A Maasai woman with beaded earrings looking at the camera",
+  "focus": "50% 35%",
+  "place": "Kenya",
+  "title": "Maasai woman with stretched ears.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Maasai_woman_with_stretched_ears.jpg",
+  "source": "https://upload.wikimedia.org/wikipedia/commons/e/e5/Maasai_woman_with_stretched_ears.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+  "artist": "William Warby from London, England",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "exif": {
+   "Make": "OLYMPUS IMAGING CORP.",
+   "Model": "E-510",
+   "FNumber": "55/10",
+   "ExposureTime": "1/160",
+   "ISOSpeedRatings": null,
+   "FocalLength": "142/1",
+   "FocalLengthIn35mmFilm": null
+  }
+ },
+ {
+  "id": "interior",
+  "alt": "The gilded Gothic hall of Bruges City Hall, rows of chairs leading to the far wall",
+  "focus": "50% 55%",
+  "place": "Bruges, Belgium",
+  "title": "Bruges City Hall Interior.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Bruges_City_Hall_Interior.jpg",
+  "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/Bruges_City_Hall_Interior.jpg/3840px-Bruges_City_Hall_Interior.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "artist": "Michael D Beckwith",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "exif": {
+   "Make": "Canon",
+   "Model": "Canon EOS 5DS",
+   "FNumber": "11/1",
+   "ExposureTime": "16/10",
+   "ISOSpeedRatings": 100,
+   "FocalLength": "17/1",
+   "FocalLengthIn35mmFilm": null
+  }
+ },
+ {
+  "id": "astro",
+  "alt": "The Milky Way rising over snowy mountains in the Marukha valley",
+  "focus": "50% 40%",
+  "place": "Arkhyz, Russia",
+  "title": "Milky Way over the valley of Marukha River, Arkhyz, Russiа.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Milky_Way_over_the_valley_of_Marukha_River,_Arkhyz,_Russi%D0%B0.jpg",
+  "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/Milky_Way_over_the_valley_of_Marukha_River%2C_Arkhyz%2C_Russi%D0%B0.jpg/3840px-Milky_Way_over_the_valley_of_Marukha_River%2C_Arkhyz%2C_Russi%D0%B0.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "artist": "Alexander Kurilov",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "exif": {
+   "Make": null,
+   "Model": null,
+   "FNumber": null,
+   "ExposureTime": null,
+   "ISOSpeedRatings": null,
+   "FocalLength": null,
+   "FocalLengthIn35mmFilm": null
+  }
+ },
+ {
+  "id": "fox",
+  "alt": "A red fox drinking from a lake, mirrored in the water",
+  "focus": "60% 50%",
+  "place": "Gennevilliers, France",
+  "title": "Red Fox drinking from a lake in Gennevilliers, France.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Red_Fox_drinking_from_a_lake_in_Gennevilliers,_France.jpg",
+  "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c4/Red_Fox_drinking_from_a_lake_in_Gennevilliers%2C_France.jpg/3840px-Red_Fox_drinking_from_a_lake_in_Gennevilliers%2C_France.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "artist": "Alexis Lours",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "exif": {
+   "Make": "Canon",
+   "Model": "Canon EOS R7",
+   "FNumber": "9/1",
+   "ExposureTime": "1/1250",
+   "ISOSpeedRatings": 1250,
+   "FocalLength": "800/1",
+   "FocalLengthIn35mmFilm": null
+  }
+ },
+ {
+  "id": "arctic",
+  "alt": "A white arctic fox sitting in deep snow",
+  "focus": "55% 50%",
+  "place": "Iceland",
+  "title": "Vulpes lagopus in Iceland.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Vulpes_lagopus_in_Iceland.jpg",
+  "source": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ea/Vulpes_lagopus_in_Iceland.jpg/3840px-Vulpes_lagopus_in_Iceland.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "artist": "Jonatan Pie (unsplash.com/@r3dmax)",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "exif": {
+   "Make": null,
+   "Model": null,
+   "FNumber": null,
+   "ExposureTime": null,
+   "ISOSpeedRatings": null,
+   "FocalLength": null,
+   "FocalLengthIn35mmFilm": null
+  }
  }
 ]

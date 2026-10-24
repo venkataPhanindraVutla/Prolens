@@ -1,0 +1,124 @@
+.section {
+  display: grid;
+  gap: 24px;
+}
+
+.track {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 2.4vw, 32px);
+  margin-top: 24px;
+}
+
+.pair {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.frame {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 6px;
+  cursor: ew-resize;
+  user-select: none;
+  background: var(--grey-1);
+}
+
+.layer,
+.fill {
+  position: absolute;
+  inset: 0;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.levelLine {
+  position: absolute;
+  left: 15%;
+  right: 15%;
+  top: 50%;
+  height: 2px;
+  background: #22c55e;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.3);
+}
+
+.tag {
+  position: absolute;
+  top: 12px;
+  padding: 4px 9px;
+  border-radius: 6px;
+  background: rgb(9 9 9 / 0.65);
+  font-size: 0.68rem;
+  white-space: nowrap;
+  z-index: 3;
+}
+
+.left {
+  left: 12px;
+}
+
+.right {
+  right: 12px;
+  color: var(--lime);
+}
+
+/* A big handle you can catch with a thumb. */
+.handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--paper);
+  z-index: 4;
+  pointer-events: none;
+}
+
+.handle b {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 46px;
+  height: 46px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid var(--paper);
+  background: rgb(11 11 11 / 0.6) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F4F4EF' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m9 6-6 6 6 6M15 6l6 6-6 6'/%3E%3C/svg%3E") center / 22px no-repeat;
+  backdrop-filter: blur(6px);
+}
+
+.title {
+  font-size: 1.4rem;
+  letter-spacing: -0.02em;
+}
+
+.note {
+  color: var(--grey-4);
+  font-size: 0.98rem;
+}
+
+.credit {
+  color: var(--grey-3);
+  font-size: 0.7rem;
+  text-decoration: none;
+}
+
+/* Phones: stacked, so dragging across a photo never fights a swipe. */
+@media (max-width: 900px) {
+  .track {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .frame {
+    margin: 0 calc(var(--gutter) * -1);
+    border-radius: 0;
+  }
+}

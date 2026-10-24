@@ -1,0 +1,151 @@
+.gallery {
+  position: relative;
+}
+
+.head {
+  display: grid;
+  gap: 24px;
+  padding-bottom: 32px;
+}
+
+.track {
+  display: grid;
+  gap: clamp(80px, 12vw, 160px);
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 var(--gutter) clamp(88px, 12vw, 168px);
+}
+
+/* Desktop: magazine spreads, the photo big and the genre name overlapping its edge, sides alternating. */
+.spread {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  align-items: end;
+}
+
+.spread[data-side='right'] {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr);
+}
+
+.spread[data-side='right'] .figure {
+  order: 2;
+}
+
+.figure {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+}
+
+.frame {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.text {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 10px;
+  padding: 0 0 8px clamp(24px, 4vw, 56px);
+}
+
+.spread[data-side='right'] .text {
+  padding: 0 clamp(24px, 4vw, 56px) 8px 0;
+  text-align: right;
+  justify-items: end;
+}
+
+.index {
+  font-size: 0.75rem;
+  color: var(--grey-3);
+}
+
+.genre {
+  font-size: clamp(3rem, 7vw, 6.6rem);
+  line-height: 0.88;
+  letter-spacing: -0.05em;
+  margin-left: calc(clamp(24px, 4vw, 56px) * -2.2);
+  text-shadow: 0 6px 30px rgb(0 0 0 / 0.6);
+}
+
+.spread[data-side='right'] .genre {
+  margin-left: 0;
+  margin-right: calc(clamp(24px, 4vw, 56px) * -2.2);
+}
+
+.recipeName {
+  color: var(--grey-4);
+  font-size: 0.9rem;
+}
+
+.recipe {
+  color: var(--lime);
+  font-size: clamp(0.85rem, 1.1vw, 1rem);
+}
+
+.tip {
+  max-width: 36ch;
+  color: var(--grey-4);
+}
+
+.credit {
+  font-size: 0.68rem;
+  color: var(--grey-3);
+}
+
+.credit a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Phones: a swipeable strip of full-height cards. */
+@media (max-width: 900px) {
+  .track {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 0 var(--gutter) 64px;
+    scrollbar-width: none;
+  }
+
+  .spread,
+  .spread[data-side='right'] {
+    flex: none;
+    width: 84vw;
+    grid-template-columns: 1fr;
+    align-items: start;
+    scroll-snap-align: center;
+  }
+
+  .spread[data-side='right'] .figure {
+    order: 0;
+  }
+
+  .frame {
+    aspect-ratio: 4 / 5;
+  }
+
+  .text,
+  .spread[data-side='right'] .text {
+    padding: 0;
+    margin-top: -64px;
+    text-align: left;
+    justify-items: start;
+  }
+
+  .genre,
+  .spread[data-side='right'] .genre {
+    margin: 0;
+    font-size: clamp(2.8rem, 13vw, 4rem);
+    padding-left: 12px;
+  }
+
+  .index {
+    order: -1;
+    padding-left: 12px;
+  }
+}

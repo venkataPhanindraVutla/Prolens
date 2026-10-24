@@ -148,3 +148,11 @@ select {
 .pink {
   color: var(--pink);
 }
+
+/* Sections after the opening layers render only as they come near the screen, so their fonts and photos
+   don't compete with the first paint on a slow connection. */
+main > section ~ section,
+main > div > section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1400px;
+}

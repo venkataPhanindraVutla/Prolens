@@ -6,8 +6,8 @@
 
 .horizon {
   position: absolute;
-  left: 22%;
-  right: 30%;
+  left: 18%;
+  right: 18%;
   top: 50%;
   height: 2px;
   z-index: 2;
@@ -23,18 +23,18 @@
 /* Fixed ticks at the frame edges: what the horizon has to line up with. */
 .reference {
   position: absolute;
-  left: 4%;
-  right: 16%;
+  left: 6%;
+  right: 6%;
   top: 50%;
   height: 0;
   border-top: 2px solid transparent;
-  border-image: linear-gradient(90deg, var(--paper) 0 26px, transparent 26px calc(100% - 26px), var(--paper) calc(100% - 26px)) 1;
+  border-image: linear-gradient(90deg, #fff 0 26px, transparent 26px calc(100% - 26px), #fff calc(100% - 26px)) 1;
   z-index: 2;
-  opacity: 0.85;
+  opacity: 0.55;
 }
 
 .horizon.ok span {
-  background: var(--lime);
+  background: #22c55e;
 }
 
 .controls {
@@ -89,10 +89,3 @@
   color: var(--lime);
 }
 
-.rollTag {
-  color: var(--paper);
-}
-
-.rollTag:global(.level) {
-  color: var(--lime);
-}

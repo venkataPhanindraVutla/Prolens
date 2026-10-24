@@ -1,7 +1,7 @@
 import { useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
+import AppViewfinder from '../../app-ui/AppViewfinder'
 import Photo from '../../components/Photo'
 import type { Chapter } from './chapter'
-import vf from './Viewfinder.module.css'
 import lv from './Level.module.css'
 
 const MAX = 15
@@ -36,28 +36,37 @@ export function useLevel(): Chapter {
     }
   }
 
+  const chips = [{ text: `Roll ${roll.toFixed(1)}° · Pitch 0°`, tone: level ? ('success' as const) : undefined }, { text: 'Eye level' }]
+  if (Math.abs(roll) > 8) chips.push({ text: 'Dutch tilt' })
+
   return {
     id: 'level',
     photoId: 'level',
-    hud: `PHOTO · LEVEL ${roll > 0 ? '+' : ''}${roll.toFixed(1)}° · 82 mm · f/8 · 1/1298 · ISO 200`,
     title: (
       <>
         Get the horizon <span className="pink">dead level</span>.
       </>
     ),
     body: 'The level reads the phone’s sensors and turns green inside half a degree. Drag the bar to tilt the camera until the fog line settles.',
-    screen: () => (
-      <>
-        <div className={lv.tilted} style={{ transform: `rotate(${roll}deg) scale(1.38)` }}>
-          <Photo id="level" sizes="(min-width: 980px) 56vw, 100vw" />
-        </div>
-        {/* The line follows the real horizon, as in the app's level overlay. */}
-        <div data-horizon className={[lv.horizon, level ? lv.ok : ''].join(' ')} style={{ transform: `translateY(-50%) rotate(${roll}deg)` }} aria-hidden="true">
-          <span />
-        </div>
-        <div className={lv.reference} aria-hidden="true" />
-        <span className={[vf.tag, lv.rollTag, 'mono', level ? 'level' : ''].join(' ')}>{readout}</span>
-      </>
+    phone: (
+      <AppViewfinder
+        preview={
+          <div className={lv.tilted} style={{ transform: `rotate(${roll}deg) scale(1.3)` }}>
+            <Photo id="level" sizes="360px" />
+          </div>
+        }
+        overlay={
+          <>
+            <div data-horizon className={[lv.horizon, level ? lv.ok : ''].join(' ')} style={{ transform: `translateY(-50%) rotate(${roll}deg)` }} aria-hidden="true">
+              <span />
+            </div>
+            <div className={lv.reference} aria-hidden="true" />
+          </>
+        }
+        chips={chips}
+        histogram={null}
+        tools={{ histogram: false }}
+      />
     ),
     controls: (
       <div className={lv.controls}>

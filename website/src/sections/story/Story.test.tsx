@@ -21,5 +21,12 @@ test('choosing a grid chip selects it', async () => {
   const grids = screen.getByRole('radiogroup', { name: 'Grid' })
   await userEvent.click(within(grids).getByRole('radio', { name: 'Golden spiral' }))
   expect(within(grids).getByRole('radio', { name: 'Golden spiral' })).toHaveAttribute('aria-checked', 'true')
-  expect(screen.getByText(/A Fibonacci spiral built from golden squares/)).toBeInTheDocument()
+  expect(screen.getByText(/kept at the real 1.618 ratio/)).toBeInTheDocument()
+})
+
+test('the golden spiral is drawn at its true ratio, never stretched', async () => {
+  const { container } = render(<LocationProvider><Story /></LocationProvider>)
+  await userEvent.click(screen.getByRole('radio', { name: 'Golden spiral' }))
+  // The true-ratio spiral outlines its golden rectangle; the stretched one has none.
+  expect(container.querySelector('[data-grid="spiralTrue"]')).not.toBeNull()
 })

@@ -13,6 +13,7 @@
     "photos": "node scripts/photos.mjs"
   },
   "dependencies": {
+    "@fontsource/geist-sans": "^5.3.0",
     "@fontsource/jetbrains-mono": "^5.3.0",
     "@fontsource/space-grotesk": "^5.3.0",
     "react": "^19.3.1",

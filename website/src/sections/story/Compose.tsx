@@ -1,13 +1,20 @@
 import { useState } from 'react'
+import AppViewfinder from '../../app-ui/AppViewfinder'
 import GridOverlay from '../../components/GridOverlay'
 import Photo from '../../components/Photo'
 import { gridSpec } from '../../lib/grids'
-import type { Chapter } from './chapter'
+import { PREVIEW, type Chapter } from './chapter'
 import css from './story.module.css'
-import vf from './Viewfinder.module.css'
 
-const CHIPS = ['thirds', 'phi', 'spiral', 'triangles', 'dynamic', 'onePoint']
-const SIZES = '(min-width: 980px) 56vw, 100vw'
+/** Chip label to the grid drawn. The golden spiral is always drawn at its true 1.618 ratio, never stretched. */
+const CHIPS: { id: string; label: string }[] = [
+  { id: 'thirds', label: 'Rule of thirds' },
+  { id: 'phi', label: 'Phi grid' },
+  { id: 'spiralTrue', label: 'Golden spiral' },
+  { id: 'triangles', label: 'Golden triangles' },
+  { id: 'dynamic', label: 'Dynamic symmetry' },
+  { id: 'onePoint', label: 'One-point perspective' },
+]
 
 export function useCompose(): Chapter {
   const [grid, setGrid] = useState('thirds')
@@ -15,33 +22,26 @@ export function useCompose(): Chapter {
   return {
     id: 'compose',
     photoId: 'compose',
-    hud: `PHOTO · GRID ${spec.name.toUpperCase()} · 24 mm · f/11 · 1/45 · ISO 200`,
     title: (
       <>
         Compose on <span className="pink">23 grids</span>.
       </>
     ),
     body: 'Thirds is only the start. Golden spirals, triangles, dynamic symmetry and perspective grids sit over the live view, so the frame is built before you press the shutter.',
-    screen: (f) => (
-      <>
-        <Photo id="compose" sizes={SIZES} />
-        <GridOverlay id={grid} width={f.w} height={f.h} color="rgb(244 244 239 / 0.95)" />
-        <span className={`${vf.tag} mono`}>{spec.name}</span>
-      </>
+    phone: (
+      <AppViewfinder
+        preview={<Photo id="compose" sizes="360px" />}
+        overlay={<GridOverlay id={grid} width={PREVIEW.w} height={PREVIEW.h} variant="app" />}
+        histogram={null}
+        tools={{ histogram: false }}
+      />
     ),
     controls: (
       <>
         <div className={css.chips} role="radiogroup" aria-label="Grid">
-          {CHIPS.map((id) => (
-            <button
-              key={id}
-              type="button"
-              role="radio"
-              aria-checked={grid === id}
-              className={`${css.chip} focusable`}
-              onClick={() => setGrid(id)}
-            >
-              {gridSpec(id)!.name}
+          {CHIPS.map((c) => (
+            <button key={c.id} type="button" role="radio" aria-checked={grid === c.id} className={`${css.chip} focusable`} onClick={() => setGrid(c.id)}>
+              {c.label}
             </button>
           ))}
         </div>

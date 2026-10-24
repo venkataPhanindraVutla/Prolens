@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import AppPhone from '../../app-ui/AppPhone'
 import SectionHeading from '../../components/SectionHeading'
 import { useMedia } from '../../lib/motion'
 import { creditLine, exifLine, photo } from '../../lib/photos'
@@ -9,14 +10,14 @@ import { useLevel } from './Level'
 import { useLight } from './Light'
 import { useModes } from './Modes'
 import css from './story.module.css'
-import Viewfinder, { TALL_FRAME, WIDE_FRAME } from './Viewfinder'
 
 function Caption({ id }: { id: string }) {
   const p = photo(id)
+  const exif = exifLine(p)
   return (
     <p className={`${css.caption} mono`}>
       <span>{p.place}</span>
-      <span>{exifLine(p)}</span>
+      {exif && <span>{exif}</span>}
       <a href={p.page} target="_blank" rel="noopener">
         Photo: {creditLine(p)}
       </a>
@@ -24,7 +25,10 @@ function Caption({ id }: { id: string }) {
   )
 }
 
-/** On wide screens a sideways phone stays pinned while the chapters scroll past and swap its screen. */
+/**
+ * The phone stays pinned while the chapters scroll past and swap its screen: beside the text on wide screens,
+ * across the top on phones, with each chapter's controls scrolling up under it within thumb reach.
+ */
 export default function Story() {
   const chapters: Chapter[] = [useCompose(), useLevel(), useExpose(), useModes(), useLight()]
   const wide = useMedia('(min-width: 980px)')
@@ -32,13 +36,13 @@ export default function Story() {
   const refs = useRef<(HTMLElement | null)[]>([])
 
   useEffect(() => {
-    if (!wide || typeof IntersectionObserver === 'undefined') return
-    // A chapter is active while it crosses the middle fifth of the window.
+    if (typeof IntersectionObserver === 'undefined') return
+    // Wide: the chapter crossing the middle of the window. Phones: the one rising into the band under the pinned phone.
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) if (e.isIntersecting) setActive(Number((e.target as HTMLElement).dataset.index))
       },
-      { rootMargin: '-40% 0px -40% 0px' },
+      { rootMargin: wide ? '-40% 0px -40% 0px' : '-62% 0px -18% 0px' },
     )
     refs.current.forEach((el) => el && io.observe(el))
     return () => io.disconnect()
@@ -46,18 +50,16 @@ export default function Story() {
 
   const current = chapters[active]
   return (
-    <section id="story" className={[css.story, wide ? css.wide : ''].join(' ')} aria-label="What Prolens does">
-      {wide && (
-        <div className={css.pin}>
-          <Viewfinder wide hud={current.hud} mode={current.mode}>
-            {chapters.map((c, i) => (
-              <div key={c.id} className={[css.layer, i === active ? css.on : ''].join(' ')} aria-hidden={i !== active}>
-                {c.screen(WIDE_FRAME)}
-              </div>
-            ))}
-          </Viewfinder>
-        </div>
-      )}
+    <section id="story" className={[css.story, wide ? css.wide : css.narrow].join(' ')} aria-label="What Prolens does">
+      <div className={css.pin}>
+        <AppPhone statusBar={current.statusBar} className={css.phone}>
+          {chapters.map((c, i) => (
+            <div key={c.id} className={[css.layer, i === active ? css.on : ''].join(' ')} aria-hidden={i !== active}>
+              {c.phone}
+            </div>
+          ))}
+        </AppPhone>
+      </div>
       <div className={css.chapters}>
         {chapters.map((c, i) => (
           <article
@@ -69,17 +71,10 @@ export default function Story() {
             className={[css.chapter, i === active ? css.active : ''].join(' ')}
             aria-labelledby={`chapter-${c.id}`}
           >
-            {!wide && (
-              <div className={css.inline}>
-                <Viewfinder wide={false} hud={c.hud} mode={c.mode}>
-                  {c.screen(TALL_FRAME)}
-                </Viewfinder>
-              </div>
-            )}
             <SectionHeading id={`chapter-${c.id}`}>{c.title}</SectionHeading>
             <p className={css.body}>{c.body}</p>
             {c.controls}
-            <Caption id={c.photoId} />
+            {c.photoId && <Caption id={c.photoId} />}
           </article>
         ))}
       </div>

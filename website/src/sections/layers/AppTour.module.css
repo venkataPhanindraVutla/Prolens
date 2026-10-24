@@ -1,0 +1,112 @@
+.tour {
+  position: relative;
+  overflow: hidden;
+}
+
+.head {
+  display: grid;
+  gap: 24px;
+  padding-bottom: 32px;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tabs button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--grey-2);
+  border-radius: 999px;
+  background: none;
+  cursor: pointer;
+}
+
+.tabs button[aria-selected='true'] {
+  background: var(--paper);
+  border-color: var(--paper);
+  color: var(--ink);
+}
+
+/* A row of phones you swipe through; the one in the middle is lit. */
+.track {
+  display: flex;
+  gap: clamp(20px, 3vw, 48px);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 24px max(var(--gutter), calc(50vw - 160px)) clamp(88px, 10vw, 140px);
+  scrollbar-width: none;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.item {
+  flex: none;
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+  width: 320px;
+  margin: 0;
+  scroll-snap-align: center;
+}
+
+/* Phones away from the middle step back; their captions stay readable. */
+.item .phone {
+  opacity: 0.45;
+  transform: scale(0.94);
+  transition: opacity 300ms var(--ease-out), transform 300ms var(--ease-out);
+}
+
+.item.on .phone {
+  opacity: 1;
+  transform: none;
+}
+
+.phone {
+  --phone-w: 300px;
+}
+
+.caption {
+  display: grid;
+  gap: 4px;
+  max-width: 300px;
+  text-align: center;
+  color: var(--grey-4);
+  font-size: 0.92rem;
+}
+
+.caption b {
+  color: var(--paper);
+  font-weight: 600;
+}
+
+@media (max-width: 760px) {
+  .tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin: 0 calc(var(--gutter) * -1);
+    padding: 2px var(--gutter);
+    scrollbar-width: none;
+  }
+
+  .tabs button {
+    flex: none;
+  }
+
+  .track {
+    padding-left: 12vw;
+    padding-right: 12vw;
+  }
+
+  .item {
+    width: 76vw;
+  }
+
+  .phone {
+    --phone-w: min(76vw, 300px);
+  }
+}

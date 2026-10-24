@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import AppViewfinder from '../../app-ui/AppViewfinder'
 import { falseColor, histogram, luma, peaking, zebra } from '../../lib/analysis'
 import { photo, src } from '../../lib/photos'
-import type { Chapter, Frame } from './chapter'
+import { PREVIEW, type Chapter } from './chapter'
 import css from './story.module.css'
 import ex from './Expose.module.css'
 
@@ -13,8 +14,6 @@ const TOOLS: { id: Tool; label: string }[] = [
   { id: 'peaking', label: 'Peaking' },
 ]
 const PHOTO = photo('expose')
-/** Analysis runs at a fraction of the frame, like the app's downsampled preview. */
-const SCALE = 2.5
 
 /** Draws img into a w × h canvas the way object-fit: cover would, keeping the photo's focus point. */
 function drawCover(g: CanvasRenderingContext2D, img: HTMLImageElement, w: number, h: number) {
@@ -25,9 +24,10 @@ function drawCover(g: CanvasRenderingContext2D, img: HTMLImageElement, w: number
   g.drawImage(img, (w - dw) * fx, (h - dh) * fy, dw, dh)
 }
 
-function Screen({ tools, frame }: { tools: Set<Tool>; frame: Frame }) {
-  const w = Math.round(frame.w / SCALE)
-  const h = Math.round(frame.h / SCALE)
+/** The photo, measured and painted at the viewfinder preview's size; reports its histogram up to the HUD. */
+function Screen({ tools, onHistogram }: { tools: Set<Tool>; onHistogram: (h: number[]) => void }) {
+  const w = PREVIEW.w
+  const h = PREVIEW.h
   const base = useRef<HTMLCanvasElement>(null)
   const over = useRef<HTMLCanvasElement>(null)
   const [l, setL] = useState<Uint8Array | null>(null)
@@ -43,7 +43,9 @@ function Screen({ tools, frame }: { tools: Set<Tool>; frame: Frame }) {
       const run = () => {
         if (cancelled) return
         drawCover(g, img, w, h)
-        setL(luma(g.getImageData(0, 0, w, h).data))
+        const lum = luma(g.getImageData(0, 0, w, h).data)
+        setL(lum)
+        onHistogram(histogram(lum))
       }
       if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(run, { timeout: 1500 })
       else setTimeout(run, 100)
@@ -52,7 +54,7 @@ function Screen({ tools, frame }: { tools: Set<Tool>; frame: Frame }) {
     return () => {
       cancelled = true
     }
-  }, [w, h])
+  }, [w, h, onHistogram])
 
   useEffect(() => {
     const o = over.current?.getContext('2d')
@@ -76,19 +78,10 @@ function Screen({ tools, frame }: { tools: Set<Tool>; frame: Frame }) {
     o.putImageData(img, 0, 0)
   }, [tools, l, w, h])
 
-  const hist = useMemo(() => (l ? histogram(l) : null), [l])
-  const max = hist ? Math.max(...hist) : 1
   return (
     <>
       <canvas ref={base} width={w} height={h} className={ex.canvas} role="img" aria-label={PHOTO.alt} />
       <canvas ref={over} width={w} height={h} className={ex.canvas} />
-      {tools.has('histogram') && hist && (
-        <svg className={ex.hist} viewBox="0 0 64 32" preserveAspectRatio="none" aria-hidden="true">
-          {hist.map((v, i) => (
-            <rect key={i} x={i} y={32 - (v / max) * 32} width={1} height={(v / max) * 32} />
-          ))}
-        </svg>
-      )}
     </>
   )
 }
@@ -102,18 +95,24 @@ export function useExpose(): Chapter {
       else next.add(t)
       return next
     })
-  const on = TOOLS.filter((t) => tools.has(t.id)).map((t) => t.label.toUpperCase())
+  const [hist, setHist] = useState<number[] | null>(null)
   return {
     id: 'expose',
     photoId: 'expose',
-    hud: `PHOTO · ${on.length ? on.join(' + ') : 'NO OVERLAYS'} · 50 mm · f/6.3 · 1/400 · ISO 100`,
     title: (
       <>
         See exposure. <span className="pink">Don’t guess it.</span>
       </>
     ),
     body: 'This is the real photo, measured pixel by pixel. Zebras stripe what’s about to clip, false colour maps brightness like a cinema monitor, peaking outlines what’s sharp, and the histogram shows the whole frame at once.',
-    screen: (f) => <Screen tools={tools} frame={f} />,
+    phone: (
+      <AppViewfinder
+        preview={<Screen tools={tools} onHistogram={setHist} />}
+        histogram={hist}
+        tools={{ histogram: tools.has('histogram'), zebra: tools.has('zebras'), focus: tools.has('peaking') }}
+        chips={tools.has('falseColour') ? [{ text: 'False colour' }] : []}
+      />
+    ),
     controls: (
       <div className={css.chips}>
         {TOOLS.map((t) => (

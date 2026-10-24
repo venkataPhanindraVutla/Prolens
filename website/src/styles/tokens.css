@@ -1,0 +1,19 @@
+:root {
+  --ink: #0b0b0b;
+  --paper: #f4f4ef;
+  --pink: #ff2dab;
+  --lime: #d4ff3f;
+
+  /* Greys between ink and paper: raised surface, hairlines, muted text, secondary text. */
+  --grey-1: #161616;
+  --grey-2: #2a2a2a;
+  --grey-3: #75756f;
+  --grey-4: #b8b8b2;
+
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --gutter: clamp(16px, 5vw, 72px);
+  --measure: 62ch;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+}

@@ -1,0 +1,125 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+p,
+ol,
+ul,
+figure {
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+
+a {
+  color: inherit;
+}
+
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--lime);
+  outline-offset: 2px;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-feature-settings: 'tnum' 1;
+  letter-spacing: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Focus square: lime corner ticks on hover and keyboard focus, like an autofocus point. */
+.focusable {
+  position: relative;
+}
+
+.focusable::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms var(--ease-out), inset 120ms var(--ease-out);
+  background:
+    linear-gradient(var(--lime), var(--lime)) top left / 8px 1.5px,
+    linear-gradient(var(--lime), var(--lime)) top left / 1.5px 8px,
+    linear-gradient(var(--lime), var(--lime)) top right / 8px 1.5px,
+    linear-gradient(var(--lime), var(--lime)) top right / 1.5px 8px,
+    linear-gradient(var(--lime), var(--lime)) bottom left / 8px 1.5px,
+    linear-gradient(var(--lime), var(--lime)) bottom left / 1.5px 8px,
+    linear-gradient(var(--lime), var(--lime)) bottom right / 8px 1.5px,
+    linear-gradient(var(--lime), var(--lime)) bottom right / 1.5px 8px;
+  background-repeat: no-repeat;
+}
+
+.focusable:hover::after,
+.focusable:focus-visible::after {
+  opacity: 1;
+  inset: -3px;
+}
+
+.focusable:focus-visible {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

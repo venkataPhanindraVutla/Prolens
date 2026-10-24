@@ -46,7 +46,22 @@ You need JDK 21 and the Android SDK (`local.properties` with `sdk.dir`).
 
 Release signing reads `prolens.storeFile`, `prolens.storePassword`, `prolens.keyAlias` and `prolens.keyPassword` from `~/.gradle/gradle.properties`. Without them the release builds unsigned. Keystores and passwords are never committed.
 
+## Website
+
+The landing page lives in `website/` (React, Vite, TypeScript) and is published to GitHub Pages.
+
+```
+cd website
+npm install
+npm run dev      # local preview
+npm test         # unit tests
+```
+
 ## Credits
 
 - The sun and moon maths is ported from [SunCalc](https://github.com/mourner/suncalc) by Vladimir Agafonkin (BSD-2-Clause).
 - The Geist font is by Vercel (SIL Open Font License).
+
+## Licence
+
+Copyright 2026 the Prolens contributors. Licensed under the [Apache License 2.0](LICENSE).

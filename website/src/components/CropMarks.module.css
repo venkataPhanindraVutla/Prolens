@@ -1,0 +1,16 @@
+.marks {
+  position: absolute;
+  pointer-events: none;
+}
+
+.marks > span {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 0 solid var(--grey-3);
+}
+
+.tl { top: 0; left: 0; border-top-width: 1.5px !important; border-left-width: 1.5px !important; }
+.tr { top: 0; right: 0; border-top-width: 1.5px !important; border-right-width: 1.5px !important; }
+.bl { bottom: 0; left: 0; border-bottom-width: 1.5px !important; border-left-width: 1.5px !important; }
+.br { bottom: 0; right: 0; border-bottom-width: 1.5px !important; border-right-width: 1.5px !important; }

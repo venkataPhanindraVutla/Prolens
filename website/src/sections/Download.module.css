@@ -1,0 +1,75 @@
+.download {
+  display: grid;
+  gap: 28px;
+}
+
+.card {
+  position: relative;
+  display: grid;
+  gap: 22px;
+  margin-top: 24px;
+  padding: clamp(24px, 4vw, 48px);
+  border: 1px solid var(--grey-2);
+  border-radius: 4px;
+  max-width: 860px;
+}
+
+.cta {
+  justify-self: start;
+  min-height: 64px;
+  padding: 0 1.8em;
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  color: var(--grey-3);
+  font-size: 0.8rem;
+}
+
+.hash {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hash > span {
+  color: var(--grey-4);
+}
+
+.copy {
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--grey-2);
+  border-radius: 999px;
+  background: none;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.steps li {
+  counter-increment: step;
+  padding-top: 14px;
+  border-top: 1px solid var(--grey-2);
+  color: var(--grey-4);
+}
+
+.steps li::before {
+  content: counter(step);
+  display: block;
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+  color: var(--lime);
+  font-size: 0.8rem;
+}

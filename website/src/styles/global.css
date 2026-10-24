@@ -123,3 +123,28 @@ select {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* Page rhythm shared by every section. */
+.section {
+  position: relative;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: clamp(88px, 12vw, 168px) var(--gutter);
+}
+
+.display {
+  font-size: clamp(2.6rem, 7.2vw, 6.4rem);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+
+.lede {
+  max-width: var(--measure);
+  color: var(--grey-4);
+  font-size: clamp(1.05rem, 1.4vw, 1.25rem);
+  line-height: 1.5;
+}
+
+.pink {
+  color: var(--pink);
+}

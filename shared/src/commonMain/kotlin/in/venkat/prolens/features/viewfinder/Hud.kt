@@ -30,6 +30,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+import `in`.venkat.prolens.app.Tab
 import `in`.venkat.prolens.core.designsystem.ButtonVariant
 import `in`.venkat.prolens.core.designsystem.Pro
 import `in`.venkat.prolens.core.designsystem.ProButton
@@ -62,12 +64,10 @@ internal fun ToolToggle(icon: ImageVector, label: String, on: Boolean, angle: St
 @Composable
 internal fun ToolRow(
     gridOn: Boolean, level: Boolean, histogram: Boolean, peaking: Boolean, zebras: Boolean, angle: State<Float>,
-    onApps: () -> Unit, onGrid: () -> Unit, onLevel: () -> Unit, onHistogram: () -> Unit, onPeaking: () -> Unit, onZebras: () -> Unit, onTools: () -> Unit,
+    onGrid: () -> Unit, onLevel: () -> Unit, onHistogram: () -> Unit, onPeaking: () -> Unit, onZebras: () -> Unit, onTools: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        ToolToggle(ProIcons.Apps, "Other screens", false, angle, onApps)
-        Box(Modifier.weight(1f))
         ToolToggle(ProIcons.Grid, "Grid", gridOn, angle, onGrid)
         ToolToggle(ProIcons.Level, "Level", level, angle, onLevel)
         ToolToggle(ProIcons.Histogram, "Histogram", histogram, angle, onHistogram)
@@ -105,13 +105,14 @@ internal fun HudRow(
     exposure: ExposureSettings,
     readout: CameraReadout,
     caps: CameraCapabilities,
+    zoomRatio: Float,
     angle: State<Float>,
     onOpen: (HudField) -> Unit,
 ) {
     val iso = if (exposure.isoAuto) readout.iso?.let { "${it}A" } ?: "Auto" else "${exposure.iso}"
     val shutter = if (exposure.shutterAuto) readout.shutter?.let { "${PhotoFormat.shutter(it)}A" } ?: "Auto" else PhotoFormat.shutter(exposure.shutter)
     val aperture = caps.apertures.firstOrNull()?.let { PhotoFormat.aperture(it.toDouble()) } ?: "—"
-    val lens = caps.equivalentFocalMm?.let { "${it.roundToInt()} mm" } ?: "—"
+    val lens = caps.equivalentFocalMm?.let { "${(it * zoomRatio).roundToInt()} mm" } ?: "—"
     val wb = if (exposure.wbAuto) "AWB" else "${exposure.wbKelvin}K"
     val focus = if (exposure.focusAuto) "AF" else fmtFocus(exposure.focusM)
     Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
@@ -179,6 +180,38 @@ private fun ShutterButton(active: Boolean, onClick: () -> Unit) {
             } else {
                 drawCircle(Color.White)
             }
+        }
+    }
+}
+
+/**
+ * The camera-style mode strip above the shutter: the other screens as words, Viewfinder in the middle.
+ * Tap a name, or swipe sideways on the preview, to switch.
+ */
+internal val ModeOrder = listOf(Tab.Calculators, Tab.Light, Tab.Viewfinder, Tab.Coach, Tab.Gear)
+
+@Composable
+internal fun ModeStrip(onSelect: (Tab) -> Unit, modifier: Modifier = Modifier) {
+    val c = Pro.colors
+    Row(
+        modifier.fillMaxWidth().padding(vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ModeOrder.forEach { t ->
+            val on = t == Tab.Viewfinder
+            Text(
+                t.label,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(Pro.shapes.radius))
+                    .clickable(enabled = !on, role = Role.Tab) { onSelect(t) }
+                    .padding(horizontal = 4.dp, vertical = 6.dp),
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontSize = 13.sp,
+                    fontWeight = if (on) FontWeight.SemiBold else FontWeight.Medium,
+                    color = if (on) Color(0xFFFACC15) else c.mutedForeground,
+                ),
+            )
         }
     }
 }

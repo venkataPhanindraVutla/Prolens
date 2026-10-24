@@ -88,12 +88,23 @@ data class CameraCapabilities(
 /** A downsampled luma (Y) frame, row-major, one byte per pixel, oriented like the preview. */
 class LumaFrame(val width: Int, val height: Int, val data: ByteArray)
 
+/** The camera's zoom range and current ratio. Below 1× is the ultra-wide, where the phone exposes it. */
+data class ZoomState(val min: Float = 1f, val max: Float = 1f, val ratio: Float = 1f)
+
 /** What the camera reports back while metering on auto. */
 data class CameraReadout(val iso: Int? = null, val shutter: Double? = null, val focusDiopters: Float? = null)
 
 interface CameraController {
     val capabilities: StateFlow<CameraCapabilities>
     val readout: StateFlow<CameraReadout>
+    val zoom: StateFlow<ZoomState>
+    fun setZoom(ratio: Float)
+    /**
+     * Focuses and meters at ([x], [y]), each 0..1 across the preview. With [lock] they hold until [unlockFocus];
+     * otherwise the camera returns to continuous auto after a few seconds. Manual focus or exposure is left alone.
+     */
+    fun focusAt(x: Float, y: Float, lock: Boolean)
+    fun unlockFocus()
     /** Push manual or auto exposure, white balance and focus to the camera. */
     fun apply(exposure: ExposureSettings)
     /** Receives downsampled luma frames (~8 fps) while non-null. */

@@ -19,6 +19,13 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.plus
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableLongStateOf
+import `in`.venkat.prolens.app.Tab
+import `in`.venkat.prolens.core.designsystem.OverlayChip
 import androidx.compose.ui.platform.LocalDensity
 import `in`.venkat.prolens.core.platform.Hold
 import `in`.venkat.prolens.core.platform.ImmersiveMode
@@ -69,7 +76,6 @@ private sealed interface Sheet {
     data object Grid : Sheet
     data object Tools : Sheet
     data class Value(val field: HudField) : Sheet
-    data object Screens : Sheet
 }
 
 @Composable
@@ -151,8 +157,13 @@ private fun Viewfinder(state: AppState) {
         }
     }
 
-    val lens = remember(gear, caps) { lensInfo(gear, caps) }
-    val fov = remember(caps) { fieldOfView(caps) }
+    val zoom by controller.zoom.collectAsStateWithLifecycle()
+    val lens = remember(gear, caps, zoom.ratio) { lensInfo(gear, caps, zoom.ratio) }
+    val fov = remember(caps, zoom.ratio, settings.aspect) { zoomedFov(fieldOfView(caps), zoom.ratio, settings.aspect.sensorRatio) }
+    var pinchZoom by remember { mutableFloatStateOf(1f) }
+    var focus by remember { mutableStateOf<FocusMark?>(null) }
+    var marks by remember { mutableLongStateOf(0L) }
+    var hudVisible by rememberSaveable { mutableStateOf(true) }
 
     /* Capture: timer, then steady shot, then the shutter. Tapping again before the photo is taken cancels. */
     var phase by remember { mutableStateOf(Phase.Idle) }
@@ -200,15 +211,50 @@ private fun Viewfinder(state: AppState) {
         val coverTop = (with(density) { topStrip.toDp() } - gap).coerceAtLeast(0.dp)
         val coverBottom = (with(density) { bottomStrip.toDp() } - gap).coerceAtLeast(0.dp)
 
-        Box(Modifier.align(Alignment.Center).size(w, h).clipToBounds()) {
+        Box(
+            Modifier
+                .align(Alignment.Center)
+                .size(w, h)
+                .clipToBounds()
+                .previewGestures(
+                    hold = hold,
+                    onTap = { p, u ->
+                        if (focus?.locked == true) controller.unlockFocus()
+                        controller.focusAt(u.x, u.y, lock = false)
+                        focus = FocusMark(p.x, p.y, locked = false, id = ++marks)
+                    },
+                    onHold = { p, u ->
+                        controller.focusAt(u.x, u.y, lock = true)
+                        focus = FocusMark(p.x, p.y, locked = true, id = ++marks)
+                    },
+                    onPinchStart = { pinchZoom = controller.zoom.value.ratio },
+                    onPinch = { z ->
+                        pinchZoom = (pinchZoom * z).coerceIn(zoom.min, zoom.max)
+                        controller.setZoom(pinchZoom)
+                    },
+                    onSwipeSideways = { next ->
+                        val i = ModeOrder.indexOf(Tab.Viewfinder) + if (next) 1 else -1
+                        ModeOrder.getOrNull(i)?.let(state::select)
+                    },
+                    onSwipeUpDown = {
+                        hudVisible = !hudVisible
+                        if (!hudVisible) state.showToast("Swipe up or down to bring the controls back")
+                    },
+                ),
+        ) {
             CameraPreview(controller, Modifier.fillMaxSize())
             PreviewOverlay(settings, analysis, blink, orientation, lens, fov, sunPoints, sunNow, hold, Modifier.fillMaxSize())
             Box(Modifier.fillMaxSize().padding(top = coverTop, bottom = coverBottom)) {
                 HeldLayer(hold, angle, Modifier.fillMaxSize()) {
-                    if (settings.histogram) HistogramPanel(analysis, Modifier.align(Alignment.TopStart))
-                    OverlayChips(settings, orientation, lens, phase == Phase.Holding, hold, Modifier.align(Alignment.TopEnd).padding(8.dp))
-                    if (settings.waveform) WaveformPanel(analysis, Modifier.align(Alignment.BottomStart))
-                    if (settings.falseColor) FalseColorLegend(Modifier.align(Alignment.BottomEnd).padding(8.dp))
+                    if (hudVisible) {
+                        if (settings.histogram) HistogramPanel(analysis, Modifier.align(Alignment.TopStart))
+                        OverlayChips(settings, orientation, lens, phase == Phase.Holding, hold, Modifier.align(Alignment.TopEnd).padding(8.dp))
+                        if (settings.waveform) WaveformPanel(analysis, Modifier.align(Alignment.BottomStart))
+                        if (settings.falseColor) FalseColorLegend(Modifier.align(Alignment.BottomEnd).padding(8.dp))
+                    }
+                    if (focus?.locked == true) {
+                        OverlayChip("Focus and exposure locked", Color(0xFFFACC15), Modifier.align(Alignment.TopCenter).padding(top = 8.dp))
+                    }
                     if (countdown > 0) {
                         Text(
                             "$countdown", Modifier.align(Alignment.Center),
@@ -217,48 +263,52 @@ private fun Viewfinder(state: AppState) {
                     }
                 }
             }
+            focus?.let { FocusSquare(it) }
             if (flashAlpha > 0f) Box(Modifier.fillMaxSize().background(Color.White.copy(alpha = flashAlpha)))
         }
 
-        ToolRow(
-            gridOn = settings.grid != "none" || settings.grid2 != "none",
-            level = settings.level, histogram = settings.histogram, peaking = settings.peaking, zebras = settings.zebras,
-            angle = angle,
-            onApps = { sheet = Sheet.Screens },
-            onGrid = { sheet = Sheet.Grid },
-            onLevel = { state.updateViewfinder { it.copy(level = !it.level) } },
-            onHistogram = { state.updateViewfinder { it.copy(histogram = !it.histogram) } },
-            onPeaking = { state.updateViewfinder { it.copy(peaking = !it.peaking) } },
-            onZebras = { state.updateViewfinder { it.copy(zebras = !it.zebras) } },
-            onTools = { sheet = Sheet.Tools },
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .onSizeChanged { topStrip = it.height }
-                .background(Strip)
-                .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)),
-        )
-
-        Column(
-            Modifier
-                .align(Alignment.BottomCenter)
-                .onSizeChanged { bottomStrip = it.height }
-                .background(Strip)
-                .navigationBarsPadding(),
+        AnimatedVisibility(
+            hudVisible,
+            Modifier.align(Alignment.TopCenter).onSizeChanged { topStrip = it.height },
+            enter = fadeIn(), exit = fadeOut(),
         ) {
-            HudRow(settings.exposure, readout, caps, angle) { sheet = Sheet.Value(it) }
-            CaptureRow(
-                timerSeconds = settings.timerSeconds, active = phase != Phase.Idle, saved = saved, angle = angle,
-                onShutter = ::shoot,
-                onTimer = { state.updateViewfinder { it.copy(timerSeconds = when (it.timerSeconds) { 0 -> 2; 2 -> 10; else -> 0 }) } },
-                onLast = { state.showToast(if (saved > 0) "$saved saved this session" else "No captures yet") },
+            ToolRow(
+                gridOn = settings.grid != "none" || settings.grid2 != "none",
+                level = settings.level, histogram = settings.histogram, peaking = settings.peaking, zebras = settings.zebras,
+                angle = angle,
+                onGrid = { sheet = Sheet.Grid },
+                onLevel = { state.updateViewfinder { it.copy(level = !it.level) } },
+                onHistogram = { state.updateViewfinder { it.copy(histogram = !it.histogram) } },
+                onPeaking = { state.updateViewfinder { it.copy(peaking = !it.peaking) } },
+                onZebras = { state.updateViewfinder { it.copy(zebras = !it.zebras) } },
+                onTools = { sheet = Sheet.Tools },
+                modifier = Modifier
+                    .background(Strip)
+                    .windowInsetsPadding(WindowInsets.displayCutout.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)),
             )
+        }
+
+        /* Bottom: lens chips float over the preview; HUD, mode strip and shutter sit on the strip. */
+        Column(Modifier.align(Alignment.BottomCenter).onSizeChanged { bottomStrip = it.height }) {
+            ZoomBar(zoom, angle, controller::setZoom)
+            Column(Modifier.background(Strip).navigationBarsPadding()) {
+                AnimatedVisibility(hudVisible, enter = fadeIn(), exit = fadeOut()) {
+                    HudRow(settings.exposure, readout, caps, zoom.ratio, angle) { sheet = Sheet.Value(it) }
+                }
+                ModeStrip(state::select)
+                CaptureRow(
+                    timerSeconds = settings.timerSeconds, active = phase != Phase.Idle, saved = saved, angle = angle,
+                    onShutter = ::shoot,
+                    onTimer = { state.updateViewfinder { it.copy(timerSeconds = when (it.timerSeconds) { 0 -> 2; 2 -> 10; else -> 0 }) } },
+                    onLast = { state.showToast(if (saved > 0) "$saved saved this session" else "No captures yet") },
+                )
+            }
         }
     }
 
     when (val s = sheet) {
         null -> {}
         Sheet.Grid -> GridSheet(settings, Hold.isLandscape(hold), { f -> state.updateViewfinder(f) }) { sheet = null }
-        Sheet.Screens -> ScreensSheet({ sheet = null; state.select(it) }) { sheet = null }
         Sheet.Tools -> ToolsSheet(settings, { f -> state.updateViewfinder(f) }) { sheet = null }
         is Sheet.Value -> ValueSheet(s.field, settings.exposure, caps, { f -> state.updateViewfinder { it.copy(exposure = f(it.exposure)) } }) { sheet = null }
     }

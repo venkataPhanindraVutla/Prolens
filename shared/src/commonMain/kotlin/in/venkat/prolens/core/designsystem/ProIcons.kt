@@ -47,6 +47,5 @@ object ProIcons {
     val MapPin by lazy { icon("mapPin", "M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z", circle(12f, 10f, 3f)) }
     val Moon by lazy { icon("moon", "M12 3a6 6 0 0 0 9 9a9 9 0 1 1-9-9z") }
     val Compass by lazy { icon("compass", circle(12f, 12f, 10f), "M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36z") }
-    val Apps by lazy { icon("apps", "M5 4h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z", "M15 4h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z", "M5 14h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1z", "M15 14h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1z") }
     val Layers by lazy { icon("layers", "M12 2l10 5-10 5L2 7z", "M2 17l10 5 10-5M2 12l10 5 10-5") }
 }

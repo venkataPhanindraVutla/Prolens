@@ -58,8 +58,6 @@ import `in`.venkat.prolens.core.designsystem.ProSwitchRow
 import `in`.venkat.prolens.core.grids.GridGroup
 import `in`.venkat.prolens.core.grids.Grids
 import `in`.venkat.prolens.core.grids.drawGrid
-import `in`.venkat.prolens.app.Tab
-import `in`.venkat.prolens.core.designsystem.ProListRow
 import `in`.venkat.prolens.core.model.AspectRatio
 import `in`.venkat.prolens.core.model.ExposureSettings
 import `in`.venkat.prolens.core.model.PeakingSensitivity
@@ -341,18 +339,6 @@ internal fun ToolsSheet(settings: ViewfinderSettings, onChange: ((ViewfinderSett
                     }
                 }
             }
-        }
-    }
-}
-
-/* ---------- Other screens ---------- */
-
-/** The tab bar hides on the full-screen viewfinder; this sheet reaches the other screens. */
-@Composable
-internal fun ScreensSheet(onPick: (Tab) -> Unit, onDismiss: () -> Unit) {
-    ProSheet("Go to", onDismiss) {
-        listOf(Tab.Calculators, Tab.Light, Tab.Coach, Tab.Gear).forEach { t ->
-            ProListRow(t.label, onClick = { onPick(t) })
         }
     }
 }

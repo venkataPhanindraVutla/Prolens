@@ -25,6 +25,8 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
+import androidx.camera.core.FocusMeteringAction
+import java.util.concurrent.TimeUnit
 import androidx.camera.core.UseCaseGroup
 import androidx.camera.core.ViewPort
 import android.util.Rational
@@ -79,6 +81,8 @@ class AndroidCameraController(private val context: Context) : CameraController {
     override val capabilities: StateFlow<CameraCapabilities> = _capabilities
     private val _readout = MutableStateFlow(CameraReadout())
     override val readout: StateFlow<CameraReadout> = _readout
+    private val _zoom = MutableStateFlow(ZoomState())
+    override val zoom: StateFlow<ZoomState> = _zoom
 
     private var view: PreviewView? = null
     private var provider: ProcessCameraProvider? = null
@@ -136,8 +140,11 @@ class AndroidCameraController(private val context: Context) : CameraController {
         val group = UseCaseGroup.Builder().addUseCase(preview).addUseCase(analysis).addUseCase(capture)
         sensorRatio?.let { r -> group.setViewPort(ViewPort.Builder(Rational(1000, (1000 * r).roundToInt()), Surface.ROTATION_0).build()) }
         val cam = runCatching { p.bindToLifecycle(owner, CameraSelector.DEFAULT_BACK_CAMERA, group.build()) }.getOrNull() ?: return
+        camera?.cameraInfo?.zoomState?.removeObservers(owner)
         camera = cam
         _capabilities.value = readCapabilities(cam)
+        cam.cameraInfo.zoomState.observe(owner) { z -> _zoom.value = ZoomState(z.minZoomRatio, z.maxZoomRatio, z.zoomRatio) }
+        cam.cameraControl.setZoomRatio(_zoom.value.ratio.coerceAtLeast(cam.cameraInfo.zoomState.value?.minZoomRatio ?: 1f))
         apply(pending)
     }
 
@@ -205,31 +212,53 @@ class AndroidCameraController(private val context: Context) : CameraController {
             o.setCaptureRequestOption(CaptureRequest.SENSOR_SENSITIVITY, iso.roundToInt())
             o.setCaptureRequestOption(CaptureRequest.SENSOR_EXPOSURE_TIME, (t * 1e9).toLong())
         } else {
-            o.setCaptureRequestOption(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON)
+            // Auto exposure stays with CameraX, so tap-to-meter and AE lock keep working.
             if (caps.evStep > 0) {
                 val idx = (exposure.ev / caps.evStep).roundToInt().coerceIn(caps.evRange.first, caps.evRange.last)
                 cam.cameraControl.setExposureCompensationIndex(idx)
             }
         }
 
+        // Auto focus and white balance stay with CameraX (continuous AF, tap-to-focus); only manual values are forced.
         if (!exposure.focusAuto && caps.minFocusDiopters > 0f) {
             o.setCaptureRequestOption(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF)
             o.setCaptureRequestOption(CaptureRequest.LENS_FOCUS_DISTANCE, (1f / exposure.focusM.toFloat()).coerceIn(0f, caps.minFocusDiopters))
-        } else {
-            o.setCaptureRequestOption(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
         }
-
         if (!exposure.wbAuto) {
             o.setCaptureRequestOption(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_OFF)
             o.setCaptureRequestOption(CaptureRequest.COLOR_CORRECTION_MODE, CaptureRequest.COLOR_CORRECTION_MODE_TRANSFORM_MATRIX)
             o.setCaptureRequestOption(CaptureRequest.COLOR_CORRECTION_GAINS, wbGains(exposure.wbKelvin, exposure.tint))
-        } else {
-            o.setCaptureRequestOption(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO)
         }
         c2.setCaptureRequestOptions(o.build())
     }
 
     override fun setAnalyzer(analyzer: ((LumaFrame) -> Unit)?) { this.analyzer = analyzer }
+
+    override fun setZoom(ratio: Float) {
+        val cam = camera ?: return
+        val z = _zoom.value
+        cam.cameraControl.setZoomRatio(ratio.coerceIn(z.min, z.max))
+    }
+
+    override fun focusAt(x: Float, y: Float, lock: Boolean) {
+        val cam = camera ?: return
+        val pv = view ?: return
+        val manualExposure = _capabilities.value.manualSensor && (!pending.isoAuto || !pending.shutterAuto)
+        val manualFocus = !pending.focusAuto && _capabilities.value.minFocusDiopters > 0f
+        var flags = 0
+        if (!manualFocus) flags = flags or FocusMeteringAction.FLAG_AF
+        if (!manualExposure) flags = flags or FocusMeteringAction.FLAG_AE
+        if (flags == 0) return
+        val point = pv.meteringPointFactory.createPoint(x * pv.width, y * pv.height)
+        val action = FocusMeteringAction.Builder(point, flags).apply {
+            if (lock) disableAutoCancel() else setAutoCancelDuration(4, TimeUnit.SECONDS)
+        }.build()
+        cam.cameraControl.startFocusAndMetering(action)
+    }
+
+    override fun unlockFocus() {
+        camera?.cameraControl?.cancelFocusAndMetering()
+    }
 
     override fun setHold(hold: Int) {
         this.hold = hold

@@ -70,9 +70,9 @@ private val Shadow = Color.Black.copy(alpha = 0.35f)
 /** What the lens frame needs from gear, worked out once per change instead of per draw. */
 internal class LensInfo(val ratio: Double?, val label: String)
 
-internal fun lensInfo(gear: GearState, caps: CameraCapabilities): LensInfo {
+internal fun lensInfo(gear: GearState, caps: CameraCapabilities, zoom: Float = 1f): LensInfo {
     val target = gear.focal * PhotoMath.cropFactor(gear.body)
-    val phone = caps.equivalentFocalMm?.toDouble() ?: 24.0
+    val phone = (caps.equivalentFocalMm?.toDouble() ?: 24.0) * zoom
     val label = "${gear.body.name} · ${gear.focal.roundToInt()} mm (${target.roundToInt()} mm eq)"
     return LensInfo(lensFrameRatio(phone, target), label)
 }

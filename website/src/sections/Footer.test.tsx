@@ -19,3 +19,8 @@ test('every photograph is credited with its author and a licence link', async ()
     expect(container.querySelector(`a[href="${p.page}"]`), p.id).not.toBeNull()
   }
 })
+
+test('on a phone the photo credits fold into a toggle', () => {
+  render(<Footer />)
+  expect(screen.getByText(/Photo credits/, { selector: 'summary' })).toBeInTheDocument()
+})

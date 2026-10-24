@@ -8,7 +8,7 @@ import Story from './Story'
 afterEach(() => vi.unstubAllGlobals())
 
 test('the level starts tilted and arrows bring it to level', async () => {
-  mockMedia()
+  mockMedia('min-width: 980px')
   render(<LocationProvider><Story /></LocationProvider>)
   const tilt = screen.getByRole('slider', { name: 'Tilt' })
   expect(tilt).toHaveAttribute('aria-valuenow', '4.5')
@@ -20,13 +20,13 @@ test('the level starts tilted and arrows bring it to level', async () => {
 })
 
 test('dragging the level never blocks vertical page scroll', () => {
-  mockMedia()
+  mockMedia('min-width: 980px')
   render(<LocationProvider><Story /></LocationProvider>)
   expect(screen.getByRole('slider', { name: 'Tilt' })).toHaveStyle({ touchAction: 'pan-y' })
 })
 
 test('the horizon line turns with the scene, like the app’s', () => {
-  mockMedia()
+  mockMedia('min-width: 980px')
   const { container } = render(<LocationProvider><Story /></LocationProvider>)
   const line = container.querySelector('[data-horizon]') as HTMLElement
   expect(line.style.transform).toContain('rotate(4.5deg)')

@@ -6,6 +6,7 @@ import Download from './sections/Download'
 import EveryPhone from './sections/EveryPhone'
 import Footer from './sections/Footer'
 import Hero from './sections/Hero'
+import MobileBar from './sections/MobileBar'
 import BeforeAfter from './sections/layers/BeforeAfter'
 import Parallax from './sections/layers/Parallax'
 import OpenSource from './sections/OpenSource'
@@ -49,6 +50,7 @@ export default function App() {
       </main>
       <Footer />
       <MotionDirector />
+      <MobileBar />
     </LocationProvider>
   )
 }

@@ -20,14 +20,14 @@ const renderStory = () =>
   )
 
 test('without geolocation the city picker is the way in', () => {
-  mockMedia()
+  mockMedia('min-width: 980px')
   renderStory()
   expect(screen.getByRole('combobox', { name: 'City' })).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: 'Use my location' })).toBeNull()
 })
 
 test('a city’s golden hour is shown in that city’s own time zone', async () => {
-  mockMedia()
+  mockMedia('min-width: 980px')
   const now = Date.UTC(2026, 5, 21, 3)
   vi.useFakeTimers({ now, toFake: ['Date'] })
   renderStory()
@@ -38,7 +38,7 @@ test('a city’s golden hour is shown in that city’s own time zone', async () 
 })
 
 test('polar night says so instead of showing a broken time', async () => {
-  mockMedia()
+  mockMedia('min-width: 980px')
   vi.useFakeTimers({ now: Date.UTC(2026, 11, 21, 12), toFake: ['Date'] })
   const { container } = renderStory()
   await userEvent.selectOptions(screen.getByRole('combobox', { name: 'City' }), 'Tromsø')
@@ -47,7 +47,7 @@ test('polar night says so instead of showing a broken time', async () => {
 })
 
 test('both blue hours are listed', () => {
-  mockMedia()
+  mockMedia('min-width: 980px')
   renderStory()
   expect(screen.getByText('Morning blue hour')).toBeInTheDocument()
   expect(screen.getByText('Evening blue hour')).toBeInTheDocument()

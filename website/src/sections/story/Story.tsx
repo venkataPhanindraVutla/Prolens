@@ -50,8 +50,25 @@ export default function Story() {
   }, [wide])
 
   const current = chapters[active]
+  const [tab, setTab] = useState(0)
+  const root = useRef<HTMLElement>(null)
+  const pickTab = (i: number) => {
+    setTab(i)
+    // Bring the chapter's start into view if the tabs have scrolled past it.
+    const el = root.current
+    if (el && el.getBoundingClientRect().top < 0) el.scrollIntoView?.({ block: 'start' })
+  }
   return (
-    <section id="story" className={[css.story, wide ? css.wide : css.narrow].join(' ')} aria-label="What Prolens does">
+    <section ref={root} id="story" className={[css.story, wide ? css.wide : css.narrow].join(' ')} aria-label="What Prolens does">
+      {!wide && (
+        <div className={css.chapterTabs} role="tablist" aria-label="Chapters">
+          {chapters.map((c, i) => (
+            <button key={c.id} type="button" role="tab" aria-selected={i === tab} className="focusable" onClick={() => pickTab(i)}>
+              {c.id[0].toUpperCase() + c.id.slice(1)}
+            </button>
+          ))}
+        </div>
+      )}
       {wide && (
         <div className={css.pin}>
           <AppPhone statusBar={current.statusBar} className={css.phone}>
@@ -64,7 +81,7 @@ export default function Story() {
         </div>
       )}
       <div className={css.chapters}>
-        {chapters.map((c, i) => (
+        {chapters.map((c, i) => (wide || i === tab) && (
           <article
             key={c.id}
             ref={(el) => {

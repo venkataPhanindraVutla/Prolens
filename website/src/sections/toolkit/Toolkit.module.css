@@ -269,3 +269,29 @@
     min-height: 44px;
   }
 }
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 4px;
+  border: 1px solid var(--grey-2);
+  border-radius: 999px;
+  scrollbar-width: none;
+}
+
+.tabs button {
+  flex: none;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  cursor: pointer;
+}
+
+.tabs button[aria-selected='true'] {
+  background: var(--paper);
+  color: var(--ink);
+}

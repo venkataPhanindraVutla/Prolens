@@ -1,4 +1,6 @@
+import { useState, type ReactElement } from 'react'
 import SectionHeading from '../../components/SectionHeading'
+import { useMedia } from '../../lib/motion'
 import DofCalc from './DofCalc'
 import GoldenClock from './GoldenClock'
 import GridLibrary from './GridLibrary'
@@ -14,7 +16,51 @@ const MORE = [
   ['Background blur', 'How soft the background goes behind a subject, as a share of the frame.'],
 ]
 
+function More() {
+  return (
+    <div className={`${tk.tool} ${tk.more}`} data-reveal="up" data-reveal-delay={0.1}>
+      <h3 className={tk.title}>Also in the app</h3>
+      <dl>
+        {MORE.map(([k, v]) => (
+          <div key={k}>
+            <dt>{k}</dt>
+            <dd>{v}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  )
+}
+
+const TOOLS: [string, () => ReactElement][] = [
+  ['Depth of field', DofCalc],
+  ['Grids', GridLibrary],
+  ['Golden hour', GoldenClock],
+  ['More', More],
+]
+
 export default function Toolkit() {
+  const phone = useMedia('(max-width: 760px)')
+  const [tab, setTab] = useState(0)
+  if (phone) {
+    const Tool = TOOLS[tab][1]
+    return (
+      <section className={`section ${tk.toolkit}`} aria-labelledby="toolkit-title" data-stage>
+        <SectionHeading id="toolkit-title" className="display">
+          The toolkit, <span className="pink">live</span>.
+        </SectionHeading>
+        <p className="lede">The same maths the app runs, on real photographs.</p>
+        <div className={tk.tabs} role="tablist" aria-label="Tools">
+          {TOOLS.map(([name], i) => (
+            <button key={name} type="button" role="tab" aria-selected={i === tab} className="focusable" onClick={() => setTab(i)}>
+              {name}
+            </button>
+          ))}
+        </div>
+        <Tool />
+      </section>
+    )
+  }
   return (
     <section className={`section ${tk.toolkit}`} aria-labelledby="toolkit-title" data-stage>
       <SectionHeading id="toolkit-title" className="display">
@@ -26,17 +72,7 @@ export default function Toolkit() {
         <DofCalc />
         <GridLibrary />
         <GoldenClock />
-        <div className={`${tk.tool} ${tk.more}`} data-reveal="up" data-reveal-delay={0.1}>
-          <h3 className={tk.title}>Also in the app</h3>
-          <dl>
-            {MORE.map(([k, v]) => (
-              <div key={k}>
-                <dt>{k}</dt>
-                <dd>{v}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
+        <More />
       </div>
     </section>
   )

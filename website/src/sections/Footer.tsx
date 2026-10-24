@@ -1,8 +1,11 @@
 import { repoUrl } from '../lib/issues'
+import { useMedia } from '../lib/motion'
 import { PHOTOS } from '../lib/photos'
 import css from './Footer.module.css'
 
 export default function Footer() {
+  // Open on wide screens; folded on phones, where twenty lines of credits would fill the screen.
+  const phone = useMedia('(max-width: 760px)')
   return (
     <footer className={css.footer}>
       <p className={css.signoff} data-reveal="up">
@@ -22,8 +25,8 @@ export default function Footer() {
             <li>Site type: Space Grotesk, JetBrains Mono</li>
           </ul>
         </div>
-        <div className={css.photos}>
-          <h2 className={css.photosTitle}>Photographs</h2>
+        <details className={css.photos} open={!phone}>
+          <summary className={css.photosTitle}>Photo credits ({PHOTOS.length})</summary>
           <p className={css.photosNote}>Every photograph is by the named photographer, from Wikimedia Commons, used under its licence and resized for the web. None was taken with Prolens.</p>
           <ul>
             {PHOTOS.map((p) => (
@@ -38,7 +41,7 @@ export default function Footer() {
               </li>
             ))}
           </ul>
-        </div>
+        </details>
       </div>
     </footer>
   )

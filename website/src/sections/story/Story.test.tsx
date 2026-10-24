@@ -8,7 +8,7 @@ import Story from './Story'
 afterEach(() => vi.unstubAllGlobals())
 
 test('five chapters, each with its own heading', () => {
-  mockMedia()
+  mockMedia('min-width: 980px')
   render(<LocationProvider><Story /></LocationProvider>)
   const titles = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)
   expect(titles).toHaveLength(5)
@@ -16,7 +16,7 @@ test('five chapters, each with its own heading', () => {
 })
 
 test('choosing a grid chip selects it', async () => {
-  mockMedia()
+  mockMedia('min-width: 980px')
   render(<LocationProvider><Story /></LocationProvider>)
   const grids = screen.getByRole('radiogroup', { name: 'Grid' })
   await userEvent.click(within(grids).getByRole('radio', { name: 'Golden spiral' }))
@@ -29,4 +29,15 @@ test('the golden spiral is drawn at its true ratio, never stretched', async () =
   await userEvent.click(screen.getByRole('radio', { name: 'Golden spiral' }))
   // The true-ratio spiral outlines its golden rectangle; the stretched one has none.
   expect(container.querySelector('[data-grid="spiralTrue"]')).not.toBeNull()
+})
+
+test('on a phone the chapters are tabs, one chapter at a time', async () => {
+  mockMedia()
+  render(<LocationProvider><Story /></LocationProvider>)
+  const tabs = screen.getByRole('tablist', { name: 'Chapters' })
+  expect(within(tabs).getAllByRole('tab').map((t) => t.textContent)).toEqual(['Compose', 'Level', 'Expose', 'Modes', 'Light'])
+  expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(1)
+  await userEvent.click(within(tabs).getByRole('tab', { name: 'Level' }))
+  expect(screen.getByRole('heading', { level: 2, name: /dead level/ })).toBeInTheDocument()
+  expect(screen.getByRole('slider', { name: 'Tilt' })).toBeInTheDocument()
 })

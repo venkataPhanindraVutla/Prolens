@@ -47,12 +47,15 @@ interface Props {
   histogram?: number[] | null
   hud?: HudCell[]
   zoom?: { presets: number[]; active: number }
+  /** Draw one layer alone, on a transparent screen, for the exploded 3D view. */
+  layer?: 'all' | 'preview' | 'overlay' | 'chrome'
 }
 
 const fmtZoom = (z: number) => String(z)
 
 /** The Prolens viewfinder, portrait, as ViewfinderScreen.kt lays it out. */
-export default function AppViewfinder({ preview, overlay, mode = 'Photo', tools, chips = [], histogram, hud = DEFAULT_HUD, zoom = { presets: [0.6, 1, 2, 5], active: 1 } }: Props) {
+export default function AppViewfinder({ preview, overlay, mode = 'Photo', tools, chips = [], histogram, hud = DEFAULT_HUD, zoom = { presets: [0.6, 1, 2, 5], active: 1 }, layer = 'all' }: Props) {
+  const show = (part: 'preview' | 'overlay' | 'chrome') => layer === 'all' || layer === part
   const on = { ...DEFAULT_TOOLS, ...tools }
   const max = histogram ? Math.max(1, ...histogram) : 1
   const tool = (t: Tool) => (
@@ -61,18 +64,18 @@ export default function AppViewfinder({ preview, overlay, mode = 'Photo', tools,
     </span>
   )
   return (
-    <div className={ui.viewfinder}>
+    <div className={ui.viewfinder} style={layer === 'all' ? undefined : { background: 'transparent' }}>
       <div className={ui.preview}>
-        {preview}
-        {overlay}
-        {on.histogram && histogram && (
+        {show('preview') && preview}
+        {show('overlay') && overlay}
+        {show('overlay') && on.histogram && histogram && (
           <svg className={ui.histogram} viewBox="0 0 64 32" preserveAspectRatio="none" aria-hidden="true">
             {histogram.map((v, i) => (
               <rect key={i} x={i} y={32 - (v / max) * 32} width={1} height={(v / max) * 32} />
             ))}
           </svg>
         )}
-        {chips.length > 0 && (
+        {show('overlay') && chips.length > 0 && (
           <div className={ui.chips}>
             {chips.map((c) => (
               <span key={c.text} className={[ui.chip, c.tone ? ui[c.tone] : ''].join(' ')}>
@@ -83,55 +86,59 @@ export default function AppViewfinder({ preview, overlay, mode = 'Photo', tools,
         )}
       </div>
 
-      <div className={ui.toolRow} aria-hidden="true">
-        {LEFT.map(tool)}
-        <span className={ui.spacer} />
-        {RIGHT.map(tool)}
-      </div>
+      {show('chrome') && (
+        <>
+          <div className={ui.toolRow} aria-hidden="true">
+            {LEFT.map(tool)}
+            <span className={ui.spacer} />
+            {RIGHT.map(tool)}
+          </div>
 
-      <div className={ui.bottom} aria-hidden="true">
-        <div className={ui.zoomPill}>
-          {zoom.presets.map((z) =>
-            z === zoom.active ? (
-              <span key={z} className={`${ui.zoomChip} ${ui.zoomActive}`}>
-                {fmtZoom(z)}×
-              </span>
-            ) : (
-              <span key={z} className={ui.zoomChip}>
-                {fmtZoom(z)}
-              </span>
-            ),
-          )}
-        </div>
-        <div className={ui.strip}>
-          <div className={ui.hud} data-testid="app-hud">
-            {hud.map((c) => (
-              <div key={c.label} className={[ui.cell, c.plain ? ui.cellPlain : ''].join(' ')}>
-                <span className={ui.cellLabel}>{c.label}</span>
-                <span className={[ui.cellValue, c.auto ? ui.cellAuto : ''].join(' ')}>{c.value}</span>
+          <div className={ui.bottom} aria-hidden="true">
+            <div className={ui.zoomPill}>
+              {zoom.presets.map((z) =>
+                z === zoom.active ? (
+                  <span key={z} className={`${ui.zoomChip} ${ui.zoomActive}`}>
+                    {fmtZoom(z)}×
+                  </span>
+                ) : (
+                  <span key={z} className={ui.zoomChip}>
+                    {fmtZoom(z)}
+                  </span>
+                ),
+              )}
+            </div>
+            <div className={ui.strip}>
+              <div className={ui.hud} data-testid="app-hud">
+                {hud.map((c) => (
+                  <div key={c.label} className={[ui.cell, c.plain ? ui.cellPlain : ''].join(' ')}>
+                    <span className={ui.cellLabel}>{c.label}</span>
+                    <span className={[ui.cellValue, c.auto ? ui.cellAuto : ''].join(' ')}>{c.value}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+              <ul className={ui.modes} data-testid="app-modes" style={{ ['--i' as string]: MODE_LABELS.indexOf(mode) }}>
+                {MODE_LABELS.map((m) => (
+                  <li key={m} data-selected={m === mode} className={m === mode ? ui.modeOn : ''}>
+                    {m}
+                  </li>
+                ))}
+              </ul>
+              <div className={ui.capture}>
+                <span className={ui.thumb}>
+                  <Icon name="image" />
+                </span>
+                <span className={ui.shutter}>
+                  <span />
+                </span>
+                <span className={ui.flip}>
+                  <Icon name="flip" />
+                </span>
+              </div>
+            </div>
           </div>
-          <ul className={ui.modes} data-testid="app-modes" style={{ ['--i' as string]: MODE_LABELS.indexOf(mode) }}>
-            {MODE_LABELS.map((m) => (
-              <li key={m} data-selected={m === mode} className={m === mode ? ui.modeOn : ''}>
-                {m}
-              </li>
-            ))}
-          </ul>
-          <div className={ui.capture}>
-            <span className={ui.thumb}>
-              <Icon name="image" />
-            </span>
-            <span className={ui.shutter}>
-              <span />
-            </span>
-            <span className={ui.flip}>
-              <Icon name="flip" />
-            </span>
-          </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   )
 }

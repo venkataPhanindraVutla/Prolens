@@ -9,6 +9,10 @@
   padding-bottom: 32px;
 }
 
+.tabsHead {
+  padding-top: 0;
+}
+
 .tabs {
   display: flex;
   flex-wrap: wrap;
@@ -32,6 +36,7 @@
 
 /* A row of phones you swipe through; the one in the middle is lit. */
 .track {
+  perspective: 1400px;
   display: flex;
   gap: clamp(20px, 3vw, 48px);
   overflow-x: auto;
@@ -52,18 +57,23 @@
   width: 320px;
   margin: 0;
   scroll-snap-align: center;
+  transform-style: preserve-3d;
 }
 
-/* Phones away from the middle step back; their captions stay readable. */
-.item .phone {
-  opacity: 0.45;
-  transform: scale(0.94);
-  transition: opacity 300ms var(--ease-out), transform 300ms var(--ease-out);
+/* With reduced motion, phones away from the middle just dim; captions stay readable. */
+@media (prefers-reduced-motion: reduce) {
+  .item .phone {
+    opacity: 0.45;
+  }
+
+  .item.on .phone {
+    opacity: 1;
+  }
 }
 
-.item.on .phone {
-  opacity: 1;
-  transform: none;
+.cover {
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 
 .phone {

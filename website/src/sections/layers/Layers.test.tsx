@@ -46,3 +46,28 @@ test('with reduced motion the parallax layers do not move', () => {
   const { container } = render(<Parallax />)
   for (const el of container.querySelectorAll<HTMLElement>('[data-depth]')) expect(el.style.transform).toBe('')
 })
+
+test('the exploded view names each real layer of the viewfinder', async () => {
+  mockMedia()
+  const { default: ExplodedPhone } = await import('./ExplodedPhone')
+  render(<ExplodedPhone />)
+  const list = screen.getByRole('list', { name: 'Layers of the viewfinder' })
+  expect(within(list).getAllByRole('listitem').map((li) => li.querySelector('b')?.textContent)).toEqual([
+    'Controls',
+    'Exposure readouts',
+    'Composition grid',
+    'Live preview',
+    'Phone',
+  ])
+})
+
+test('with reduced motion the gallery spreads and tour phones stay flat', () => {
+  mockMedia('reduce')
+  const { container } = render(
+    <>
+      <Gallery />
+      <AppTour />
+    </>,
+  )
+  for (const el of container.querySelectorAll<HTMLElement>('[data-3d]')) expect(el.style.transform === '' || el.style.transform === 'none').toBe(true)
+})

@@ -29,6 +29,7 @@ fun GearScreen(state: AppState) {
     val gear by state.gear.collectAsStateWithLifecycle()
     ProScreen("Gear") {
         ActiveSetupCard(state, gear)
+        PhoneCard(state)
         BodiesCard(state, gear)
         AddBodyForm(state)
         LensesCard(state, gear)

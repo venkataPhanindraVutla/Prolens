@@ -174,6 +174,7 @@ private fun Viewfinder(state: AppState) {
 
     /* Binding: front or back, then the session the mode needs. Leaving a mode undoes what entering it set. */
     LaunchedEffect(settings.frontCamera) { controller.setFront(settings.frontCamera) }
+    LaunchedEffect(features, caps.manualSensor) { if (!settings.frontCamera) state.reportPhone(features, caps) }
     var entered by remember { mutableStateOf<CaptureMode?>(null) }
     LaunchedEffect(mode, settings.slowMotionFps, features.slowMotionFps) {
         val fps = settings.slowMotionFps.takeIf { it in features.slowMotionFps } ?: features.slowMotionFps.firstOrNull() ?: 0

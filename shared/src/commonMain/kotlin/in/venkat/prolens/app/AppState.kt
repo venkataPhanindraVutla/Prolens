@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import `in`.venkat.prolens.core.platform.KeyValueStore
+import `in`.venkat.prolens.core.platform.CameraCapabilities
+import `in`.venkat.prolens.core.platform.CameraFeatures
 
 enum class Tab(val label: String) { Viewfinder("Viewfinder"), Calculators("Calculators"), Light("Light"), Coach("Coach"), Gear("Gear") }
 
@@ -33,6 +35,13 @@ class AppState(val store: KeyValueStore? = null) : ViewModel() {
 
     private val _location = MutableStateFlow(load("location", Location.serializer()) ?: Location("London", 51.5074, -0.1278, "Europe/London"))
     val location: StateFlow<Location> = _location.asStateFlow()
+
+    /** What the phone's cameras can do, as the viewfinder found it. Empty until the camera has opened once. */
+    private val _phone = MutableStateFlow<Pair<CameraFeatures, CameraCapabilities>?>(null)
+    val phone: StateFlow<Pair<CameraFeatures, CameraCapabilities>?> = _phone.asStateFlow()
+    fun reportPhone(features: CameraFeatures, capabilities: CameraCapabilities) {
+        if (features.lenses.isNotEmpty()) _phone.value = features to capabilities
+    }
 
     /** A short message shown over the current screen, then cleared. */
     private val _toast = MutableStateFlow<String?>(null)

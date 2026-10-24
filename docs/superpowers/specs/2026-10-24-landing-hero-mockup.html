@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prolens hero directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --ink:#0B0B0B; --paper:#F4F4EF; --pink:#FF2DAB; --lime:#D4FF3F; --dim:#8a8a85; --line:#232323; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { scroll-behavior:smooth; }
+  body { background:var(--ink); color:var(--paper); font-family:"Space Grotesk",system-ui,sans-serif; overflow-x:hidden; }
+  .mono { font-family:"JetBrains Mono",ui-monospace,monospace; }
+  .label { position:absolute; top:18px; left:24px; z-index:30; font:600 12px "JetBrains Mono",monospace; color:var(--ink); background:var(--lime); padding:4px 10px; border-radius:999px; }
+  section.hero { position:relative; height:100vh; min-height:620px; border-bottom:1px solid var(--line); overflow:hidden; }
+  .btn { display:inline-flex; align-items:center; gap:8px; font-weight:700; font-size:15px; padding:14px 22px; border-radius:999px; text-decoration:none; transition:transform .15s, background .15s; cursor:pointer; border:0; }
+  .btn-lime { background:var(--lime); color:var(--ink); }
+  .btn-lime:hover { transform:translateY(-2px); }
+  .btn-ghost { background:transparent; color:var(--paper); border:1px solid #3a3a3a; }
+  .btn-ghost:hover { border-color:var(--pink); color:var(--pink); }
+
+  /* phone */
+  .phone { position:relative; width:270px; height:560px; border-radius:42px; padding:10px; background:#161616; box-shadow:0 0 0 1px #2c2c2c, 0 40px 80px -30px #000; }
+  .phone canvas { width:100%; height:100%; border-radius:34px; display:block; }
+  .phone .notch { position:absolute; top:18px; left:50%; transform:translateX(-50%); width:80px; height:22px; border-radius:12px; background:#000; z-index:2; }
+
+  /* A */
+  #a { display:grid; grid-template-columns:1.1fr .9fr; align-items:center; padding:0 7vw; gap:4vw; }
+  #a h1 { font-size:clamp(56px,8vw,128px); line-height:.88; letter-spacing:-.045em; font-weight:700; }
+  #a h1 em { font-style:normal; color:var(--pink); }
+  #a p { color:#b8b8b2; font-size:18px; max-width:460px; margin:26px 0 30px; line-height:1.45; }
+  #a .stage { display:flex; flex-direction:column; align-items:center; gap:14px; }
+  #a .hint { font-size:12px; color:var(--lime); }
+  .ticker { position:absolute; left:0; right:0; bottom:0; border-top:1px solid var(--line); overflow:hidden; white-space:nowrap; padding:12px 0; color:var(--lime); font-size:13px; }
+  .ticker span { display:inline-block; animation:tick 26s linear infinite; padding-left:100%; }
+  @keyframes tick { to { transform:translateX(-100%); } }
+
+  /* B */
+  #b { cursor:none; }
+  #b canvas.bg { position:absolute; inset:0; width:100%; height:100%; }
+  #b .grid { position:absolute; inset:0; pointer-events:none; background:
+      linear-gradient(#ffffff26,#ffffff26) 33.33% 0/1px 100% no-repeat,
+      linear-gradient(#ffffff26,#ffffff26) 66.66% 0/1px 100% no-repeat,
+      linear-gradient(#ffffff26,#ffffff26) 0 33.33%/100% 1px no-repeat,
+      linear-gradient(#ffffff26,#ffffff26) 0 66.66%/100% 1px no-repeat; }
+  .corner { position:absolute; width:46px; height:46px; border:0 solid var(--paper); opacity:.85; }
+  #b .copy { position:absolute; left:6vw; top:22vh; z-index:5; pointer-events:none; }
+  #b h1 { font-size:clamp(54px,7.4vw,118px); line-height:.88; letter-spacing:-.045em; font-weight:700; }
+  #b h1 em { font-style:normal; color:var(--pink); }
+  #b .hud { position:absolute; left:0; right:0; bottom:0; display:flex; justify-content:space-between; align-items:center; padding:18px 6vw; background:linear-gradient(transparent,#0b0b0bcc); font-size:13px; z-index:6; }
+  #b .hud b { color:var(--lime); font-weight:600; }
+  #focus { position:absolute; width:86px; height:86px; border:1.5px solid var(--lime); transform:translate(-50%,-50%); pointer-events:none; z-index:7; transition:width .18s, height .18s; }
+  #focus::after { content:attr(data-d); position:absolute; top:calc(100% + 8px); left:0; font:600 12px "JetBrains Mono",monospace; color:var(--lime); white-space:nowrap; }
+  #flash { position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; z-index:9; transition:opacity .25s; }
+  #b .rec { position:absolute; top:22px; right:6vw; font-size:12px; color:var(--pink); z-index:6; }
+  #b .cta { position:absolute; right:6vw; top:44vh; z-index:6; display:flex; flex-direction:column; gap:10px; align-items:flex-end; cursor:pointer; }
+  #b .cta * { cursor:pointer; }
+
+  /* C */
+  #c { background:var(--ink); }
+  #leak { position:absolute; width:520px; height:520px; border-radius:50%; background:radial-gradient(circle,#FF2DABcc 0%,#FF2DAB33 40%,transparent 70%); filter:blur(10px); mix-blend-mode:screen; pointer-events:none; transform:translate(-50%,-50%); z-index:1; }
+  #c .word { position:absolute; left:4vw; top:8vh; font-size:clamp(120px,21vw,330px); font-weight:700; line-height:.78; letter-spacing:-.07em; z-index:2; }
+  #c .word .out { color:transparent; -webkit-text-stroke:2px var(--paper); }
+  #c .phone { position:absolute; right:16vw; top:14vh; z-index:3; transition:transform .1s; }
+  #c .sub { position:absolute; left:4vw; bottom:14vh; z-index:3; max-width:440px; color:#c9c9c3; font-size:19px; line-height:1.45; }
+  #c .ctas { position:absolute; left:4vw; bottom:6vh; z-index:3; display:flex; gap:12px; }
+  #c .rail { position:absolute; top:0; bottom:0; right:0; width:46px; background:var(--lime); color:var(--ink); overflow:hidden; z-index:4; }
+  #c .rail span { position:absolute; writing-mode:vertical-rl; font:700 14px "JetBrains Mono",monospace; white-space:nowrap; left:12px; animation:rail 22s linear infinite; }
+  @keyframes rail { from { top:100%; } to { top:-220%; } }
+
+  /* story */
+  #story { position:relative; display:grid; grid-template-columns:1fr 1fr; padding:0 7vw; }
+  #story .pin { position:sticky; top:0; height:100vh; display:flex; align-items:center; justify-content:center; }
+  #story .steps > div { height:100vh; display:flex; flex-direction:column; justify-content:center; gap:16px; opacity:.25; transition:opacity .3s; }
+  #story .steps > div.on { opacity:1; }
+  #story .num { font:600 13px "JetBrains Mono",monospace; color:var(--lime); }
+  #story h2 { font-size:clamp(40px,4.6vw,72px); line-height:.92; letter-spacing:-.035em; }
+  #story h2 em { font-style:normal; color:var(--pink); }
+  #story p { color:#b8b8b2; font-size:18px; max-width:420px; line-height:1.5; }
+  .story-label { position:sticky; top:18px; z-index:30; }
+
+  /* chooser */
+  .choose { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:50; display:flex; gap:8px; background:#141414ee; border:1px solid #2a2a2a; padding:8px; border-radius:999px; backdrop-filter:blur(8px); }
+  .choose div { padding:10px 16px; border-radius:999px; font:600 13px "JetBrains Mono",monospace; color:var(--paper); cursor:pointer; border:1px solid transparent; }
+  .choose div:hover { border-color:var(--lime); }
+  .choose div.selected { background:var(--lime); color:var(--ink); }
+</style>
+</head>
+<body>
+
+<!-- A -->
+<section class="hero" id="a">
+  <div class="label">A · Classic split, live phone</div>
+  <div>
+    <div class="mono" style="color:var(--dim);font-size:13px;margin-bottom:22px">PROLENS · FREE AND OPEN SOURCE</div>
+    <h1>Shoot like<br>you <em>mean</em> it.</h1>
+    <p>23 composition grids, a real level, manual controls, Night, Pano and Slo-mo, plus golden-hour planning. A pro field kit for your phone.</p>
+    <a class="btn btn-lime">Download for Android</a>
+    <a class="btn btn-ghost">Star on GitHub</a>
+  </div>
+  <div class="stage">
+    <div class="phone"><div class="notch"></div><canvas id="pa"></canvas></div>
+    <div class="hint mono" id="gridname">Drag on the phone · Rule of thirds</div>
+  </div>
+  <div class="ticker mono"><span>ISO 100 · 1/250 · ƒ1.9 · 24 MM · AWB · +0.3 EV · ROLL 0.0° · GOLDEN HOUR IN 42 MIN · ISO 100 · 1/250 · ƒ1.9 · 24 MM · AWB · +0.3 EV · ROLL 0.0° · GOLDEN HOUR IN 42 MIN</span></div>
+</section>
+
+<!-- B -->
+<section class="hero" id="b">
+  <div class="label">B · Full-frame viewfinder</div>
+  <canvas class="bg" id="pb"></canvas>
+  <div class="grid"></div>
+  <div class="corner" style="top:26px;left:26px;border-width:2px 0 0 2px"></div>
+  <div class="corner" style="top:26px;right:26px;border-width:2px 2px 0 0"></div>
+  <div class="corner" style="bottom:70px;left:26px;border-width:0 0 2px 2px"></div>
+  <div class="corner" style="bottom:70px;right:26px;border-width:0 2px 2px 0"></div>
+  <div class="rec mono">● 23 GRIDS · OPEN SOURCE</div>
+  <div class="copy">
+    <h1>Your whole<br>screen is a<br><em>viewfinder</em>.</h1>
+    <p class="mono" style="margin-top:22px;color:#cfcfc8;font-size:13px">Move to focus. Click to shoot.</p>
+  </div>
+  <div class="cta"><a class="btn btn-lime">Download for Android</a><a class="btn btn-ghost">Request a feature</a></div>
+  <div id="focus" data-d="AF · 2.40 m"></div>
+  <div id="flash"></div>
+  <div class="hud mono"><span>ISO <b id="iso">100</b></span><span><b id="sh">1/250</b></span><span>ƒ<b>1.9</b></span><span><b>24</b> MM</span><span>EV <b id="ev">+0.0</b></span><span id="shots">0 SHOTS</span></div>
+</section>
+
+<!-- C -->
+<section class="hero" id="c">
+  <div class="label">C · Bold editorial poster</div>
+  <div id="leak"></div>
+  <div class="word">PRO<br><span class="out">LENS</span></div>
+  <div class="phone" id="cphone"><div class="notch"></div><canvas id="pc"></canvas></div>
+  <p class="sub">Composition, exposure and light in your pocket. Built in the open, shaped by the photographers who use it.</p>
+  <div class="ctas"><a class="btn btn-lime">Download for Android</a><a class="btn btn-ghost">View on GitHub</a></div>
+  <div class="rail"><span>GRIDS · LEVEL · PEAKING · ZEBRAS · FALSE COLOUR · NIGHT · MACRO · MICRO · PANO · SLO-MO · TEMPLATES · GOLDEN HOUR · GRIDS · LEVEL · PEAKING · ZEBRAS</span></div>
+</section>
+
+<!-- story -->
+<div class="label story-label" style="position:sticky;display:inline-block;margin:18px 24px">Then: the pinned-phone scroll story (same for all three)</div>
+<section id="story">
+  <div class="pin"><div class="phone"><div class="notch"></div><canvas id="ps"></canvas></div></div>
+  <div class="steps">
+    <div data-step="0"><div class="num">01 · COMPOSE</div><h2>23 grids.<br><em>Zero</em> guesswork.</h2><p>Thirds, phi, golden spirals, triangles, dynamic symmetry and real 3D perspective, right on the live view.</p></div>
+    <div data-step="1"><div class="num">02 · LEVEL</div><h2>Horizons that<br>stay <em>straight</em>.</h2><p>A level that turns green at 0°, reads from how you hold the phone, and knows when you're shooting top-down.</p></div>
+    <div data-step="2"><div class="num">03 · LIGHT</div><h2>Know when the<br>light <em>turns gold</em>.</h2><p>Golden and blue hour for any place, the sun's path over your viewfinder, and the moon.</p></div>
+  </div>
+</section>
+<div style="height:40vh"></div>
+
+<div class="choose">
+  <div data-choice="a" onclick="toggleSelect(this)">Pick A</div>
+  <div data-choice="b" onclick="toggleSelect(this)">Pick B</div>
+  <div data-choice="c" onclick="toggleSelect(this)">Pick C</div>
+</div>
+
+<script>
+/* A golden-hour scene, drawn once per size. */
+function scene(c, opts = {}) {
+  const r = c.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
+  c.width = r.width * dpr; c.height = r.height * dpr;
+  const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const w = r.width, h = r.height, hz = h * (opts.horizon || .58), sun = opts.sun ?? .7;
+  const sky = g.createLinearGradient(0, 0, 0, hz);
+  sky.addColorStop(0, opts.night ? '#05060c' : '#1d1830'); sky.addColorStop(.55, opts.night ? '#141a3a' : '#a2566b'); sky.addColorStop(1, opts.night ? '#2b2d55' : '#f4b26f');
+  g.fillStyle = sky; g.fillRect(0, 0, w, hz);
+  if (!opts.night) {
+    const sx = w * sun, sy = hz - h * .07, sr = Math.min(w, h) * .05;
+    const glow = g.createRadialGradient(sx, sy, 0, sx, sy, sr * 7);
+    glow.addColorStop(0, '#fff8e6'); glow.addColorStop(.2, '#ffd9a0cc'); glow.addColorStop(1, '#ffb07000');
+    g.fillStyle = glow; g.fillRect(0, 0, w, hz);
+    g.fillStyle = '#fff'; g.beginPath(); g.arc(sx, sy, sr, 0, 7); g.fill();
+  } else {
+    for (let i = 0; i < 160; i++) { g.fillStyle = `rgba(255,255,255,${Math.random() * .8})`; g.fillRect(Math.random() * w, Math.random() * hz, 1.2, 1.2); }
+  }
+  const ridge = (amp, col, ph) => { g.fillStyle = col; g.beginPath(); g.moveTo(0, hz); for (let i = 0; i <= 40; i++) { const x = i / 40 * w; g.lineTo(x, hz - amp * (.55 + .45 * Math.sin(i * .9 + ph) * Math.cos(i * .37 + ph))); } g.lineTo(w, hz); g.fill(); };
+  ridge(h * .16, opts.night ? '#151833' : '#5b3a52', 3); ridge(h * .09, opts.night ? '#0c0e20' : '#2e2236', 7);
+  const lake = g.createLinearGradient(0, hz, 0, h * .8); lake.addColorStop(0, opts.night ? '#20244a' : '#e39a62'); lake.addColorStop(1, '#2a2440');
+  g.fillStyle = lake; g.fillRect(0, hz, w, h * .22);
+  g.fillStyle = '#0d0c0a'; g.beginPath(); g.moveTo(0, h * .8); g.quadraticCurveTo(w * .5, h * .74, w, h * .79); g.lineTo(w, h); g.lineTo(0, h); g.fill();
+  g.fillStyle = '#070707'; const px = w * .64, pb = h * .78, ph = h * .12;
+  g.beginPath(); g.arc(px, pb - ph * .92, ph * .09, 0, 7); g.fill(); g.fillRect(px - ph * .1, pb - ph * .8, ph * .2, ph * .8);
+  return { g, w, h };
+}
+const GRIDS = [
+  ['Rule of thirds', (g, w, h) => { [1/3, 2/3].forEach(f => { line(g, w*f, 0, w*f, h); line(g, 0, h*f, w, h*f); }); }],
+  ['Phi grid', (g, w, h) => { [.382, .618].forEach(f => { line(g, w*f, 0, w*f, h); line(g, 0, h*f, w, h*f); }); }],
+  ['Golden triangles', (g, w, h) => { line(g, 0, h, w, 0); const ft = (px, py) => { const dx = w, dy = -h, t = ((px) * dx + (py - h) * dy) / (dx*dx + dy*dy); return [dx*t, h + dy*t]; }; let f = ft(0, 0); line(g, 0, 0, f[0], f[1]); f = ft(w, h); line(g, w, h, f[0], f[1]); }],
+  ['Diagonal method', (g, w, h) => { const m = Math.min(w, h); line(g, 0, 0, m, m); line(g, w, 0, w-m, m); line(g, 0, h, m, h-m); line(g, w, h, w-m, h-m); }],
+  ['Pyramid', (g, w, h) => { line(g, 0, h, w/2, 0); line(g, w/2, 0, w, h); line(g, w/4, h/2, w*.75, h/2); }],
+  ['One-point perspective', (g, w, h) => { for (let i = 0; i <= 8; i++) { line(g, w/2, h/2, w*i/8, 0); line(g, w/2, h/2, w*i/8, h); } }],
+];
+function line(g, a, b, c, d) { g.beginPath(); g.moveTo(a, b); g.lineTo(c, d); g.stroke(); }
+
+/* A: drag to change grids */
+let gi = 0;
+function drawA() {
+  const c = document.getElementById('pa'), { g, w, h } = scene(c);
+  g.strokeStyle = 'rgba(255,255,255,.75)'; g.lineWidth = 1.2; GRIDS[gi][1](g, w, h);
+  g.strokeStyle = '#D4FF3F'; g.lineWidth = 2; line(g, w*.3, h*.5, w*.7, h*.5);
+  g.fillStyle = '#0b0b0bcc'; g.fillRect(0, h - 64, w, 64);
+  g.fillStyle = '#fff'; g.font = '600 11px JetBrains Mono'; g.fillText('ISO 100   1/250   ƒ1.9   24MM', 18, h - 36);
+  document.getElementById('gridname').textContent = 'Drag on the phone · ' + GRIDS[gi][0];
+}
+let dragX = null;
+const pa = document.getElementById('pa');
+pa.addEventListener('pointerdown', e => { dragX = e.clientX; pa.setPointerCapture(e.pointerId); });
+pa.addEventListener('pointermove', e => { if (dragX === null) return; if (Math.abs(e.clientX - dragX) > 40) { gi = (gi + (e.clientX > dragX ? 1 : GRIDS.length - 1)) % GRIDS.length; dragX = e.clientX; drawA(); } });
+pa.addEventListener('pointerup', () => dragX = null);
+pa.addEventListener('click', () => { gi = (gi + 1) % GRIDS.length; drawA(); });
+
+/* B: cursor focus, click shutter */
+const b = document.getElementById('b'), focus = document.getElementById('focus');
+let shots = 0;
+function drawB() { scene(document.getElementById('pb'), { horizon: .62, sun: .74 }); }
+b.addEventListener('pointermove', e => {
+  const r = b.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  focus.style.left = x + 'px'; focus.style.top = y + 'px';
+  const d = (1 + (1 - y / r.height) * 40).toFixed(2);
+  focus.dataset.d = `AF · ${d} m`;
+  document.getElementById('iso').textContent = Math.round(100 + (x / r.width) * 700);
+  const s = [1000, 500, 250, 125, 60][Math.min(4, Math.floor(y / r.height * 5))];
+  document.getElementById('sh').textContent = '1/' + s;
+  document.getElementById('ev').textContent = ((x / r.width - .5) * 2).toFixed(1).replace(/^(?!-)/, '+');
+});
+b.addEventListener('click', e => {
+  if (e.target.closest('.cta')) return;
+  focus.style.width = focus.style.height = '62px'; setTimeout(() => focus.style.width = focus.style.height = '86px', 160);
+  const f = document.getElementById('flash'); f.style.opacity = .85; setTimeout(() => f.style.opacity = 0, 90);
+  document.getElementById('shots').textContent = (++shots) + (shots === 1 ? ' SHOT' : ' SHOTS');
+});
+
+/* C: light leak and phone follow the cursor */
+const cs = document.getElementById('c'), leak = document.getElementById('leak'), cp = document.getElementById('cphone');
+cs.addEventListener('pointermove', e => {
+  const r = cs.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  leak.style.left = x + 'px'; leak.style.top = y + 'px';
+  const rx = (y / r.height - .5) * -10, ry = (x / r.width - .5) * 14;
+  cp.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(5deg)`;
+});
+function drawC() { const { g, w, h } = scene(document.getElementById('pc'), { sun: .35 }); g.strokeStyle = 'rgba(255,255,255,.7)'; g.lineWidth = 1.2; GRIDS[1][1](g, w, h); }
+
+/* Story: pinned phone changes per step */
+function drawStory(step) {
+  const c = document.getElementById('ps');
+  if (step === 2) { const { g, w, h } = scene(c, { sun: .5 }); g.strokeStyle = '#FACC15'; g.setLineDash([5, 5]); g.lineWidth = 1.6; g.beginPath(); for (let i = 0; i <= 30; i++) { const t = i / 30, x = w * t, y = h * .58 - Math.sin(t * Math.PI) * h * .4; i ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke(); g.setLineDash([]); g.fillStyle = '#0b0b0bcc'; g.fillRect(14, 60, 170, 28); g.fillStyle = '#D4FF3F'; g.font = '600 11px JetBrains Mono'; g.fillText('GOLDEN HOUR · 42 MIN', 22, 78); return; }
+  const { g, w, h } = scene(c, { sun: .7 });
+  if (step === 0) { g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = 1.2; GRIDS[2][1](g, w, h); }
+  if (step === 1) { g.save(); g.translate(w/2, h/2); g.rotate(-.02); g.strokeStyle = '#22c55e'; g.lineWidth = 2.5; line(g, -w*.32, 0, w*.32, 0); g.restore(); g.fillStyle = '#0b0b0bcc'; g.fillRect(w - 150, 60, 136, 28); g.fillStyle = '#22c55e'; g.font = '600 11px JetBrains Mono'; g.fillText('ROLL 0.0° · LEVEL', w - 142, 78); }
+}
+const steps = [...document.querySelectorAll('#story .steps > div')];
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { steps.forEach(s => s.classList.toggle('on', s === e.target)); drawStory(+e.target.dataset.step); } }), { threshold: .6 });
+steps.forEach(s => io.observe(s));
+
+function all() { drawA(); drawB(); drawC(); drawStory(0); }
+addEventListener('resize', all); document.fonts.ready.then(all); all();
+</script>
+</body>
+</html>

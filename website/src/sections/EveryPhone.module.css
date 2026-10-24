@@ -1,0 +1,98 @@
+.every {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  gap: clamp(40px, 6vw, 96px);
+  align-items: center;
+}
+
+.intro {
+  display: grid;
+  gap: 24px;
+}
+
+.switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.switch button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--grey-2);
+  border-radius: 999px;
+  background: none;
+  cursor: pointer;
+}
+
+.switch button[aria-checked='true'] {
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--paper);
+}
+
+.card {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  padding: clamp(22px, 3vw, 36px);
+  border-radius: 14px;
+  background: var(--grey-1);
+  border: 1px solid var(--grey-2);
+}
+
+.card h3 {
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.desc {
+  color: var(--grey-3);
+  font-size: 0.9rem;
+}
+
+.rows {
+  display: grid;
+  padding: 0;
+  list-style: none;
+}
+
+.rows li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--grey-2);
+  font-size: 0.95rem;
+}
+
+.rows li span:last-child {
+  color: var(--grey-4);
+  font-size: 0.8rem;
+  text-align: right;
+}
+
+.note {
+  color: var(--pink);
+  font-size: 0.9rem;
+}
+
+.modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding-top: 6px;
+  color: var(--grey-3);
+  font-size: 0.78rem;
+}
+
+.current {
+  color: var(--lime);
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .every {
+    grid-template-columns: 1fr;
+  }
+}

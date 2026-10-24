@@ -202,24 +202,45 @@
   }
 
   .title {
-    font-size: clamp(1.8rem, 9vw, 2.6rem);
+    top: 18px;
+    left: 20px;
+    right: 20px;
+    max-width: none;
+    font-size: clamp(1.7rem, 8vw, 2.3rem);
   }
 
-  /* Layer names run along the bottom on phones. */
+  .layers,
+  .covers {
+    top: 64px;
+    bottom: 80px;
+  }
+
+  /* One row of controls at a time, at thumb height: layer names while it's apart, screens during the tour. */
   .layerNames {
     top: auto;
-    bottom: 76px;
+    bottom: 16px;
     right: 0;
     left: 0;
     transform: none;
     display: flex;
     overflow-x: auto;
-    padding: 0 var(--gutter);
+    padding: 2px 20px;
     scrollbar-width: none;
+    mask-image: linear-gradient(90deg, #000 85%, transparent);
   }
 
   .layerNames button {
     flex: none;
+    min-height: 44px;
   }
 
+  .tabs {
+    bottom: 16px;
+    transition: opacity 300ms;
+  }
+
+  .tabs[data-phase='layers'] {
+    opacity: 0;
+    pointer-events: none;
+  }
 }

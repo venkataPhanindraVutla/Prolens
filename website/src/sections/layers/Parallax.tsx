@@ -27,7 +27,9 @@ export default function Parallax() {
       const r = el.getBoundingClientRect()
       // -1 as the section enters from below, +1 as it leaves at the top.
       const t = Math.max(-1, Math.min(1, (window.innerHeight / 2 - (r.top + r.height / 2)) / (window.innerHeight / 2 + r.height / 2)))
-      for (const l of layers) l.style.transform = `translate3d(0, ${(-t * Number(l.dataset.depth) * 320).toFixed(1)}px, 0)`
+      // Phones get a gentler drift, so the stacked prints never collide.
+      const reach = window.innerWidth < 760 ? 70 : 320
+      for (const l of layers) l.style.transform = `translate3d(0, ${(-t * Number(l.dataset.depth) * reach).toFixed(1)}px, 0)`
     }
     const onScroll = () => {
       if (visible && !frame) frame = requestAnimationFrame(paint)

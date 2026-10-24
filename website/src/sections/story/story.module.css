@@ -136,6 +136,7 @@
 
 /* On phones the chips become one swipeable row at thumb height. */
 .narrow .chips {
+  mask-image: linear-gradient(90deg, #000 84%, transparent);
   flex-wrap: nowrap;
   overflow-x: auto;
   scroll-snap-type: x proximity;

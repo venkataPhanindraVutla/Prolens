@@ -124,7 +124,7 @@ export default function AppTour() {
     if (!el || typeof ResizeObserver === 'undefined') return
     const fit = () => {
       const narrow = el.clientWidth < 760
-      const pw = Math.min(narrow ? el.clientWidth * 0.68 : 300, (el.clientHeight - (narrow ? 230 : 200)) * 0.445)
+      const pw = Math.min(narrow ? el.clientWidth * 0.6 : 300, (el.clientHeight - (narrow ? 250 : 200)) * 0.445)
       el.style.setProperty('--pw', String(Math.round(pw)))
     }
     fit()
@@ -193,7 +193,7 @@ export default function AppTour() {
           })}
         </motion.div>
 
-        <div className={css.tabs} role="tablist" aria-label="App screens">
+        <div className={css.tabs} role="tablist" aria-label="App screens" data-phase={phase}>
           {NAMES.map((name, i) => (
             <button key={name} type="button" role="tab" aria-selected={i === active} className="focusable" onClick={() => go(i)}>
               {name}

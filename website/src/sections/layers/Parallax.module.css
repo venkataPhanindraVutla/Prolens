@@ -99,19 +99,58 @@
   aspect-ratio: 1;
 }
 
+/* Phones: no overlap. The words come first, then the prints as a staggered two-column spread that drifts gently. */
 @media (max-width: 760px) {
   .parallax {
-    min-height: 180svh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px 14px;
+    min-height: 0;
+    padding-bottom: 64px;
+    overflow: visible;
   }
 
   .text {
-    top: 34svh;
-    margin-top: 44svh;
-    padding: 20px 4px;
+    position: static;
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 72px 0 8px;
+    text-align: left;
+    justify-items: start;
   }
 
-  .a { left: -6%; top: 3%; width: 52vw; }
-  .b { right: -10%; top: 22%; width: 64vw; }
-  .c { left: -8%; bottom: 14%; width: 62vw; }
-  .d { right: -4%; bottom: 2%; width: 46vw; }
+  .title {
+    font-size: clamp(2.3rem, 11vw, 3.2rem);
+  }
+
+  .layer {
+    position: relative;
+    inset: auto;
+    width: auto;
+  }
+
+  .a,
+  .b,
+  .c,
+  .d {
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    width: auto;
+  }
+
+  .b,
+  .d {
+    margin-top: 48px;
+  }
+
+  .b .frame,
+  .c .frame {
+    aspect-ratio: 4 / 5;
+  }
+
+  .layer figcaption a {
+    display: none;
+  }
 }

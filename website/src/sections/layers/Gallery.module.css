@@ -151,7 +151,7 @@
   .text,
   .spread[data-side='right'] .text {
     padding: 0;
-    margin-top: -64px;
+    margin-top: -44px;
     text-align: left;
     justify-items: start;
   }
@@ -164,7 +164,11 @@
   }
 
   .index {
-    order: -1;
-    padding-left: 12px;
+    display: none;
+  }
+
+  /* The edge fades, so it reads as a row that carries on. */
+  .track {
+    mask-image: linear-gradient(90deg, #000 88%, transparent);
   }
 }

@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform } from 'motion/react'
-import { useReducedMotion } from '../../lib/motion'
+import { useMedia, useReducedMotion } from '../../lib/motion'
 import { useRef } from 'react'
 import Photo from '../../components/Photo'
 import SectionHeading from '../../components/SectionHeading'
@@ -28,12 +28,14 @@ function Spread({ g, i }: { g: Genre; i: number }) {
   const ref = useRef<HTMLElement>(null)
   const { scrollYProgress: p } = useScroll({ target: ref, offset: ['start end', 'end start'] })
   const side = i % 2 ? -1 : 1
-  const photoRotateY = useTransform(p, [0, 1], [side * 14, side * -14])
-  const photoRotateX = useTransform(p, [0, 1], [8, -8])
+  // On a phone the cards sit side by side in a swipe row, so the tilt is a hint, not a turn.
+  const amp = useMedia('(max-width: 900px)') ? 0.3 : 1
+  const photoRotateY = useTransform(p, [0, 1], [side * 14 * amp, side * -14 * amp])
+  const photoRotateX = useTransform(p, [0, 1], [8 * amp, -8 * amp])
   const photoScale = useTransform(p, [0, 0.35, 0.65, 1], [0.86, 1, 1, 0.94])
-  const photoY = useTransform(p, [0, 1], [40, -40])
-  const wordY = useTransform(p, [0, 1], [36, -36])
-  const textY = useTransform(p, [0, 1], [60, -60])
+  const photoY = useTransform(p, [0, 1], [40 * amp, -40 * amp])
+  const wordY = useTransform(p, [0, 1], [36 * amp, -36 * amp])
+  const textY = useTransform(p, [0, 1], [60 * amp, -60 * amp])
   const photoInner = useTransform(p, [0, 1], ['-6%', '6%'])
   const ph = photo(g.photo)
   const exif = exifLine(ph)

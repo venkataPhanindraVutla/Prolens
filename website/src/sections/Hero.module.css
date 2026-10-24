@@ -312,71 +312,112 @@
   to { transform: translateY(-50%); }
 }
 
-/* Phones: the photo stays full-bleed; the wordmark and controls stack at the bottom, the rail runs across the top. */
+/* Phones: the photo stays full-bleed. The wordmark sits high, the buttons low within thumb reach,
+   and the shutter rides the right edge like a phone camera's. */
 @media (max-width: 760px) {
   .hero {
     --rail: 0px;
-    height: max(620px, 100svh);
+    height: max(640px, 100svh);
+  }
+
+  .shade {
+    background:
+      linear-gradient(180deg, rgb(11 11 11 / 0.75) 0%, rgb(11 11 11 / 0.15) 34%, transparent 46%),
+      linear-gradient(0deg, rgb(11 11 11 / 0.95) 0%, rgb(11 11 11 / 0.5) 30%, transparent 52%);
   }
 
   .frame {
-    inset: 54px 12px 12px;
+    inset: 52px 12px 12px;
+  }
+
+  .frame span {
+    width: 20px;
+    height: 20px;
   }
 
   .hud {
-    top: 66px;
-    left: 26px;
-    right: 26px;
-    font-size: 0.64rem;
+    top: 62px;
+    left: 24px;
+    right: 24px;
+    justify-content: flex-start;
+    font-size: 0.62rem;
   }
 
   .hud > span:first-child {
     display: none;
   }
 
-  .credit {
-    top: auto;
-    bottom: 22px;
-    right: 26px;
-    left: 26px;
-    text-align: right;
+  /* No pointer to follow on a phone: the focus square would only sit on the type. */
+  .focus {
+    display: none;
   }
 
   .word {
-    left: 22px;
-    bottom: 300px;
-    font-size: clamp(88px, 29vw, 160px);
+    top: 92px;
+    bottom: auto;
+    left: 20px;
+    font-size: clamp(96px, 31vw, 170px);
   }
 
   .copy {
-    left: 22px;
-    right: 22px;
-    bottom: 54px;
+    left: 20px;
+    right: 20px;
+    bottom: 44px;
     max-width: none;
-    gap: 18px;
+    gap: 16px;
   }
 
-  .hero {
-    --fx: 62%;
-    --fy: 34%;
+  .sub {
+    font-size: 1rem;
   }
 
-  .camera {
-    right: 22px;
-    bottom: auto;
-    top: 96px;
-    flex-direction: column;
-    align-items: end;
+  .ctas {
+    flex-wrap: nowrap;
     gap: 8px;
   }
 
-  .roll {
-    order: 0;
+  .ctas > * {
+    flex: 1 1 auto;
+    padding: 0 0.9em;
+    font-size: 0.92rem;
+    white-space: nowrap;
+  }
+
+  .camera {
+    right: 18px;
+    bottom: auto;
+    top: 46%;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 8px;
   }
 
   .shutter {
-    width: 60px;
-    height: 60px;
+    width: 58px;
+    height: 58px;
+    padding: 5px;
+  }
+
+  .roll > span {
+    display: none;
+  }
+
+  .roll li {
+    width: 34px;
+    height: 24px;
+  }
+
+  .roll ol {
+    flex-direction: column;
+  }
+
+  .credit {
+    top: auto;
+    bottom: 16px;
+    left: 20px;
+    right: 20px;
+    text-align: left;
+    font-size: 0.6rem;
   }
 
   .rail {

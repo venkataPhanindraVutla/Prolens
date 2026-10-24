@@ -132,6 +132,16 @@ select {
   padding: clamp(88px, 12vw, 168px) var(--gutter);
 }
 
+@media (max-width: 760px) {
+  .section {
+    padding-block: 64px;
+  }
+
+  .display {
+    font-size: clamp(2.3rem, 11vw, 3.4rem);
+  }
+}
+
 .display {
   font-size: clamp(2.6rem, 7.2vw, 6.4rem);
   line-height: 0.92;

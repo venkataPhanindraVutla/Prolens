@@ -2,24 +2,24 @@ import { expect, test } from 'vitest'
 import { FALLBACK_RELEASE } from '../config'
 import { fetchRelease, formatSize, parseRelease } from './release'
 
-const v10 = {
-  tag_name: 'v1.0',
+const v11 = {
+  tag_name: 'v1.1',
   assets: [
     {
-      name: 'Prolens-1.0.apk',
-      size: 13353471,
-      digest: 'sha256:d1cb1834e1c44dbdac9ef292bed718708adf922e833b106a65dbdd4f6af91dbe',
-      browser_download_url: 'https://github.com/venkataPhanindraVutla/Prolens/releases/download/v1.0/Prolens-1.0.apk',
+      name: 'Prolens-1.1.apk',
+      size: 13599511,
+      digest: 'sha256:274ed215e75ce7846e6c5542add1a66cddfbb17723d9f94b2d82130952bf5117',
+      browser_download_url: 'https://github.com/venkataPhanindraVutla/Prolens/releases/download/v1.1/Prolens-1.1.apk',
     },
   ],
 }
 
-test('reads the real v1.0 release', () => {
-  const r = parseRelease(v10)!
-  expect(r.version).toBe('v1.0')
-  expect(r.sizeBytes).toBe(13353471)
-  expect(r.sha256).toBe('d1cb1834e1c44dbdac9ef292bed718708adf922e833b106a65dbdd4f6af91dbe')
-  expect(r.url).toMatch(/Prolens-1\.0\.apk$/)
+test('reads the real v1.1 release', () => {
+  const r = parseRelease(v11)!
+  expect(r.version).toBe('v1.1')
+  expect(r.sizeBytes).toBe(13599511)
+  expect(r.sha256).toBe('274ed215e75ce7846e6c5542add1a66cddfbb17723d9f94b2d82130952bf5117')
+  expect(r.url).toMatch(/Prolens-1\.1\.apk$/)
   expect(r.source).toBe('api')
 })
 
@@ -30,7 +30,7 @@ test('no APK asset or a wrong shape gives null', () => {
 })
 
 test('a missing digest hides the checksum', () => {
-  const noDigest = { ...v10, assets: [{ ...v10.assets[0], digest: undefined }] }
+  const noDigest = { ...v11, assets: [{ ...v11.assets[0], digest: undefined }] }
   expect(parseRelease(noDigest)!.sha256).toBeNull()
 })
 
@@ -48,5 +48,5 @@ test('size is decimal megabytes', () => {
 })
 
 test('the fallback downloads the exact file its checksum describes', () => {
-  expect(FALLBACK_RELEASE.url).toBe('https://github.com/venkataPhanindraVutla/Prolens/releases/download/v1.0/Prolens-1.0.apk')
+  expect(FALLBACK_RELEASE.url).toBe('https://github.com/venkataPhanindraVutla/Prolens/releases/download/v1.1/Prolens-1.1.apk')
 })

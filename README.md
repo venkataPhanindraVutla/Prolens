@@ -2,9 +2,13 @@
 
 A pro camera and photography toolkit for Android, built with Kotlin Multiplatform and Compose Multiplatform. The UI and logic are shared, so iOS can be added later as another target.
 
+Download the latest APK from [Releases](https://github.com/venkataPhanindraVutla/Prolens/releases/latest), or see it on the [website](https://venkataphanindravutla.github.io/Prolens/).
+
 ## What's in it
 
 - **Viewfinder:**
+  - Capture modes in a strip above the shutter: Night, Micro, Macro, Photo, Slo-mo, Pano and Templates, each shown only when the phone can do it.
+  - Lens chips from the phone's real zoom range, pinch to zoom, tap to focus and meter, press and hold to lock, and the front camera.
   - Live CameraX preview with 23 composition grids in six families (classic, golden ratio, triangles, diagonals, perspective and 3D, guides).
   - Level and camera-angle label, histogram, clipping warnings, focus peaking, zebras, false colour and waveform.
   - A lens frame for your real camera, the sun's path, and a 3D ground grid.
@@ -14,7 +18,8 @@ A pro camera and photography toolkit for Android, built with Kotlin Multiplatfor
 - **Calculators:** depth of field, background blur, exposure, ND filter (with a timer), shutter speed, astro (500 and NPF rules), field of view, flash.
 - **Light:** golden and blue hour for any place and date, in that place's time zone, plus the sun path, sun direction, shadow length and the moon.
 - **Coach:** 15 genre recipes you can apply to the viewfinder, camera angles and shot sizes, lighting patterns, and composition principles.
-- **Gear:** camera bodies and lenses. Every calculator and the lens frame use them.
+- **Gear:** camera bodies and lenses, which every calculator and the lens frame use, and what this phone's cameras can do.
+- Viewfinder settings, gear and location are saved between launches.
 
 ## Project layout
 

@@ -10,7 +10,7 @@ test('the phone download bar links to the download and names the version', () =>
   vi.stubGlobal('fetch', () => new Promise(() => {}))
   render(<MobileBar />)
   expect(screen.getByRole('link', { name: /Download/ })).toHaveAttribute('href', '#download')
-  expect(screen.getByText(/v1\.0/)).toBeInTheDocument()
+  expect(screen.getByText(/v1\.1/)).toBeInTheDocument()
 })
 
 test('there is no download bar on wide screens', () => {

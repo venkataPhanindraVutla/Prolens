@@ -30,7 +30,7 @@ test('download jumps to the download section and GitHub opens the repo', () => {
 
 test('the proof strip carries the release size', () => {
   const { container } = render(<ProofStrip />)
-  expect(container.textContent).toContain('Android 7+ · 13.4 MB')
+  expect(container.textContent).toContain('Android 7+ · 13.6 MB')
   expect(container.textContent).toContain('free · open source · no ads · no account · works offline')
 })
 

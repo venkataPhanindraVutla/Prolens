@@ -19,6 +19,8 @@ import androidx.camera.camera2.interop.Camera2Interop
 import androidx.camera.camera2.interop.CaptureRequestOptions
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.Camera
+import androidx.camera.core.CameraInfo
+import android.util.Log
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
@@ -139,13 +141,30 @@ class AndroidCameraController(private val context: Context) : CameraController {
         // The screen is locked portrait, so the crop is set upright; a sideways hold only turns the saved photo.
         val group = UseCaseGroup.Builder().addUseCase(preview).addUseCase(analysis).addUseCase(capture)
         sensorRatio?.let { r -> group.setViewPort(ViewPort.Builder(Rational(1000, (1000 * r).roundToInt()), Surface.ROTATION_0).build()) }
-        val cam = runCatching { p.bindToLifecycle(owner, CameraSelector.DEFAULT_BACK_CAMERA, group.build()) }.getOrNull() ?: return
+        val cam = runCatching { p.bindToLifecycle(owner, backCamera(p), group.build()) }.getOrNull() ?: return
         camera?.cameraInfo?.zoomState?.removeObservers(owner)
         camera = cam
         _capabilities.value = readCapabilities(cam)
         cam.cameraInfo.zoomState.observe(owner) { z -> _zoom.value = ZoomState(z.minZoomRatio, z.maxZoomRatio, z.zoomRatio) }
         cam.cameraControl.setZoomRatio(_zoom.value.ratio.coerceAtLeast(cam.cameraInfo.zoomState.value?.minZoomRatio ?: 1f))
         apply(pending)
+    }
+
+    /**
+     * The back camera with the widest zoom range. On multi-camera phones that's the logical camera that
+     * includes the ultra-wide (0.6×), which the default back camera (main lens only, from 1×) leaves out.
+     */
+    private fun backCamera(p: ProcessCameraProvider): CameraSelector {
+        fun range(info: CameraInfo): android.util.Range<Float>? =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                runCatching { Camera2CameraInfo.from(info).getCameraCharacteristic(CameraCharacteristics.CONTROL_ZOOM_RATIO_RANGE) }.getOrNull()
+            } else null
+        val best = p.availableCameraInfos
+            .filter { it.lensFacing == CameraSelector.LENS_FACING_BACK }
+            .sortedWith(compareBy<CameraInfo> { range(it)?.lower ?: 1f }.thenByDescending { range(it)?.upper ?: 1f })
+            .firstOrNull() ?: return CameraSelector.DEFAULT_BACK_CAMERA
+        Log.i("Prolens", "Back camera ${Camera2CameraInfo.from(best).cameraId}, zoom ${range(best)}")
+        return best.cameraSelector
     }
 
     fun unbind() {

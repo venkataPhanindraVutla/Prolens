@@ -36,8 +36,7 @@ export default function EveryPhone() {
           Built for <span className="pink">every</span> phone.
         </SectionHeading>
         <p className="lede" data-reveal="up">
-          Prolens asks each phone what its cameras can really do, then shows only that: the lenses apps may use, the
-          closest focus, real slow-motion frame rates, and whose night mode runs.
+          Prolens reads what each phone’s cameras can really do, and shows only that. Try three kinds of phone.
         </p>
         <div className={css.switch} role="radiogroup" aria-label="Phone">
           {PROFILES.map((x) => (
@@ -80,8 +79,8 @@ export default function EveryPhone() {
       </figure>
 
       <div className={css.card} data-reveal="up" data-reveal-delay={0.15}>
-        <h3>This phone</h3>
-        <p className={css.desc}>Lenses and modes Prolens can use here. Other phones show their own.</p>
+        <h3>{p.name}</h3>
+        <p className={css.desc}>What Prolens offers on a phone like this.</p>
         <dl className={css.rows}>
           {rows.map(([k, v]) => (
             <div key={k}>

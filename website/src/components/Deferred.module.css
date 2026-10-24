@@ -1,0 +1,9 @@
+.wait {
+  min-height: var(--min);
+}
+
+@media (max-width: 760px) {
+  .wait {
+    min-height: var(--min-phone);
+  }
+}

@@ -31,13 +31,11 @@ test('the golden spiral is drawn at its true ratio, never stretched', async () =
   expect(container.querySelector('[data-grid="spiralTrue"]')).not.toBeNull()
 })
 
-test('on a phone the chapters are tabs, one chapter at a time', async () => {
+test('on a phone the chapters stack, with no tabs: compose, level, expose and light', () => {
   mockMedia()
   render(<LocationProvider><Story /></LocationProvider>)
-  const tabs = screen.getByRole('tablist', { name: 'Chapters' })
-  expect(within(tabs).getAllByRole('tab').map((t) => t.textContent)).toEqual(['Compose', 'Level', 'Expose', 'Modes', 'Light'])
-  expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(1)
-  await userEvent.click(within(tabs).getByRole('tab', { name: 'Level' }))
-  expect(screen.getByRole('heading', { level: 2, name: /dead level/ })).toBeInTheDocument()
+  expect(screen.queryByRole('tablist')).toBeNull()
+  const ids = screen.getAllByRole('heading', { level: 2 }).map((h) => h.id)
+  expect(ids).toEqual(['chapter-compose', 'chapter-level', 'chapter-expose', 'chapter-light'])
   expect(screen.getByRole('slider', { name: 'Tilt' })).toBeInTheDocument()
 })

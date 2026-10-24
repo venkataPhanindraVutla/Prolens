@@ -201,7 +201,7 @@
   --pw: 250;
   display: grid;
   gap: 18px;
-  padding: 64px var(--gutter) 72px;
+  padding: 48px var(--gutter) 48px;
   overflow: hidden;
 }
 
@@ -246,12 +246,49 @@
   flex: none;
 }
 
-.phoneScene .tabs {
-  position: static;
-  transform: none;
-  justify-self: start;
-  max-width: 100%;
-  margin-top: 28px;
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  margin-top: -12px;
+}
+
+.dots button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--grey-2);
+  transition: width 250ms var(--ease-out), background-color 250ms;
+}
+
+.dots button[aria-selected='true'] span {
+  width: 22px;
+  background: var(--lime);
+}
+
+.caption {
+  min-height: 3em;
+  max-width: 34ch;
+  justify-self: center;
+  text-align: center;
+  color: var(--grey-4);
+}
+
+.caption b {
+  display: block;
+  color: var(--paper);
+  font-weight: 600;
 }
 
 /* A native swipe row of live phones. */
@@ -261,7 +298,8 @@
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   margin: 0 calc(var(--gutter) * -1);
-  padding: 8px calc((100% - var(--pw) * 1px) / 2 + var(--gutter)) 24px;
+  margin-top: 20px;
+  padding: 8px calc((100% - var(--pw) * 1px) / 2 + var(--gutter)) 16px;
   scrollbar-width: none;
 }
 

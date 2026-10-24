@@ -50,6 +50,12 @@
 }
 
 @media (max-width: 760px) {
+  /* The buttons carry the section on a phone; the link and the counts are on the desktop page. */
+  .repo,
+  .stats {
+    display: none;
+  }
+
   .actions {
     display: grid;
     grid-template-columns: 1fr 1fr;

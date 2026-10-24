@@ -214,3 +214,27 @@
     text-align: left;
   }
 }
+
+/* Phones: the three phone types fit side by side, and the card keeps only the modes each one gets. */
+@media (max-width: 760px) {
+  .switch {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    mask-image: none;
+  }
+
+  .switch button {
+    padding: 6px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    line-height: 1.2;
+  }
+
+  .rows {
+    display: none;
+  }
+}

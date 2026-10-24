@@ -12,6 +12,13 @@ test('choosing the 3× lens zooms the photo five times past the 0.6× ultra-wide
 
 test('a phone that hides its ultra-wide offers no 0.6× lens', async () => {
   render(<EveryPhone />)
-  await userEvent.click(screen.getByRole('radio', { name: 'Ultra-wide kept from apps' }))
+  await userEvent.click(screen.getByRole('radio', { name: 'Hidden ultra-wide' }))
   expect(within(screen.getByRole('radiogroup', { name: 'Lens' })).queryByRole('radio', { name: '0.6×' })).toBeNull()
+})
+
+test('the card names the example phone, not the visitor’s', async () => {
+  render(<EveryPhone />)
+  await userEvent.click(screen.getByRole('radio', { name: 'One camera' }))
+  expect(screen.getByRole('heading', { level: 3, name: 'One camera' })).toBeInTheDocument()
+  expect(screen.queryByText('This phone')).toBeNull()
 })

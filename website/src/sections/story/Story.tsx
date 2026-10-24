@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import AppPhone from '../../app-ui/AppPhone'
+import AppPhone, { AppCrop } from '../../app-ui/AppPhone'
 import SectionHeading from '../../components/SectionHeading'
 import { useMedia } from '../../lib/motion'
 import { creditLine, exifLine, photo } from '../../lib/photos'
@@ -25,9 +25,14 @@ function Caption({ id }: { id: string }) {
   )
 }
 
+/** On phones, the band of the viewfinder each chapter is about: the tool row and most of the preview, in dp. */
+const CROP = { from: 72, to: 620 }
+
 /**
  * Wide screens: the phone stays pinned beside the text while the chapters scroll past and swap its screen.
- * Phones: nothing pins. Each chapter is its own card, with the app screen and its controls together.
+ * Phones: nothing pins. The chapters stack, each with the viewfinder edge to edge and its controls under it.
+ * Modes is left to "Built for every phone", which shows the modes each phone gets, and Light needs no screen,
+ * since its controls already list the times.
  */
 export default function Story() {
   const chapters: Chapter[] = [useCompose(), useLevel(), useExpose(), useModes(), useLight()]
@@ -50,25 +55,8 @@ export default function Story() {
   }, [wide])
 
   const current = chapters[active]
-  const [tab, setTab] = useState(0)
-  const root = useRef<HTMLElement>(null)
-  const pickTab = (i: number) => {
-    setTab(i)
-    // Bring the chapter's start into view if the tabs have scrolled past it.
-    const el = root.current
-    if (el && el.getBoundingClientRect().top < 0) el.scrollIntoView?.({ block: 'start' })
-  }
   return (
-    <section ref={root} id="story" className={[css.story, wide ? css.wide : css.narrow].join(' ')} aria-label="What Prolens does">
-      {!wide && (
-        <div className={css.chapterTabs} role="tablist" aria-label="Chapters">
-          {chapters.map((c, i) => (
-            <button key={c.id} type="button" role="tab" aria-selected={i === tab} className="focusable" onClick={() => pickTab(i)}>
-              {c.id[0].toUpperCase() + c.id.slice(1)}
-            </button>
-          ))}
-        </div>
-      )}
+    <section id="story" className={[css.story, wide ? css.wide : css.narrow].join(' ')} aria-label="What Prolens does">
       {wide && (
         <div className={css.pin}>
           <AppPhone statusBar={current.statusBar} className={css.phone}>
@@ -81,7 +69,7 @@ export default function Story() {
         </div>
       )}
       <div className={css.chapters}>
-        {chapters.map((c, i) => (wide || i === tab) && (
+        {chapters.map((c, i) => (wide || c.id !== 'modes') && (
           <article
             key={c.id}
             ref={(el) => {
@@ -102,11 +90,11 @@ export default function Story() {
             ) : (
               <>
                 <p className={css.body}>{c.body}</p>
-                <div className={css.cardPhone}>
-                  <AppPhone statusBar={c.statusBar} className={css.phone}>
+                {!c.statusBar && (
+                  <AppCrop from={CROP.from} to={CROP.to} className={css.crop}>
                     {c.phone}
-                  </AppPhone>
-                </div>
+                  </AppCrop>
+                )}
                 <div className={css.cardControls}>{c.controls}</div>
               </>
             )}

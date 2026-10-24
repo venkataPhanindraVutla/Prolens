@@ -27,7 +27,7 @@ export function useCompose(): Chapter {
         Compose on <span className="pink">23 grids</span>.
       </>
     ),
-    body: 'Thirds is only the start. Golden spirals, triangles, dynamic symmetry and perspective grids sit over the live view, so the frame is built before you press the shutter.',
+    body: 'Spirals, triangles and perspective lines over the live view. Tap one to redraw the frame.',
     phone: (
       <AppViewfinder
         preview={<Photo id="compose" sizes="360px" />}

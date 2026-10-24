@@ -53,7 +53,7 @@ export function useModes(): Chapter {
         A mode for <span className="pink">every shot</span>.
       </>
     ),
-    body: 'Night, close-up, slow motion, panoramas and shot templates live in one strip above the shutter. Swipe it, like the app.',
+    body: 'Night, close-up, slow motion, panoramas and templates, in one strip above the shutter.',
     phone: (
       <AppViewfinder
         preview={

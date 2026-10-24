@@ -134,7 +134,7 @@ select {
 
 @media (max-width: 760px) {
   .section {
-    padding-block: 64px;
+    padding-block: 48px;
   }
 
   .display {

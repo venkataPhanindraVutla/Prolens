@@ -54,10 +54,7 @@ export default function Parallax() {
         <h2 id="parallax-title" className={css.title}>
           Every frame starts <span className="pink">before</span> the shutter.
         </h2>
-        <p className="lede">
-          Where you stand, how you hold the phone, what the light is doing. Prolens puts that thinking on the screen,
-          so the decisions a photographer makes are there while you shoot.
-        </p>
+        <p className="lede">Where you stand, how you hold the phone, what the light is doing. Prolens puts that on the screen.</p>
       </div>
       {LAYERS.map((l) => {
         const p = photo(l.id)

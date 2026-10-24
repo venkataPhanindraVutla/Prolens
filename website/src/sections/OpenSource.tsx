@@ -19,12 +19,9 @@ export default function OpenSource() {
       </SectionHeading>
       <div className={css.body} data-reveal="up">
         <p className="lede">
-          Every line of Prolens is on GitHub under the Apache-2.0 licence: the Kotlin Multiplatform app, the exposure and
-          depth-of-field maths, the sun tracker and all 23 grids.
+          Every line is on GitHub under Apache-2.0: the app, the exposure maths, the sun tracker and all 23 grids.
         </p>
-        <p className="lede">
-          Shoot with it, then tell us what a real day out needed. The next build is made from those requests.
-        </p>
+        <p className="lede">Shoot with it, then tell us what a real day out needed.</p>
         <a className={`${css.repo} mono focusable`} href={repoUrl} target="_blank" rel="noopener">
           github.com/venkataPhanindraVutla/Prolens
         </a>

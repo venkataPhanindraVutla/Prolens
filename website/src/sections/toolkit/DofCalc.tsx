@@ -89,6 +89,7 @@ export default function DofCalc() {
         </label>
         <Hud
           live
+          className={tk.results}
           items={[
             { label: 'Near', value: distance(d.near) },
             { label: 'Far', value: distance(d.far) },

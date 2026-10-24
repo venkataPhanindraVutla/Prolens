@@ -47,7 +47,7 @@ export function useLevel(): Chapter {
         Get the horizon <span className="pink">dead level</span>.
       </>
     ),
-    body: 'The level reads the phone’s sensors and turns green inside half a degree. Drag the bar to tilt the camera until the fog line settles.',
+    body: 'It turns green inside half a degree. Drag the bar until the fog line settles.',
     phone: (
       <AppViewfinder
         preview={

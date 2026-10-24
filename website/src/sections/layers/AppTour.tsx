@@ -8,6 +8,15 @@ import css from './AppTour.module.css'
 import ExplodedPhone, { LAYERS } from './ExplodedPhone'
 
 const NAMES = ['Viewfinder', 'Toolkit', 'Calculators', 'Light', 'Coach', 'Gear']
+/** One line per screen, under the phone swipe row, since the app's own type is small at phone width. */
+const CAPTIONS: Record<string, string> = {
+  Viewfinder: 'Grids, level, zebras and the exposure readout over the live view.',
+  Toolkit: 'Every tool, one tap from the camera.',
+  Calculators: 'Eight calculators that know your lens.',
+  Light: 'Golden hour, blue hour and the sun’s path, wherever you are.',
+  Coach: 'Fifteen shot recipes, with angles, lighting and composition.',
+  Gear: 'Your cameras and lenses, and what this phone can really do.',
+}
 
 /** Scroll progress: layers hold apart, then assemble upright into the first screen, then the tour runs. */
 const HOLD = 0.12
@@ -192,13 +201,6 @@ function AppTourPhone() {
       </button>
       {apart && <LayerNames focused={focused} setFocused={lift} />}
 
-      <div className={css.tabs} role="tablist" aria-label="App screens">
-        {NAMES.map((name, i) => (
-          <button key={name} type="button" role="tab" aria-selected={i === active} className="focusable" onClick={() => go(i)}>
-            {name}
-          </button>
-        ))}
-      </div>
       <div ref={track} className={css.swipe}>
         {NAMES.map((name, i) => {
           const sc = screenFor(name, (n) => go(NAMES.indexOf(n)))
@@ -219,6 +221,16 @@ function AppTourPhone() {
           )
         })}
       </div>
+      <div className={css.dots} role="tablist" aria-label="App screens">
+        {NAMES.map((name, i) => (
+          <button key={name} type="button" role="tab" aria-label={name} aria-selected={i === active} onClick={() => go(i)}>
+            <span />
+          </button>
+        ))}
+      </div>
+      <p className={css.caption} aria-live="polite">
+        <b>{NAMES[active]}</b> {CAPTIONS[NAMES[active]]}
+      </p>
     </section>
   )
 }

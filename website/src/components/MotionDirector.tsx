@@ -30,13 +30,16 @@ function whenIdle(fn: () => void): () => void {
  * - [data-reveal="up" | "photo" | "fade"] elements rise in, develop open or fade in as they reach the screen
  *   (optional data-reveal-delay in seconds staggers groups);
  * - [data-stage] sections ease back and dim as they scroll away under the next one.
- * Elements already on screen are never hidden, and nothing happens with reduced motion or without IntersectionObserver.
+ * Elements already on screen are never hidden, and nothing happens on phones, with reduced motion or without IntersectionObserver.
  */
 export default function MotionDirector() {
   const reduced = useReducedMotion()
 
   useEffect(() => {
     if (reduced || typeof IntersectionObserver === 'undefined') return
+    // Phones are left still. Content arrives at the pace of a thumb, so a reveal still running as it comes on screen
+    // reads as greyed out, and short sections would start easing back while they're still being read.
+    if (window.matchMedia?.('(max-width: 760px)').matches) return
     let cancelled = false
     const stops: (() => void)[] = []
     const seen = new WeakSet<Element>()

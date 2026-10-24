@@ -1,4 +1,3 @@
-import { useState, type ReactElement } from 'react'
 import SectionHeading from '../../components/SectionHeading'
 import { useMedia } from '../../lib/motion'
 import DofCalc from './DofCalc'
@@ -32,35 +31,19 @@ function More() {
   )
 }
 
-const TOOLS: [string, () => ReactElement][] = [
-  ['Depth of field', DofCalc],
-  ['Grids', GridLibrary],
-  ['Golden hour', GoldenClock],
-  ['More', More],
-]
-
+/** Phones get the depth-of-field calculator alone: grids and golden hour already have their own chapters above. */
 export default function Toolkit() {
   const phone = useMedia('(max-width: 760px)')
-  const [tab, setTab] = useState(0)
-  if (phone) {
-    const Tool = TOOLS[tab][1]
+  if (phone)
     return (
       <section className={`section ${tk.toolkit}`} aria-labelledby="toolkit-title" data-stage>
         <SectionHeading id="toolkit-title" className="display">
           The toolkit, <span className="pink">live</span>.
         </SectionHeading>
-        <p className="lede">The same maths the app runs, on real photographs.</p>
-        <div className={tk.tabs} role="tablist" aria-label="Tools">
-          {TOOLS.map(([name], i) => (
-            <button key={name} type="button" role="tab" aria-selected={i === tab} className="focusable" onClick={() => setTab(i)}>
-              {name}
-            </button>
-          ))}
-        </div>
-        <Tool />
+        <p className="lede">The app’s own depth-of-field maths. Move a slider.</p>
+        <DofCalc />
       </section>
     )
-  }
   return (
     <section className={`section ${tk.toolkit}`} aria-labelledby="toolkit-title" data-stage>
       <SectionHeading id="toolkit-title" className="display">

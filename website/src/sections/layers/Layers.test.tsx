@@ -92,7 +92,9 @@ test('on a phone the app scene is tap-to-explode plus a swipe row, with nothing 
   await userEvent.click(explode)
   expect(screen.getByRole('button', { name: 'Put it back together' })).toBeInTheDocument()
   expect(within(screen.getByRole('group', { name: 'Layers of the viewfinder' })).getAllByRole('button')).toHaveLength(5)
-  expect(screen.getByRole('tablist', { name: 'App screens' })).toBeInTheDocument()
+  const screens = screen.getByRole('tablist', { name: 'App screens' })
+  await userEvent.click(within(screens).getByRole('tab', { name: 'Coach' }))
+  expect(screen.getByText(/Fifteen shot recipes/)).toBeInTheDocument()
   expect(container.querySelector('[data-pinned]')).toBeNull()
 })
 
@@ -105,12 +107,43 @@ test('on a phone the gallery is a swipe row of cards with dots that jump to a ge
   expect(within(dots).getByRole('tab', { name: 'Street' })).toHaveAttribute('aria-selected', 'true')
 })
 
-test('on a phone the before/after is one frame with tabs', async () => {
+test('on a phone the before/after is the one reframing comparison, with no tabs', () => {
   mockMedia('max-width: 900px')
   render(<BeforeAfter />)
+  expect(screen.queryByRole('tablist')).toBeNull()
   expect(screen.getAllByRole('slider', { name: /Compare/ })).toHaveLength(1)
-  await userEvent.click(within(screen.getByRole('tablist', { name: 'Comparisons' })).getByRole('tab', { name: 'Exposure' }))
-  expect(screen.getByRole('slider', { name: /Compare exposure/ })).toBeInTheDocument()
+  expect(screen.getByRole('slider', { name: /Compare composition/ })).toBeInTheDocument()
+})
+
+/** A 200 px wide comparison frame, so pointer positions map to percentages. */
+function sized(el: HTMLElement) {
+  el.getBoundingClientRect = () => ({ left: 0, top: 0, width: 200, height: 250, right: 200, bottom: 250, x: 0, y: 0, toJSON: () => ({}) })
+  return el
+}
+
+test('a finger that lands on the photo to scroll the page leaves the divider where it was', async () => {
+  mockMedia('max-width: 900px')
+  const { fireEvent } = await import('@testing-library/react')
+  render(<BeforeAfter />)
+  const frame = sized(screen.getByRole('slider', { name: /Compare/ }))
+  fireEvent.pointerDown(frame, { pointerType: 'touch', pointerId: 1, clientX: 20, clientY: 100 })
+  fireEvent.pointerMove(frame, { pointerType: 'touch', pointerId: 1, clientX: 22, clientY: 140 })
+  fireEvent.pointerCancel(frame, { pointerType: 'touch', pointerId: 1 })
+  expect(frame).toHaveAttribute('aria-valuenow', '50')
+})
+
+test('dragging sideways moves the divider, and a tap jumps it', async () => {
+  mockMedia('max-width: 900px')
+  const { fireEvent } = await import('@testing-library/react')
+  render(<BeforeAfter />)
+  const frame = sized(screen.getByRole('slider', { name: /Compare/ }))
+  fireEvent.pointerDown(frame, { pointerType: 'touch', pointerId: 1, clientX: 100, clientY: 100 })
+  fireEvent.pointerMove(frame, { pointerType: 'touch', pointerId: 1, clientX: 140, clientY: 102 })
+  fireEvent.pointerUp(frame, { pointerType: 'touch', pointerId: 1, clientX: 140, clientY: 102 })
+  expect(frame).toHaveAttribute('aria-valuenow', '70')
+  fireEvent.pointerDown(frame, { pointerType: 'touch', pointerId: 2, clientX: 50, clientY: 100 })
+  fireEvent.pointerUp(frame, { pointerType: 'touch', pointerId: 2, clientX: 50, clientY: 100 })
+  expect(frame).toHaveAttribute('aria-valuenow', '25')
 })
 
 test('a tap on a layer name keeps it lifted, even after the browser’s pretend mouseleave', async () => {

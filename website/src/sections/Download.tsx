@@ -45,8 +45,17 @@ export default function Download() {
           <p className={`mono ${css.meta}`}>
             <span>{formatSize(info.sizeBytes)}</span>
             <span>Android 7+</span>
-            {info.sha256 && (
-              <span className={css.hash}>
+          </p>
+          <ol className={css.steps}>
+            <li>Download the APK.</li>
+            <li>Allow installs from your browser when Android asks.</li>
+            <li>Open Prolens and grant camera access.</li>
+          </ol>
+          {/* Most people never check a hash, so it waits behind a row for those who do. */}
+          {info.sha256 && (
+            <details className={css.verify}>
+              <summary className="focusable">Verify the download</summary>
+              <p className={`mono ${css.hash}`}>
                 SHA-256{' '}
                 <span title={info.sha256}>
                   {info.sha256.slice(0, 8)}…{info.sha256.slice(-8)}
@@ -54,14 +63,9 @@ export default function Download() {
                 <button type="button" className={`${css.copy} focusable`} onClick={copy}>
                   {copied ? 'Copied' : 'Copy'}
                 </button>
-              </span>
-            )}
-          </p>
-          <ol className={css.steps}>
-            <li>Download the APK.</li>
-            <li>Allow installs from your browser when Android asks.</li>
-            <li>Open Prolens and grant camera access.</li>
-          </ol>
+              </p>
+            </details>
+          )}
           <Waitlist />
         </div>
         <p className={`${css.credit} mono`}>

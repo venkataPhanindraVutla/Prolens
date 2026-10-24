@@ -175,7 +175,7 @@
 
 /* The phone version: full photo cards in a swipe row, with dots. */
 .galleryPhone {
-  padding: 64px 0 56px;
+  padding: 48px 0 32px;
 }
 
 .phoneHead {
@@ -186,19 +186,17 @@
 
 .cards {
   display: flex;
-  gap: 14px;
+  gap: 10px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  padding: 0 7vw 8px;
+  padding: 0 9vw;
   scrollbar-width: none;
 }
 
 .card {
   flex: none;
-  width: 86vw;
-  display: grid;
-  gap: 10px;
-  align-content: start;
+  width: 82vw;
+  max-width: 440px;
   scroll-snap-align: center;
 }
 
@@ -214,8 +212,8 @@
   inset: auto 0 0;
   display: grid;
   gap: 6px;
-  padding: 72px 18px 18px;
-  background: linear-gradient(transparent, rgb(11 11 11 / 0.92));
+  padding: 96px 18px 18px;
+  background: linear-gradient(transparent, rgb(11 11 11 / 0.6) 30%, rgb(11 11 11 / 0.94));
 }
 
 .cardGenre {
@@ -226,18 +224,30 @@
 
 .cardTip {
   color: var(--grey-4);
-  font-size: 0.98rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
+/* The credit rides on the photo's top edge, out of the way of the recipe. */
 .cardCredit {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  right: 12px;
+  overflow: hidden;
+  color: rgb(244 244 239 / 0.75);
+  font-size: 0.6rem;
   text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 6px rgb(0 0 0 / 0.8);
 }
 
 .dots {
   display: flex;
   justify-content: center;
   gap: 2px;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .dots button {

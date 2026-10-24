@@ -28,17 +28,11 @@
   --phone-w: min(360px, calc(86svh * 0.445));
 }
 
-/* Phones: each chapter is a card. The app screen sits on a soft stage, its controls right under it. */
-.cardPhone {
-  display: grid;
-  place-items: center;
-  margin: 4px calc(var(--gutter) * -1) 0;
-  padding: 28px 0 24px;
-  background: radial-gradient(ellipse at 50% 30%, rgb(244 244 239 / 0.07), transparent 65%);
-}
-
-.narrow .phone {
-  --phone-w: min(76vw, 300px);
+/* Phones: the viewfinder runs edge to edge, fading into the controls under it. */
+.crop {
+  width: min(100vw, 520px);
+  margin: 8px 0 0 calc(50% - min(50vw, 260px));
+  mask-image: linear-gradient(#000 86%, transparent);
 }
 
 .cardControls {
@@ -71,7 +65,7 @@
 }
 
 .narrow .chapter {
-  padding: 56px 0 40px;
+  padding: 48px 0 40px;
   justify-content: flex-start;
   gap: 16px;
   border-top: 1px solid var(--grey-2);
@@ -190,37 +184,4 @@
   color: var(--grey-4);
   font-size: 0.98rem;
   min-height: 3em;
-}
-
-/* Phones: chapter tabs stay at the top of the screen while you're in the story. */
-.chapterTabs {
-  mask-image: linear-gradient(90deg, #000 88%, transparent);
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  display: flex;
-  gap: 4px;
-  margin: 0 calc(var(--gutter) * -1);
-  padding: 10px var(--gutter);
-  overflow-x: auto;
-  scrollbar-width: none;
-  background: rgb(11 11 11 / 0.82);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--grey-2);
-}
-
-.chapterTabs button {
-  flex: none;
-  min-height: 40px;
-  padding: 0 14px;
-  border: 0;
-  border-radius: 999px;
-  background: none;
-  cursor: pointer;
-  color: var(--grey-4);
-}
-
-.chapterTabs button[aria-selected='true'] {
-  background: var(--paper);
-  color: var(--ink);
 }

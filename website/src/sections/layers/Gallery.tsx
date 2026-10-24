@@ -121,7 +121,7 @@ function GalleryPhone() {
         <SectionHeading id="gallery-title" className="display">
           Every genre has <span className="pink">a recipe</span>.
         </SectionHeading>
-        <p className="lede">Swipe through seven, each with the Coach tab’s settings.</p>
+        <p className="lede">Seven kinds of shot, with the settings Prolens suggests. Swipe.</p>
       </div>
       <div ref={track} className={css.cards}>
         {GENRES.map((g, i) => {
@@ -136,19 +136,18 @@ function GalleryPhone() {
               aria-labelledby={`genre-${i}`}
             >
               <div className={css.cardPhoto}>
-                <Photo id={g.photo} sizes="86vw" />
+                <Photo id={g.photo} sizes="82vw" />
+                <a className={`${css.cardCredit} mono`} href={ph.page} target="_blank" rel="noopener">
+                  Photo: {creditLine(ph)}
+                </a>
                 <div className={css.cardOverlay}>
                   <h3 id={`genre-${i}`} className={css.cardGenre}>
                     {g.genre}
                   </h3>
                   <p className={`${css.recipe} mono`}>{g.recipe}</p>
+                  <p className={css.cardTip}>{g.tip}</p>
                 </div>
               </div>
-              <p className={css.recipeName}>Coach recipe · {g.recipeName}</p>
-              <p className={css.cardTip}>{g.tip}</p>
-              <a className={`${css.credit} ${css.cardCredit} mono`} href={ph.page} target="_blank" rel="noopener">
-                Photo: {creditLine(ph)}
-              </a>
             </article>
           )
         })}
@@ -174,8 +173,7 @@ export default function Gallery() {
           Every genre has <span className="pink">a recipe</span>.
         </SectionHeading>
         <p className="lede">
-          The Coach tab carries settings for fifteen kinds of shot. Here are seven, with the Prolens tools that get you
-          there. Swipe on a phone.
+          Prolens carries settings for fifteen kinds of shot. Here are seven, with the tools that get you there.
         </p>
       </div>
       <div className={css.track}>

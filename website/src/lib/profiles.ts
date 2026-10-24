@@ -34,7 +34,7 @@ export const PROFILES: PhoneProfile[] = [
   },
   {
     id: 'hidden-uw',
-    name: 'Ultra-wide kept from apps',
+    name: 'Hidden ultra-wide',
     note: 'This phone has a 0.6× camera, but doesn’t share it with apps. Prolens only offers what it can use.',
     lenses: [
       { role: 'Wide', zoom: 1, mm: 24, mp: 50, focusFromCm: 8 },

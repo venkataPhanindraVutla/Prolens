@@ -104,7 +104,7 @@ export function useExpose(): Chapter {
         See exposure. <span className="pink">Don’t guess it.</span>
       </>
     ),
-    body: 'This is the real photo, measured pixel by pixel. Zebras stripe what’s about to clip, false colour maps brightness like a cinema monitor, peaking outlines what’s sharp, and the histogram shows the whole frame at once.',
+    body: 'The real photo, measured pixel by pixel. Zebras stripe what’s about to clip; peaking outlines what’s sharp.',
     phone: (
       <AppViewfinder
         preview={<Screen tools={tools} onHistogram={setHist} />}

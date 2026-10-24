@@ -11,6 +11,8 @@ const W = 400
 const H = 500
 /** Horizontal crop that puts the arctic fox in the middle of a 4:5 frame. */
 const ARCTIC_X = 0.17
+/** How far a finger moves before it counts as a drag rather than a tap or the start of a scroll, in px. */
+const SLOP = 8
 
 /** The arctic fox pushed 1.3 stops too bright, with the app's zebras over what clips. Painted on a canvas from the real photo. */
 function BlownWithZebras() {
@@ -107,23 +109,45 @@ const PAIRS: Pair[] = [
 function Compare({ pair, delay }: { pair: Pair; delay: number }) {
   const [at, setAt] = useState(50)
   const box = useRef<HTMLDivElement>(null)
-  const dragging = useRef(false)
+  const drag = useRef<{ x: number; y: number; moving: boolean } | null>(null)
   const p = photo(pair.photoId)
 
   const setFrom = (clientX: number) => {
     const r = box.current?.getBoundingClientRect()
     if (r) setAt(Math.round(Math.max(0, Math.min(100, ((clientX - r.left) / r.width) * 100))))
   }
+  // A mouse drags at once. A finger may only be starting to scroll the page, so the divider waits until it
+  // clearly moves sideways; a tap without moving jumps the divider to it.
   const down = (e: PointerEvent<HTMLDivElement>) => {
-    dragging.current = true
-    e.currentTarget.setPointerCapture?.(e.pointerId)
-    setFrom(e.clientX)
+    const mouse = e.pointerType === 'mouse'
+    drag.current = { x: e.clientX, y: e.clientY, moving: mouse }
+    if (mouse) {
+      e.currentTarget.setPointerCapture?.(e.pointerId)
+      setFrom(e.clientX)
+    }
   }
   const move = (e: PointerEvent<HTMLDivElement>) => {
-    if (dragging.current) setFrom(e.clientX)
+    const d = drag.current
+    if (!d) return
+    if (!d.moving) {
+      const dx = Math.abs(e.clientX - d.x)
+      const dy = Math.abs(e.clientY - d.y)
+      if (dy > SLOP && dy >= dx) {
+        drag.current = null
+        return
+      }
+      if (dx <= SLOP) return
+      d.moving = true
+      e.currentTarget.setPointerCapture?.(e.pointerId)
+    }
+    setFrom(e.clientX)
   }
-  const up = () => {
-    dragging.current = false
+  const up = (e: PointerEvent<HTMLDivElement>) => {
+    if (drag.current && !drag.current.moving) setFrom(e.clientX)
+    drag.current = null
+  }
+  const cancel = () => {
+    drag.current = null
   }
   const key = (e: KeyboardEvent) => {
     const step = { ArrowLeft: -5, ArrowDown: -5, ArrowRight: 5, ArrowUp: 5 }[e.key]
@@ -149,7 +173,7 @@ function Compare({ pair, delay }: { pair: Pair; delay: number }) {
         onPointerDown={down}
         onPointerMove={move}
         onPointerUp={up}
-        onPointerCancel={up}
+        onPointerCancel={cancel}
         onKeyDown={key}
       >
         <div className={css.layer}>{pair.after}</div>
@@ -173,24 +197,19 @@ function Compare({ pair, delay }: { pair: Pair; delay: number }) {
   )
 }
 
+/** Phones get only the reframing: the story above has already shown the level and the zebras. */
+const PHONE_PAIR = PAIRS.find((p) => p.id === 'compose')!
+
 export default function BeforeAfter() {
   const phone = useMedia('(max-width: 900px)')
-  const [pick, setPick] = useState(0)
   if (phone)
     return (
       <section className={`section ${css.section}`} aria-labelledby="ba-title">
         <SectionHeading id="ba-title" className="display">
           One tool. <span className="pink">One better frame.</span>
         </SectionHeading>
-        <p className="lede">Pick a tool, then drag across the photo.</p>
-        <div className={css.tabs} role="tablist" aria-label="Comparisons">
-          {PAIRS.map((p, i) => (
-            <button key={p.id} type="button" role="tab" aria-selected={i === pick} className="focusable" onClick={() => setPick(i)}>
-              {p.title}
-            </button>
-          ))}
-        </div>
-        <Compare key={PAIRS[pick].id} pair={PAIRS[pick]} delay={0} />
+        <p className="lede">Drag across the photo.</p>
+        <Compare pair={PHONE_PAIR} delay={0} />
       </section>
     )
   return (

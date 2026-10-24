@@ -10,3 +10,10 @@
   font-size: clamp(0.72rem, 1.1vw, 0.85rem);
   text-align: center;
 }
+
+/* Phones carry the same facts under the hero's buttons instead. */
+@media (max-width: 760px) {
+  .strip {
+    display: none;
+  }
+}

@@ -116,6 +116,7 @@ export default function Hero() {
             View on GitHub
           </ShutterButton>
         </div>
+        <p className={`${css.proof} mono`}>Free · open source · no ads · Android 7+</p>
       </div>
 
       <div className={css.camera}>

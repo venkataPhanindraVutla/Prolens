@@ -49,7 +49,7 @@ export function useLight(): Chapter {
         Know when the <span className="pink">light is good</span>.
       </>
     ),
-    body: 'Golden hour, blue hour and the sun’s path for wherever you’re standing, worked out on the phone with no signal needed.',
+    body: 'Golden and blue hour for wherever you’re standing, worked out with no signal.',
     phone: (
       <AppLightScreen
         place={place.name}

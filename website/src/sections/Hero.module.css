@@ -173,6 +173,12 @@
   max-width: min(980px, calc(100% - var(--rail) - 260px));
 }
 
+.proof {
+  display: none;
+  color: rgb(244 244 239 / 0.7);
+  font-size: 0.72rem;
+}
+
 .sub {
   max-width: 400px;
   color: rgb(244 244 239 / 0.88);
@@ -322,7 +328,7 @@
 
   .shade {
     background:
-      linear-gradient(180deg, rgb(11 11 11 / 0.75) 0%, rgb(11 11 11 / 0.15) 34%, transparent 46%),
+      linear-gradient(180deg, rgb(11 11 11 / 0.8) 0%, rgb(11 11 11 / 0.35) 34%, transparent 50%),
       linear-gradient(0deg, rgb(11 11 11 / 0.95) 0%, rgb(11 11 11 / 0.5) 30%, transparent 52%);
   }
 
@@ -383,32 +389,18 @@
     white-space: nowrap;
   }
 
+  /* A shutter with nothing to label it reads as a second button on a phone. */
   .camera {
-    right: 18px;
-    bottom: auto;
-    top: 46%;
-    flex-direction: column-reverse;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .shutter {
-    width: 58px;
-    height: 58px;
-    padding: 5px;
-  }
-
-  .roll > span {
     display: none;
   }
 
-  .roll li {
-    width: 34px;
-    height: 24px;
+  .outline {
+    color: rgb(244 244 239 / 0.12);
+    -webkit-text-stroke-width: 2.5px;
   }
 
-  .roll ol {
-    flex-direction: column;
+  .proof {
+    display: block;
   }
 
   .credit {

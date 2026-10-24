@@ -172,3 +172,94 @@
     mask-image: linear-gradient(90deg, #000 88%, transparent);
   }
 }
+
+/* The phone version: full photo cards in a swipe row, with dots. */
+.galleryPhone {
+  padding: 64px 0 56px;
+}
+
+.phoneHead {
+  display: grid;
+  gap: 16px;
+  padding: 0 var(--gutter) 24px;
+}
+
+.cards {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 0 7vw 8px;
+  scrollbar-width: none;
+}
+
+.card {
+  flex: none;
+  width: 86vw;
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  scroll-snap-align: center;
+}
+
+.cardPhoto {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.cardOverlay {
+  position: absolute;
+  inset: auto 0 0;
+  display: grid;
+  gap: 6px;
+  padding: 72px 18px 18px;
+  background: linear-gradient(transparent, rgb(11 11 11 / 0.92));
+}
+
+.cardGenre {
+  font-size: clamp(2.4rem, 12vw, 3.4rem);
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+}
+
+.cardTip {
+  color: var(--grey-4);
+  font-size: 0.98rem;
+}
+
+.cardCredit {
+  text-decoration: none;
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  margin-top: 8px;
+}
+
+.dots button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--grey-2);
+  transition: width 250ms var(--ease-out), background-color 250ms;
+}
+
+.dots button[aria-selected='true'] span {
+  width: 22px;
+  background: var(--lime);
+}

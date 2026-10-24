@@ -84,3 +84,47 @@ test('the tour holds each screen in the centre, then glides', () => {
   expect(dwell(2.4)).toBeGreaterThan(2)
   expect(dwell(2.4)).toBeLessThan(2.5)
 })
+
+test('on a phone the app scene is tap-to-explode plus a swipe row, with nothing pinned', async () => {
+  mockMedia('max-width: 760px')
+  const { container } = render(<AppTour />)
+  const explode = screen.getByRole('button', { name: 'Explode the layers' })
+  await userEvent.click(explode)
+  expect(screen.getByRole('button', { name: 'Put it back together' })).toBeInTheDocument()
+  expect(within(screen.getByRole('group', { name: 'Layers of the viewfinder' })).getAllByRole('button')).toHaveLength(5)
+  expect(screen.getByRole('tablist', { name: 'App screens' })).toBeInTheDocument()
+  expect(container.querySelector('[data-pinned]')).toBeNull()
+})
+
+test('on a phone the gallery is a swipe row of cards with dots that jump to a genre', async () => {
+  mockMedia('max-width: 900px')
+  render(<Gallery />)
+  const dots = screen.getByRole('tablist', { name: 'Genres' })
+  expect(within(dots).getAllByRole('tab')).toHaveLength(GENRES.length)
+  await userEvent.click(within(dots).getByRole('tab', { name: 'Street' }))
+  expect(within(dots).getByRole('tab', { name: 'Street' })).toHaveAttribute('aria-selected', 'true')
+})
+
+test('on a phone the before/after is one frame with tabs', async () => {
+  mockMedia('max-width: 900px')
+  render(<BeforeAfter />)
+  expect(screen.getAllByRole('slider', { name: /Compare/ })).toHaveLength(1)
+  await userEvent.click(within(screen.getByRole('tablist', { name: 'Comparisons' })).getByRole('tab', { name: 'Exposure' }))
+  expect(screen.getByRole('slider', { name: /Compare exposure/ })).toBeInTheDocument()
+})
+
+test('a tap on a layer name keeps it lifted, even after the browser’s pretend mouseleave', async () => {
+  mockMedia('max-width: 760px')
+  const { fireEvent } = await import('@testing-library/react')
+  render(<AppTour />)
+  await userEvent.click(screen.getByRole('button', { name: 'Explode the layers' }))
+  const b = within(screen.getByRole('group', { name: 'Layers of the viewfinder' })).getByRole('button', { name: 'Exposure readouts' })
+  // What Chrome sends for a tap: touch pointer events, then compatibility mouse events ending in mouseleave.
+  fireEvent.pointerEnter(b, { pointerType: 'touch' })
+  fireEvent.pointerLeave(b, { pointerType: 'touch' })
+  fireEvent.mouseEnter(b)
+  fireEvent.focus(b)
+  fireEvent.click(b)
+  fireEvent.mouseLeave(b)
+  expect(b).toHaveAttribute('aria-pressed', 'true')
+})

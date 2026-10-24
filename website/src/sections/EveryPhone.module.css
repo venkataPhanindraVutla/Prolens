@@ -196,6 +196,20 @@
     gap: 2px;
   }
 
+  /* The phone types become one swipe row. */
+  .switch {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin: 0 calc(var(--gutter) * -1);
+    padding: 2px var(--gutter);
+    scrollbar-width: none;
+    mask-image: linear-gradient(90deg, #000 85%, transparent);
+  }
+
+  .switch button {
+    flex: none;
+  }
+
   .rows dd {
     text-align: left;
   }

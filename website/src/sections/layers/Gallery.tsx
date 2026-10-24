@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from 'motion/react'
 import { useMedia, useReducedMotion } from '../../lib/motion'
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Photo from '../../components/Photo'
 import SectionHeading from '../../components/SectionHeading'
 import { creditLine, exifLine, photo } from '../../lib/photos'
@@ -73,7 +73,100 @@ function Spread({ g, i }: { g: Genre; i: number }) {
   )
 }
 
+/** The phone version: a swipe row of full photo cards, dots below to show and jump to where you are. No tilt. */
+function GalleryPhone() {
+  const reduced = useReducedMotion()
+  const [active, setActive] = useState(0)
+  const track = useRef<HTMLDivElement>(null)
+  const items = useRef<(HTMLElement | null)[]>([])
+
+  useEffect(() => {
+    const root = track.current
+    if (!root) return
+    let frame = 0
+    const pick = () => {
+      frame = 0
+      const mid = root.getBoundingClientRect().left + root.clientWidth / 2
+      let best = 0
+      let bestD = Infinity
+      items.current.forEach((el, i) => {
+        if (!el) return
+        const r = el.getBoundingClientRect()
+        const d = Math.abs(r.left + r.width / 2 - mid)
+        if (d < bestD) {
+          bestD = d
+          best = i
+        }
+      })
+      setActive(best)
+    }
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(pick)
+    }
+    root.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      root.removeEventListener('scroll', onScroll)
+      cancelAnimationFrame(frame)
+    }
+  }, [])
+
+  const go = (i: number) => {
+    setActive(i)
+    items.current[i]?.scrollIntoView?.({ behavior: reduced ? 'auto' : 'smooth', block: 'nearest', inline: 'center' })
+  }
+
+  return (
+    <section className={css.galleryPhone} aria-labelledby="gallery-title">
+      <div className={css.phoneHead}>
+        <SectionHeading id="gallery-title" className="display">
+          Every genre has <span className="pink">a recipe</span>.
+        </SectionHeading>
+        <p className="lede">Swipe through seven, each with the Coach tab’s settings.</p>
+      </div>
+      <div ref={track} className={css.cards}>
+        {GENRES.map((g, i) => {
+          const ph = photo(g.photo)
+          return (
+            <article
+              key={g.genre}
+              ref={(el) => {
+                items.current[i] = el
+              }}
+              className={css.card}
+              aria-labelledby={`genre-${i}`}
+            >
+              <div className={css.cardPhoto}>
+                <Photo id={g.photo} sizes="86vw" />
+                <div className={css.cardOverlay}>
+                  <h3 id={`genre-${i}`} className={css.cardGenre}>
+                    {g.genre}
+                  </h3>
+                  <p className={`${css.recipe} mono`}>{g.recipe}</p>
+                </div>
+              </div>
+              <p className={css.recipeName}>Coach recipe · {g.recipeName}</p>
+              <p className={css.cardTip}>{g.tip}</p>
+              <a className={`${css.credit} ${css.cardCredit} mono`} href={ph.page} target="_blank" rel="noopener">
+                Photo: {creditLine(ph)}
+              </a>
+            </article>
+          )
+        })}
+      </div>
+      <div className={css.dots} role="tablist" aria-label="Genres">
+        {GENRES.map((g, i) => (
+          <button key={g.genre} type="button" role="tab" aria-label={g.genre} aria-selected={i === active} onClick={() => go(i)}>
+            <span />
+          </button>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 export default function Gallery() {
+  const phone = useMedia('(max-width: 900px)')
+  if (phone) return <GalleryPhone />
   return (
     <section className={css.gallery} aria-labelledby="gallery-title">
       <div className={`section ${css.head}`}>

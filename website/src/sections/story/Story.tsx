@@ -26,8 +26,8 @@ function Caption({ id }: { id: string }) {
 }
 
 /**
- * The phone stays pinned while the chapters scroll past and swap its screen: beside the text on wide screens,
- * across the top on phones, with each chapter's controls scrolling up under it within thumb reach.
+ * Wide screens: the phone stays pinned beside the text while the chapters scroll past and swap its screen.
+ * Phones: nothing pins. Each chapter is its own card, with the app screen and its controls together.
  */
 export default function Story() {
   const chapters: Chapter[] = [useCompose(), useLevel(), useExpose(), useModes(), useLight()]
@@ -37,12 +37,13 @@ export default function Story() {
 
   useEffect(() => {
     if (typeof IntersectionObserver === 'undefined') return
-    // Wide: the chapter crossing the middle of the window. Phones: the one rising into the band under the pinned phone.
+    if (!wide) return
+    // The chapter crossing the middle of the window is the one on the pinned phone.
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) if (e.isIntersecting) setActive(Number((e.target as HTMLElement).dataset.index))
       },
-      { rootMargin: wide ? '-40% 0px -40% 0px' : '-62% 0px -18% 0px' },
+      { rootMargin: '-40% 0px -40% 0px' },
     )
     refs.current.forEach((el) => el && io.observe(el))
     return () => io.disconnect()
@@ -51,15 +52,17 @@ export default function Story() {
   const current = chapters[active]
   return (
     <section id="story" className={[css.story, wide ? css.wide : css.narrow].join(' ')} aria-label="What Prolens does">
-      <div className={css.pin}>
-        <AppPhone statusBar={current.statusBar} className={css.phone}>
-          {chapters.map((c, i) => (
-            <div key={c.id} className={[css.layer, i === active ? css.on : ''].join(' ')} aria-hidden={i !== active}>
-              {c.phone}
-            </div>
-          ))}
-        </AppPhone>
-      </div>
+      {wide && (
+        <div className={css.pin}>
+          <AppPhone statusBar={current.statusBar} className={css.phone}>
+            {chapters.map((c, i) => (
+              <div key={c.id} className={[css.layer, i === active ? css.on : ''].join(' ')} aria-hidden={i !== active}>
+                {c.phone}
+              </div>
+            ))}
+          </AppPhone>
+        </div>
+      )}
       <div className={css.chapters}>
         {chapters.map((c, i) => (
           <article
@@ -72,10 +75,24 @@ export default function Story() {
             aria-labelledby={`chapter-${c.id}`}
           >
             <SectionHeading id={`chapter-${c.id}`}>{c.title}</SectionHeading>
-            <p className={css.body} data-reveal="up">
-              {c.body}
-            </p>
-            {c.controls}
+            {wide ? (
+              <>
+                <p className={css.body} data-reveal="up">
+                  {c.body}
+                </p>
+                {c.controls}
+              </>
+            ) : (
+              <>
+                <div className={css.cardPhone}>
+                  <AppPhone statusBar={c.statusBar} className={css.phone}>
+                    {c.phone}
+                  </AppPhone>
+                </div>
+                <div className={css.cardControls}>{c.controls}</div>
+                <p className={css.body}>{c.body}</p>
+              </>
+            )}
             {c.photoId && <Caption id={c.photoId} />}
           </article>
         ))}

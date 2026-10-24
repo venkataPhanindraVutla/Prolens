@@ -28,16 +28,22 @@
   --phone-w: min(360px, calc(86svh * 0.445));
 }
 
-/* Phones: the app pinned across the top, chapters sliding up beneath it. */
-.narrow .pin {
-  height: 58svh;
-  margin: 0 calc(var(--gutter) * -1);
-  padding-top: 10px;
-  background: linear-gradient(var(--ink) 82%, transparent);
+/* Phones: each chapter is a card. The app screen sits on a soft stage, its controls right under it. */
+.cardPhone {
+  display: grid;
+  place-items: center;
+  margin: 4px calc(var(--gutter) * -1) 0;
+  padding: 28px 0 24px;
+  background: radial-gradient(ellipse at 50% 30%, rgb(244 244 239 / 0.07), transparent 65%);
 }
 
 .narrow .phone {
-  --phone-w: calc((58svh - 24px) * 0.445);
+  --phone-w: min(76vw, 300px);
+}
+
+.cardControls {
+  display: grid;
+  gap: 12px;
 }
 
 .layer {
@@ -65,9 +71,14 @@
 }
 
 .narrow .chapter {
-  min-height: 72svh;
-  padding: 28px 0 48px;
+  padding: 56px 0 40px;
   justify-content: flex-start;
+  gap: 16px;
+  border-top: 1px solid var(--grey-2);
+}
+
+.narrow .chapter:first-child {
+  border-top: 0;
 }
 
 /* The chapter on screen gets a lime edge, like a selected frame on a contact sheet. */

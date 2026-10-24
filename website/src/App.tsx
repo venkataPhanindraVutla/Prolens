@@ -33,8 +33,8 @@ export default function App() {
             <Gallery />
           </Suspense>
         </Deferred>
-        <Deferred minHeight="640svh">
-          <Suspense fallback={<div style={{ minHeight: '640svh' }} />}>
+        <Deferred minHeight="300svh">
+          <Suspense fallback={<div style={{ minHeight: '300svh' }} />}>
             <AppTour />
           </Suspense>
         </Deferred>

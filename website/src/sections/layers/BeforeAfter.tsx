@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react'
+import { useMedia } from '../../lib/motion'
 import GridOverlay from '../../components/GridOverlay'
 import Photo from '../../components/Photo'
 import SectionHeading from '../../components/SectionHeading'
@@ -173,6 +174,25 @@ function Compare({ pair, delay }: { pair: Pair; delay: number }) {
 }
 
 export default function BeforeAfter() {
+  const phone = useMedia('(max-width: 900px)')
+  const [pick, setPick] = useState(0)
+  if (phone)
+    return (
+      <section className={`section ${css.section}`} aria-labelledby="ba-title">
+        <SectionHeading id="ba-title" className="display">
+          One tool. <span className="pink">One better frame.</span>
+        </SectionHeading>
+        <p className="lede">Pick a tool, then drag across the photo.</p>
+        <div className={css.tabs} role="tablist" aria-label="Comparisons">
+          {PAIRS.map((p, i) => (
+            <button key={p.id} type="button" role="tab" aria-selected={i === pick} className="focusable" onClick={() => setPick(i)}>
+              {p.title}
+            </button>
+          ))}
+        </div>
+        <Compare key={PAIRS[pick].id} pair={PAIRS[pick]} delay={0} />
+      </section>
+    )
   return (
     <section className={`section ${css.section}`} aria-labelledby="ba-title" data-stage>
       <SectionHeading id="ba-title" className="display">

@@ -1,9 +1,9 @@
-import { motion, useMotionValue, useMotionValueEvent, useScroll, useSpring, useTransform, type MotionValue } from 'motion/react'
-import { useLayoutEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react'
+import { animate, motion, useMotionValue, useMotionValueEvent, useScroll, useSpring, useTransform, type MotionValue } from 'motion/react'
+import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react'
 import AppPhone from '../../app-ui/AppPhone'
 import { LiveCalculators, LiveCoach, LiveGear, LiveLight, LiveToolkit, LiveViewfinder } from '../../app-ui/live/LiveScreens'
 import SectionHeading from '../../components/SectionHeading'
-import { useReducedMotion } from '../../lib/motion'
+import { useMedia, useReducedMotion } from '../../lib/motion'
 import css from './AppTour.module.css'
 import ExplodedPhone, { LAYERS } from './ExplodedPhone'
 
@@ -70,12 +70,170 @@ function Cover({ i, at, flat, children }: { i: number; at: MotionValue<number>; 
   )
 }
 
+/** Layer-name buttons: hover, focus or tap lifts that layer out of the stack. */
+function LayerNames({ focused, setFocused, hidden }: { focused: number | null; setFocused: (i: number | null) => void; hidden?: boolean }) {
+  return (
+    <div className={css.layerNames} role="group" aria-label="Layers of the viewfinder" data-hidden={hidden}>
+      {[...LAYERS].reverse().map((l) => {
+        const i = LAYERS.indexOf(l)
+        return (
+          <button
+            key={l.name}
+            type="button"
+            className="focusable"
+            aria-pressed={focused === i}
+            // Only a real mouse hovers; a tap's compatibility mouse events would undo the tap.
+            onPointerEnter={(e) => e.pointerType === 'mouse' && setFocused(i)}
+            onPointerLeave={(e) => e.pointerType === 'mouse' && setFocused(null)}
+            onFocus={() => setFocused(i)}
+            onBlur={() => setFocused(null)}
+            onClick={() => setFocused(i)}
+          >
+            {l.name}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+/**
+ * The phone version: nothing pins or plays on scroll. Tap to explode the phone into its layers (and tap a layer to
+ * lift it), then swipe through the live screens, with tabs that follow the swipe.
+ */
+function AppTourPhone() {
+  const reduced = useReducedMotion()
+  const [apart, setApart] = useState(false)
+  const [focused, setFocused] = useState<number | null>(null)
+  const [active, setActive] = useState(0)
+  const spread = useMotionValue(0)
+  const rotateX = useTransform(spread, [0, 0.9], [0, 56])
+  const rotateZ = useTransform(spread, [0, 0.9], [0, -34])
+  // Apart, the stack rises out of its box; shrink and lower it so it stays clear of the title.
+  const stackScale = useTransform(spread, [0, 0.9], [1, 0.74])
+  const stackY = useTransform(spread, [0, 0.9], [0, 46])
+  const box = useRef<HTMLDivElement>(null)
+  const track = useRef<HTMLDivElement>(null)
+  const items = useRef<(HTMLElement | null)[]>([])
+
+  useEffect(() => {
+    const to = apart ? 0.9 : 0
+    if (reduced) spread.set(to)
+    else {
+      const c = animate(spread, to, { type: 'spring', stiffness: 110, damping: 18 })
+      return () => c.stop()
+    }
+  }, [apart, reduced, spread])
+
+  // One phone width for the stack and the screens, from the column's width.
+  useLayoutEffect(() => {
+    const el = box.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const fit = () => el.style.setProperty('--pw', String(Math.round(Math.min(el.clientWidth * 0.64, 270))))
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  // The lit tab follows whichever phone is nearest the middle of the swipe row.
+  useEffect(() => {
+    const root = track.current
+    if (!root) return
+    let frame = 0
+    const pick = () => {
+      frame = 0
+      const mid = root.getBoundingClientRect().left + root.clientWidth / 2
+      let best = 0
+      let bestD = Infinity
+      items.current.forEach((el, i) => {
+        if (!el) return
+        const r = el.getBoundingClientRect()
+        const d = Math.abs(r.left + r.width / 2 - mid)
+        if (d < bestD) {
+          bestD = d
+          best = i
+        }
+      })
+      setActive(best)
+    }
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(pick)
+    }
+    root.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      root.removeEventListener('scroll', onScroll)
+      cancelAnimationFrame(frame)
+    }
+  }, [])
+
+  const go = (i: number) => {
+    setActive(i)
+    items.current[i]?.scrollIntoView?.({ behavior: reduced ? 'auto' : 'smooth', block: 'nearest', inline: 'center' })
+  }
+  const lift = (i: number | null) => {
+    if (i !== null && !apart) setApart(true)
+    setFocused(i)
+  }
+
+  return (
+    <section ref={box} className={css.phoneScene} aria-labelledby="tour-title">
+      <SectionHeading id="tour-title" className={css.phoneTitle}>
+        The whole app, <span className="pink">in your hand</span>.
+      </SectionHeading>
+
+      <div className={css.phoneStage}>
+        <motion.div style={{ scale: stackScale, y: stackY, transformStyle: 'preserve-3d' }}>
+          <ExplodedPhone spread={spread} rotateX={rotateX} rotateZ={rotateZ} focused={focused} />
+        </motion.div>
+      </div>
+      <button type="button" className={`${css.explode} focusable`} onClick={() => (setApart(!apart), setFocused(null))}>
+        {apart ? 'Put it back together' : 'Explode the layers'}
+      </button>
+      {apart && <LayerNames focused={focused} setFocused={lift} />}
+
+      <div className={css.tabs} role="tablist" aria-label="App screens">
+        {NAMES.map((name, i) => (
+          <button key={name} type="button" role="tab" aria-selected={i === active} className="focusable" onClick={() => go(i)}>
+            {name}
+          </button>
+        ))}
+      </div>
+      <div ref={track} className={css.swipe}>
+        {NAMES.map((name, i) => {
+          const sc = screenFor(name, (n) => go(NAMES.indexOf(n)))
+          return (
+            <div
+              key={name}
+              ref={(el) => {
+                items.current[i] = el
+              }}
+              className={css.swipeItem}
+              role="tabpanel"
+              aria-label={name}
+            >
+              <AppPhone statusBar={sc.statusBar} className={css.phone}>
+                {sc.node}
+              </AppPhone>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 /**
  * The whole app as one pinned scene. Scrolling in, the phone arrives pulled apart into the layers it draws and
  * assembles; touch a layer's name to lift it, drag to spin it. Scrolling on, the assembled phone becomes the first
  * of the app's screens gliding past in 3D, each one live.
  */
 export default function AppTour() {
+  const phone = useMedia('(max-width: 760px)')
+  return phone ? <AppTourPhone /> : <AppTourScene />
+}
+
+function AppTourScene() {
   const reduced = useReducedMotion()
   const ref = useRef<HTMLElement>(null)
   const { scrollYProgress: p } = useScroll({ target: ref, offset: ['start start', 'end end'] })
@@ -148,7 +306,7 @@ export default function AppTour() {
 
   return (
     <section ref={ref} className={[css.tour, reduced ? css.still : ''].join(' ')} aria-labelledby="tour-title">
-      <div ref={stage} className={css.stage}>
+      <div ref={stage} className={css.stage} data-pinned>
         <div className={css.light} aria-hidden="true" />
         <div className={css.floor} aria-hidden="true" />
         <SectionHeading id="tour-title" className={css.title}>
@@ -159,26 +317,7 @@ export default function AppTour() {
           <ExplodedPhone spread={spread} rotateX={rotateX} rotateZ={rotateZ} focused={focused} />
         </motion.div>
 
-        <div className={css.layerNames} role="group" aria-label="Layers of the viewfinder" data-hidden={phase === 'tour'}>
-          {[...LAYERS].reverse().map((l) => {
-            const i = LAYERS.indexOf(l)
-            return (
-              <button
-                key={l.name}
-                type="button"
-                className="focusable"
-                aria-pressed={focused === i}
-                onMouseEnter={() => setFocused(i)}
-                onMouseLeave={() => setFocused(null)}
-                onFocus={() => setFocused(i)}
-                onBlur={() => setFocused(null)}
-                onClick={() => setFocused(i)}
-              >
-                {l.name}
-              </button>
-            )
-          })}
-        </div>
+        <LayerNames focused={focused} setFocused={setFocused} hidden={phase === 'tour'} />
 
         <motion.div className={css.covers} style={reduced ? undefined : { opacity: coverOpacity }} data-phase={phase}>
           {NAMES.map((name, i) => {

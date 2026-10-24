@@ -196,51 +196,80 @@
   padding: 0 var(--gutter);
 }
 
-@media (max-width: 760px) {
-  .tour {
-    height: 560svh;
-  }
+/* The phone version: an ordinary section, nothing pinned. */
+.phoneScene {
+  --pw: 250;
+  display: grid;
+  gap: 18px;
+  padding: 64px var(--gutter) 72px;
+  overflow: hidden;
+}
 
-  .title {
-    top: 18px;
-    left: 20px;
-    right: 20px;
-    max-width: none;
-    font-size: clamp(1.7rem, 8vw, 2.3rem);
-  }
+.phoneTitle {
+  font-size: clamp(2.2rem, 10vw, 3rem);
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+}
 
-  .layers,
-  .covers {
-    top: 64px;
-    bottom: 80px;
-  }
+.phoneStage {
+  display: grid;
+  place-items: center;
+  height: calc(var(--pw) * 2.25px);
+  perspective: 1500px;
+  perspective-origin: 50% 40%;
+}
 
-  /* One row of controls at a time, at thumb height: layer names while it's apart, screens during the tour. */
-  .layerNames {
-    top: auto;
-    bottom: 16px;
-    right: 0;
-    left: 0;
-    transform: none;
-    display: flex;
-    overflow-x: auto;
-    padding: 2px 20px;
-    scrollbar-width: none;
-    mask-image: linear-gradient(90deg, #000 85%, transparent);
-  }
+.explode {
+  justify-self: center;
+  min-height: 48px;
+  padding: 0 22px;
+  border: 1px solid var(--lime);
+  border-radius: 999px;
+  background: rgb(212 255 63 / 0.08);
+  color: var(--lime);
+  font-weight: 600;
+  cursor: pointer;
+}
 
-  .layerNames button {
-    flex: none;
-    min-height: 44px;
-  }
+.phoneScene .layerNames {
+  position: static;
+  transform: none;
+  display: flex;
+  overflow-x: auto;
+  margin: 0 calc(var(--gutter) * -1);
+  padding: 2px var(--gutter);
+  scrollbar-width: none;
+  mask-image: linear-gradient(90deg, #000 85%, transparent);
+}
 
-  .tabs {
-    bottom: 16px;
-    transition: opacity 300ms;
-  }
+.phoneScene .layerNames button {
+  flex: none;
+}
 
-  .tabs[data-phase='layers'] {
-    opacity: 0;
-    pointer-events: none;
-  }
+.phoneScene .tabs {
+  position: static;
+  transform: none;
+  justify-self: start;
+  max-width: 100%;
+  margin-top: 28px;
+}
+
+/* A native swipe row of live phones. */
+.swipe {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  margin: 0 calc(var(--gutter) * -1);
+  padding: 8px calc((100% - var(--pw) * 1px) / 2 + var(--gutter)) 24px;
+  scrollbar-width: none;
+}
+
+.swipeItem {
+  flex: none;
+  scroll-snap-align: center;
+}
+
+.phoneScene .phone {
+  -webkit-box-reflect: unset;
 }

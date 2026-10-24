@@ -88,7 +88,7 @@ website/
     main.tsx, App.tsx                    page order
     config.ts                            REPO, SITE_URL, FORMSPREE_ID, FALLBACK_RELEASE
     styles/tokens.css, global.css
-    lib/format.ts photomath.ts suncalc.ts time.ts cities.ts grids.ts analysis.ts
+    lib/format.ts photomath.ts suncalc.ts time.ts cities.ts location.ts grids.ts analysis.ts
         release.ts issues.ts waitlist.ts motion.ts profiles.ts   (each with a .test.ts beside it)
     components/Phone.tsx Scene.tsx GridOverlay.tsx CropMarks.tsx ShutterButton.tsx Hud.tsx SectionHeading.tsx
     sections/Hero.tsx ProofStrip.tsx EveryPhone.tsx OpenSource.tsx Download.tsx Waitlist.tsx Footer.tsx

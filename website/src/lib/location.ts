@@ -1,4 +1,4 @@
-import { createContext, createElement, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
+import { createContext, createElement, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { CITIES, cityForZone } from './cities'
 import { browserZone } from './time'
 
@@ -21,7 +21,9 @@ const Ctx = createContext<LocationState | null>(null)
 
 /** One place for the whole page, so the Light chapter and the golden-hour clock agree. */
 export function LocationProvider({ children }: { children: ReactNode }) {
-  const [place, setPlace] = useState<Place>(() => cityForZone(browserZone()))
+  // Pre-rendered HTML starts at the first city; the browser's own zone takes over once mounted.
+  const [place, setPlace] = useState<Place>(CITIES[0])
+  useEffect(() => setPlace(cityForZone(browserZone())), [])
 
   const setCity = useCallback((name: string) => {
     const city = CITIES.find((c) => c.name === name)

@@ -44,13 +44,25 @@
 }
 
 .wide .chapter {
+  position: relative;
   min-height: 100svh;
-  opacity: 0.3;
-  transition: opacity 300ms var(--ease-out);
 }
 
-.wide .chapter.active {
-  opacity: 1;
+/* The chapter on the phone gets a lime edge, like a selected frame. */
+.wide .chapter::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--gutter) * -0.5);
+  top: 50%;
+  height: 0;
+  width: 2px;
+  background: var(--lime);
+  transform: translateY(-50%);
+  transition: height 300ms var(--ease-out);
+}
+
+.wide .chapter.active::before {
+  height: 120px;
 }
 
 .chapter h2 {

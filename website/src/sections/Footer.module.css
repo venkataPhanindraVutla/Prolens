@@ -1,0 +1,38 @@
+.footer {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: clamp(80px, 10vw, 140px) var(--gutter) 48px;
+  border-top: 1px solid var(--grey-2);
+  display: grid;
+  gap: 48px;
+}
+
+.signoff {
+  font-size: clamp(2.8rem, 9vw, 8rem);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--paper);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px 40px;
+  color: var(--grey-3);
+  font-size: 0.9rem;
+}
+
+.meta a {
+  color: var(--paper);
+}
+
+.credits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  padding: 0;
+  list-style: none;
+}

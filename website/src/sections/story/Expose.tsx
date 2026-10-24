@@ -66,12 +66,21 @@ function Screen({ tools }: { tools: Set<Tool> }) {
   const over = useRef<HTMLCanvasElement>(null)
   const [frame, setFrame] = useState<Uint8Array | null>(null)
 
-  // Draw the photo once and keep its luma for the tools.
+  // Draw the photo once and keep its luma for the tools, when the browser is idle so page load stays quick.
   useEffect(() => {
     const g = base.current?.getContext('2d', { willReadFrequently: true })
     if (!g) return
-    drawPhoto(g)
-    setFrame(luma(g.getImageData(0, 0, W, H).data))
+    const run = () => {
+      drawPhoto(g)
+      setFrame(luma(g.getImageData(0, 0, W, H).data))
+    }
+    // Safari has no requestIdleCallback.
+    if (typeof window.requestIdleCallback === 'function') {
+      const id = window.requestIdleCallback(run, { timeout: 2000 })
+      return () => window.cancelIdleCallback(id)
+    }
+    const id = setTimeout(run, 200)
+    return () => clearTimeout(id)
   }, [])
 
   useEffect(() => {

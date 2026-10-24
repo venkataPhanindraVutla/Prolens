@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Scene from '../../components/Scene'
 import { CITIES } from '../../lib/cities'
 import { bandText, dayFraction, daylight, phaseGradient } from '../../lib/daylight'
 import { useLocation } from '../../lib/location'
 import { lightPhase, sunPosition } from '../../lib/suncalc'
-import { formatTime } from '../../lib/time'
+import { formatTime, useNow } from '../../lib/time'
 import type { Chapter } from './chapter'
 import css from './story.module.css'
 import lt from './Light.module.css'
@@ -14,11 +14,15 @@ const PHASE_NAMES = { Night: 'Night', Astro: 'Astronomical twilight', Nautical: 
 export function useLight(): Chapter {
   const { place, setCity, locate } = useLocation()
   const [status, setStatus] = useState<string | null>(null)
-  const now = Date.now()
+  const clock = useNow()
+  const now = clock ?? 0
   const d = daylight(place, now)
   const t = d.times
   const phaseNow = lightPhase(sunPosition(now, place.lat, place.lon).altitude)
-  const canLocate = typeof navigator !== 'undefined' && 'geolocation' in navigator
+  const ready = clock !== null
+  // Decided after mount: the pre-rendered page can't know whether this browser offers location.
+  const [canLocate, setCanLocate] = useState(false)
+  useEffect(() => setCanLocate('geolocation' in navigator), [])
   const isCity = CITIES.some((c) => c.name === place.name)
 
   const useMine = async () => {
@@ -28,9 +32,9 @@ export function useLight(): Chapter {
   }
 
   const bands = [
-    { label: 'Morning golden hour', text: bandText(d, t.goldenMorningStart, t.goldenMorningEnd, place.tz) },
-    { label: 'Evening golden hour', text: bandText(d, t.goldenEveningStart, t.goldenEveningEnd, place.tz) },
-    { label: 'Evening blue hour', text: bandText(d, t.blueEveningStart, t.blueEveningEnd, place.tz) },
+    { label: 'Morning golden hour', text: ready ? bandText(d, t.goldenMorningStart, t.goldenMorningEnd, place.tz) : '—' },
+    { label: 'Evening golden hour', text: ready ? bandText(d, t.goldenEveningStart, t.goldenEveningEnd, place.tz) : '—' },
+    { label: 'Evening blue hour', text: ready ? bandText(d, t.blueEveningStart, t.blueEveningEnd, place.tz) : '—' },
   ]
 
   return {
@@ -44,12 +48,16 @@ export function useLight(): Chapter {
     screen: (
       <>
         <Scene kind="golden-coast" />
-        <span className={`${css.screenTag} mono`}>
-          {PHASE_NAMES[phaseNow]} · {formatTime(now, place.tz)}
-        </span>
-        <div className={lt.screenBar} style={{ background: phaseGradient(d.phases) }} aria-hidden="true">
-          <span style={{ left: `${dayFraction(d, now) * 100}%` }} />
-        </div>
+        {ready && (
+          <>
+            <span className={`${css.screenTag} mono`}>
+              {PHASE_NAMES[phaseNow]} · {formatTime(now, place.tz)}
+            </span>
+            <div className={lt.screenBar} style={{ background: phaseGradient(d.phases) }} aria-hidden="true">
+              <span style={{ left: `${dayFraction(d, now) * 100}%` }} />
+            </div>
+          </>
+        )}
       </>
     ),
     controls: (
@@ -78,8 +86,8 @@ export function useLight(): Chapter {
           </p>
         )}
         <div className={lt.timeline} aria-hidden="true">
-          <div className={lt.bar} style={{ background: phaseGradient(d.phases) }}>
-            <span className={lt.now} style={{ left: `${dayFraction(d, now) * 100}%` }} />
+          <div className={lt.bar} style={{ background: ready ? phaseGradient(d.phases) : 'var(--grey-2)' }}>
+            {ready && <span className={lt.now} style={{ left: `${dayFraction(d, now) * 100}%` }} />}
           </div>
           <div className={`${lt.hours} mono`}>
             <span>00</span>

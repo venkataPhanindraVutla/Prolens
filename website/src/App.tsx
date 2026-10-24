@@ -1,6 +1,7 @@
 import { LocationProvider } from './lib/location'
 import Download from './sections/Download'
 import EveryPhone from './sections/EveryPhone'
+import Footer from './sections/Footer'
 import Hero from './sections/Hero'
 import OpenSource from './sections/OpenSource'
 import ProofStrip from './sections/ProofStrip'
@@ -19,6 +20,7 @@ export default function App() {
         <OpenSource />
         <Download />
       </main>
+      <Footer />
     </LocationProvider>
   )
 }

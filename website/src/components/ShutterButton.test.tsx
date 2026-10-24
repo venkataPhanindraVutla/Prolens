@@ -34,3 +34,21 @@ test('reduced motion renders headings sharp', () => {
   render(<SectionHeading>Compose</SectionHeading>)
   expect(screen.getByRole('heading', { level: 2, name: 'Compose' })).not.toHaveClass('blurred')
 })
+
+test('a heading blurred before reduced motion is known comes back sharp', () => {
+  mockMedia()
+  vi.stubGlobal(
+    'IntersectionObserver',
+    class {
+      observe() {}
+      disconnect() {}
+    },
+  )
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ top: 5000 } as DOMRect)
+  const { rerender } = render(<SectionHeading>Later</SectionHeading>)
+  expect(screen.getByRole('heading', { name: 'Later' })).toHaveClass('blurred')
+  mockMedia('reduce')
+  rerender(<SectionHeading>Later</SectionHeading>)
+  expect(screen.getByRole('heading', { name: 'Later' })).not.toHaveClass('blurred')
+  vi.restoreAllMocks()
+})

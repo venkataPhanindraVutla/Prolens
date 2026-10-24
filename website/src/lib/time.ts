@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+
 /** Local days and clock times in a named IANA zone, using Intl only. */
 
 function parts(ms: number, tz: string) {
@@ -40,4 +42,15 @@ export function formatTime(ms: number | null, tz: string): string {
 
 export function browserZone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+}
+
+/** The current time, ticking each minute. Null until mounted, so pre-rendered HTML never bakes in the build's clock. */
+export function useNow(): number | null {
+  const [now, setNow] = useState<number | null>(null)
+  useEffect(() => {
+    setNow(Date.now())
+    const id = window.setInterval(() => setNow(Date.now()), 60_000)
+    return () => window.clearInterval(id)
+  }, [])
+  return now
 }

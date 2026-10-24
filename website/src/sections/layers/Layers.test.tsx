@@ -2,7 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, expect, test, vi } from 'vitest'
 import { mockMedia } from '../../test/media'
-import AppTour from './AppTour'
+import AppTour, { dwell } from './AppTour'
 import BeforeAfter from './BeforeAfter'
 import Gallery, { GENRES } from './Gallery'
 import Parallax from './Parallax'
@@ -75,4 +75,12 @@ test('with reduced motion the gallery spreads and tour phones stay flat', () => 
     </>,
   )
   for (const el of container.querySelectorAll<HTMLElement>('[data-3d]')) expect(el.style.transform === '' || el.style.transform === 'none').toBe(true)
+})
+
+test('the tour holds each screen in the centre, then glides', () => {
+  expect(dwell(2.1)).toBe(2)
+  expect(dwell(2.9)).toBe(3)
+  expect(dwell(2.5)).toBeCloseTo(2.5)
+  expect(dwell(2.4)).toBeGreaterThan(2)
+  expect(dwell(2.4)).toBeLessThan(2.5)
 })

@@ -1,5 +1,5 @@
 import { motion, useMotionValue, useMotionValueEvent, useScroll, useSpring, useTransform, type MotionValue } from 'motion/react'
-import { useRef, useState, type PointerEvent, type ReactNode } from 'react'
+import { useLayoutEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react'
 import AppPhone from '../../app-ui/AppPhone'
 import { LiveCalculators, LiveCoach, LiveGear, LiveLight, LiveToolkit, LiveViewfinder } from '../../app-ui/live/LiveScreens'
 import SectionHeading from '../../components/SectionHeading'
@@ -9,10 +9,22 @@ import ExplodedPhone, { LAYERS } from './ExplodedPhone'
 
 const NAMES = ['Viewfinder', 'Toolkit', 'Calculators', 'Light', 'Coach', 'Gear']
 
-/** Scroll progress where the phone has finished assembling, and where the tour runs from and to. */
-const ASSEMBLED = 0.26
-const TOUR_FROM = 0.3
+/** Scroll progress: layers hold apart, then assemble upright into the first screen, then the tour runs. */
+const HOLD = 0.12
+const ASSEMBLED = 0.25
+const HANDOFF = 0.28
+const TOUR_FROM = 0.31
 const TOUR_TO = 0.97
+
+/** Each screen holds the centre for most of its stretch of scroll, then glides quickly to the next. */
+export function dwell(v: number): number {
+  const n = Math.floor(v)
+  const t = v - n
+  if (t < 0.35) return n
+  if (t > 0.65) return n + 1
+  const k = (t - 0.35) / 0.3
+  return n + k * k * (3 - 2 * k)
+}
 
 function screenFor(name: string, open: (s: string) => void): { statusBar?: boolean; node: ReactNode } {
   switch (name) {
@@ -31,17 +43,29 @@ function screenFor(name: string, open: (s: string) => void): { statusBar?: boole
   }
 }
 
-/** One phone in the cover-flow: centred faces you and takes taps; the rest turn away and step back. */
+/**
+ * One phone in the cover-flow. Centred, it faces you and takes taps; the others shrink, turn away, darken and sit
+ * behind it, further back the further they are.
+ */
 function Cover({ i, at, flat, children }: { i: number; at: MotionValue<number>; flat: boolean; children: ReactNode }) {
   const off = useTransform(at, (v) => i - v)
-  const x = useTransform(off, (o) => `${o * 98}%`)
-  const rotateY = useTransform(off, (o) => Math.max(-60, Math.min(60, -o * 44)))
-  const z = useTransform(off, (o) => -Math.min(Math.abs(o), 3) * 240)
-  const opacity = useTransform(off, (o) => Math.max(0, 1 - Math.abs(o) * 0.32))
-  const pointerEvents = useTransform(off, (o) => (Math.abs(o) < 0.5 ? 'auto' : 'none'))
+  const dist = useTransform(off, (o) => Math.min(Math.abs(o), 3))
+  const x = useTransform(off, (o) => `${Math.sign(o) * Math.min(Math.abs(o), 3) * 64}%`)
+  const rotateY = useTransform(off, (o) => Math.max(-50, Math.min(50, -o * 40)))
+  const z = useTransform(dist, (d) => -d * 260)
+  const scale = useTransform(dist, (d) => 1 - Math.min(d, 2) * 0.12)
+  const opacity = useTransform(dist, (d) => Math.max(0, 1 - Math.max(0, d - 1) * 0.55))
+  const shade = useTransform(dist, (d) => Math.min(d, 1.5) * 0.45)
+  const zIndex = useTransform(dist, (d) => 20 - Math.round(d * 4))
+  const pointerEvents = useTransform(dist, (d) => (d < 0.5 ? 'auto' : 'none'))
   return (
-    <motion.div data-3d className={css.cover} style={flat ? undefined : { x, rotateY, z, opacity, pointerEvents }}>
+    <motion.div
+      data-3d
+      className={css.cover}
+      style={flat ? undefined : { x, rotateY, z, scale, opacity, zIndex, pointerEvents, transformPerspective: 1400 }}
+    >
       {children}
+      {!flat && <motion.span className={css.shade} style={{ opacity: shade }} aria-hidden="true" />}
     </motion.div>
   )
 }
@@ -59,22 +83,27 @@ export default function AppTour() {
   const [active, setActive] = useState(0)
   const [phase, setPhase] = useState<'layers' | 'tour'>('layers')
 
-  // Phase 1: apart, then assembling. Phase 2: the tour.
-  const scrollSpread = useTransform(p, [0, 0.1, ASSEMBLED], [1, 1, 0])
+  // Phase 1: apart, then assembling upright. Phase 2: the tour.
+  const scrollSpread = useTransform(p, [0, HOLD, ASSEMBLED], [1, 1, 0])
   const stillSpread = useMotionValue(0.85)
   const spread = reduced ? stillSpread : scrollSpread
-  const tour = useTransform(p, [TOUR_FROM, TOUR_TO], [0, NAMES.length - 1], { clamp: true })
+  const raw = useTransform(p, [TOUR_FROM, TOUR_TO], [0, NAMES.length - 1], { clamp: true })
+  const tour = useTransform(raw, dwell)
   const jump = useMotionValue(0)
   const at = useSpring(reduced ? jump : tour, { stiffness: 220, damping: 32 })
-  const stackOpacity = useTransform(p, [ASSEMBLED, ASSEMBLED + 0.03], [1, 0])
-  const coverOpacity = useTransform(p, [ASSEMBLED, ASSEMBLED + 0.03], [0, 1])
+  // The assembled phone and the first screen are drawn identically, so the handoff is a crossfade nobody sees.
+  const stackOpacity = useTransform(p, [ASSEMBLED, HANDOFF], [1, 0])
+  const coverOpacity = useTransform(p, [ASSEMBLED, HANDOFF], [0, 1])
+  const stackY = useTransform(p, [0, HOLD, ASSEMBLED], ['6vh', '6vh', '0vh'])
 
   // Drag sideways to spin the stack; it springs to wherever you leave it.
   const spin = useMotionValue(0)
   const spinSpring = useSpring(spin, { stiffness: 120, damping: 18 })
-  const baseZ = useTransform(p, [0, ASSEMBLED], [-38, -20])
-  const rotateZ = useTransform([baseZ, spinSpring], ([b, s]: number[]) => b + s)
-  const rotateX = useTransform(p, [0, ASSEMBLED], [58, 30])
+  // Tilted while apart; upright and facing you once assembled. Any spin unwinds as it assembles.
+  const baseZ = useTransform(p, [0, HOLD, ASSEMBLED], [-38, -32, 0])
+  const spinWeight = useTransform(p, [HOLD, ASSEMBLED], [1, 0])
+  const rotateZ = useTransform([baseZ, spinSpring, spinWeight], ([b, sp, w]: number[]) => b + sp * w)
+  const rotateX = useTransform(p, [0, HOLD, ASSEMBLED], [58, 52, 0])
   const drag = useRef<{ x: number; spin: number } | null>(null)
   const down = (e: PointerEvent<HTMLDivElement>) => {
     drag.current = { x: e.clientX, spin: spin.get() }
@@ -86,7 +115,23 @@ export default function AppTour() {
     drag.current = null
   }
 
-  useMotionValueEvent(p, 'change', (v) => setPhase(v < ASSEMBLED + 0.02 ? 'layers' : 'tour'))
+  useMotionValueEvent(p, 'change', (v) => setPhase(v < HANDOFF ? 'layers' : 'tour'))
+
+  // One phone size for both the stack and the screens, fitted to the window, so they line up exactly.
+  const stage = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => {
+    const el = stage.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const fit = () => {
+      const narrow = el.clientWidth < 760
+      const pw = Math.min(narrow ? el.clientWidth * 0.68 : 300, (el.clientHeight - (narrow ? 230 : 200)) * 0.445)
+      el.style.setProperty('--pw', String(Math.round(pw)))
+    }
+    fit()
+    const ro = new ResizeObserver(fit)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
   useMotionValueEvent(tour, 'change', (v) => setActive(Math.round(v)))
 
   /** Tabs scroll the page to that screen's spot in the tour (or jump straight there with reduced motion). */
@@ -103,14 +148,14 @@ export default function AppTour() {
 
   return (
     <section ref={ref} className={[css.tour, reduced ? css.still : ''].join(' ')} aria-labelledby="tour-title">
-      <div className={css.stage}>
+      <div ref={stage} className={css.stage}>
         <div className={css.light} aria-hidden="true" />
         <div className={css.floor} aria-hidden="true" />
         <SectionHeading id="tour-title" className={css.title}>
           The whole app, <span className="pink">in your hand</span>.
         </SectionHeading>
 
-        <motion.div className={css.layers} style={reduced ? undefined : { opacity: stackOpacity }} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
+        <motion.div className={css.layers} style={reduced ? undefined : { opacity: stackOpacity, y: stackY }} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
           <ExplodedPhone spread={spread} rotateX={rotateX} rotateZ={rotateZ} focused={focused} />
         </motion.div>
 

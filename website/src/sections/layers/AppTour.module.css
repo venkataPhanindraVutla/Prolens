@@ -5,7 +5,8 @@
 }
 
 .stage {
-  --s: 0.7;
+  /* Phone width in px, set from the window by AppTour; the stack and the screens share it. */
+  --pw: 300;
   position: sticky;
   top: 0;
   height: 100svh;
@@ -52,7 +53,7 @@
 
 .layers {
   position: absolute;
-  inset: 8vh 0 0;
+  inset: 0;
   display: grid;
   place-items: center;
   touch-action: pan-y;
@@ -101,7 +102,6 @@
   inset: 0;
   display: grid;
   place-items: center;
-  transform-style: preserve-3d;
 }
 
 .covers[data-phase='layers'] {
@@ -109,13 +109,22 @@
 }
 
 .cover {
+  position: relative;
   grid-area: 1 / 1;
-  transform-style: preserve-3d;
   will-change: transform;
 }
 
+/* Darkens phones as they move back from the centre. */
+.shade {
+  position: absolute;
+  inset: 0;
+  border-radius: calc(var(--pw) * 0.15px);
+  background: var(--ink);
+  pointer-events: none;
+}
+
 .phone {
-  --phone-w: min(300px, calc((100svh - 200px) * 0.445));
+  --phone-w: calc(var(--pw) * 1px);
   -webkit-box-reflect: below 14px linear-gradient(transparent 72%, rgb(0 0 0 / 0.28));
 }
 
@@ -192,10 +201,6 @@
     height: 560svh;
   }
 
-  .stage {
-    --s: 0.46;
-  }
-
   .title {
     font-size: clamp(1.8rem, 9vw, 2.6rem);
   }
@@ -217,7 +222,4 @@
     flex: none;
   }
 
-  .phone {
-    --phone-w: min(68vw, calc((100svh - 220px) * 0.445));
-  }
 }

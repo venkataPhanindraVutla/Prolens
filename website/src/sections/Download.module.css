@@ -73,3 +73,10 @@
   color: var(--lime);
   font-size: 0.8rem;
 }
+
+@media (pointer: coarse) {
+  .copy {
+    min-height: 44px;
+    padding: 0 16px;
+  }
+}

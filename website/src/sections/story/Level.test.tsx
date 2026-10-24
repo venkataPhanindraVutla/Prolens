@@ -24,3 +24,10 @@ test('dragging the level never blocks vertical page scroll', () => {
   render(<LocationProvider><Story /></LocationProvider>)
   expect(screen.getByRole('slider', { name: 'Tilt' })).toHaveStyle({ touchAction: 'pan-y' })
 })
+
+test('the horizon line turns with the scene, like the app’s', () => {
+  mockMedia()
+  const { container } = render(<LocationProvider><Story /></LocationProvider>)
+  const line = container.querySelector('[data-horizon]') as HTMLElement
+  expect(line.style.transform).toContain('rotate(4.5deg)')
+})

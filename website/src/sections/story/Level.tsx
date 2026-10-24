@@ -49,7 +49,8 @@ export function useLevel(): Chapter {
         <div className={lv.tilted} style={{ transform: `rotate(${roll}deg) scale(1.32)` }}>
           <Scene kind="panorama" />
         </div>
-        <div className={[lv.horizon, level ? lv.ok : ''].join(' ')} style={{ transform: `translateY(-50%) rotate(${-roll}deg)` }} aria-hidden="true">
+        {/* The line follows the real horizon, as in the app's level overlay. */}
+        <div data-horizon className={[lv.horizon, level ? lv.ok : ''].join(' ')} style={{ transform: `translateY(-50%) rotate(${roll}deg)` }} aria-hidden="true">
           <span />
         </div>
         <span className={[css.screenTag, lv.rollTag, 'mono', level ? 'level' : ''].join(' ')}>{readout}</span>

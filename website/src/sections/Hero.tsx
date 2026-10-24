@@ -18,18 +18,14 @@ export default function Hero() {
   const leak = useRef<HTMLDivElement>(null)
   const tilt = useRef<HTMLDivElement>(null)
 
-  // The light leak eases 12% of the way to the pointer each frame; the phone leans toward it.
+  // The light leak eases 12% of the way to the pointer each frame and the phone leans toward it.
+  // The loop sleeps once it has caught up, and wakes on the next pointer move.
   useEffect(() => {
     const el = root.current
     if (!follow || !el) return
     const target = { x: 0.62, y: 0.4 }
-    const pos = { ...target }
+    const pos = { x: 0.64, y: 0.38 }
     let frame = 0
-    const move = (e: PointerEvent) => {
-      const r = el.getBoundingClientRect()
-      target.x = (e.clientX - r.left) / r.width
-      target.y = (e.clientY - r.top) / r.height
-    }
     const tick = () => {
       pos.x += (target.x - pos.x) * 0.12
       pos.y += (target.y - pos.y) * 0.12
@@ -37,7 +33,13 @@ export default function Hero() {
       leak.current?.style.setProperty('--y', `${pos.y * 100}%`)
       if (tilt.current)
         tilt.current.style.transform = `perspective(1400px) rotateX(${(pos.y - 0.5) * -10}deg) rotateY(${(pos.x - 0.5) * 14}deg) rotateZ(5deg)`
-      frame = requestAnimationFrame(tick)
+      frame = Math.abs(target.x - pos.x) + Math.abs(target.y - pos.y) > 0.0005 ? requestAnimationFrame(tick) : 0
+    }
+    const move = (e: PointerEvent) => {
+      const r = el.getBoundingClientRect()
+      target.x = (e.clientX - r.left) / r.width
+      target.y = (e.clientY - r.top) / r.height
+      if (!frame) frame = requestAnimationFrame(tick)
     }
     el.addEventListener('pointermove', move)
     frame = requestAnimationFrame(tick)

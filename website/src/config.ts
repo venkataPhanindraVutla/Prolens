@@ -14,10 +14,13 @@ export interface ReleaseInfo {
   source: 'api' | 'fallback'
 }
 
-/** Shown until the Releases API answers, and whenever it can't. */
+/**
+ * Shown until the Releases API answers, and whenever it can't. The link is the exact v1.0 file,
+ * so the version, size and checksum shown always describe what downloads.
+ */
 export const FALLBACK_RELEASE: ReleaseInfo = {
   version: 'v1.0',
-  url: `https://github.com/${REPO}/releases/latest`,
+  url: `https://github.com/${REPO}/releases/download/v1.0/Prolens-1.0.apk`,
   sizeBytes: 13353471,
   sha256: 'd1cb1834e1c44dbdac9ef292bed718708adf922e833b106a65dbdd4f6af91dbe',
   source: 'fallback',

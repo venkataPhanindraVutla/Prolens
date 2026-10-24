@@ -185,7 +185,8 @@
 }
 
 @media (pointer: coarse) {
-  .chip {
+  .chip,
+  .range input {
     min-height: 44px;
   }
 }

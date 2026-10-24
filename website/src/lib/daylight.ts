@@ -10,20 +10,47 @@ export interface Daylight {
   /** Phase every 10 minutes across the local day, for drawing timelines and dials. */
   phases: LightPhase[]
   noonAltitude: number
+  minAltitude: number
+  maxAltitude: number
 }
 
 export function daylight(place: Place, now: number): Daylight {
   const noon = noonIn(place.tz, now)
   const times = sunTimes(noon, place.lat, place.lon)
   const dayStart = noon - DAY / 2
-  const phases = Array.from({ length: 144 }, (_, i) => lightPhase(sunPosition(dayStart + i * 600_000 + 300_000, place.lat, place.lon).altitude))
-  return { times, dayStart, phases, noonAltitude: sunPosition(times.solarNoon, place.lat, place.lon).altitude }
+  const altitudes = Array.from({ length: 144 }, (_, i) => sunPosition(dayStart + i * 600_000 + 300_000, place.lat, place.lon).altitude)
+  return {
+    times,
+    dayStart,
+    phases: altitudes.map(lightPhase),
+    noonAltitude: sunPosition(times.solarNoon, place.lat, place.lon).altitude,
+    minAltitude: Math.min(...altitudes),
+    maxAltitude: Math.max(...altitudes),
+  }
 }
 
-/** "18:02–18:40", or what the sun is doing instead when the band never happens today. */
-export function bandText(d: Daylight, start: number | null, end: number | null, tz: string): string {
-  if (start === null || end === null) return d.noonAltitude <= -0.833 ? 'Sun stays down today' : 'Sun stays up today'
-  return `${formatTime(start, tz)}–${formatTime(end, tz)}`
+/** Sun altitude edges of each band, in degrees. */
+const BANDS = { golden: [-4, 6], blue: [-6, -4] } as const
+
+/**
+ * "18:02–18:40" on an ordinary day. Near the poles a band can start and never end, end without having started,
+ * or never happen; the text says which, so it always agrees with the timeline.
+ */
+export function bandText(d: Daylight, start: number | null, end: number | null, tz: string, band: keyof typeof BANDS = 'golden'): string {
+  if (start !== null && end !== null) return `${formatTime(start, tz)}–${formatTime(end, tz)}`
+  if (start !== null) return `${formatTime(start, tz)} onwards`
+  if (end !== null) return `until ${formatTime(end, tz)}`
+  const [lo, hi] = BANDS[band]
+  if (d.maxAltitude < lo) return 'Sun stays too low today'
+  if (d.minAltitude > hi) return 'Sun stays too high today'
+  return 'All day'
+}
+
+/** Sunrise to sunset, or whether the sun stays down or up all day. */
+export function sunText(d: Daylight, tz: string): string {
+  const { sunrise, sunset } = d.times
+  if (sunrise !== null && sunset !== null) return `${formatTime(sunrise, tz)}–${formatTime(sunset, tz)}`
+  return d.noonAltitude <= -0.833 ? 'Sun stays down today' : 'Sun stays up today'
 }
 
 export const PHASE_COLORS: Record<LightPhase, string> = {

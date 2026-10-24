@@ -25,5 +25,7 @@ test('a missing time is a dash, never Invalid Date', () => {
 test('a city is picked from the browser zone, London otherwise', () => {
   expect(cityForZone('Asia/Kolkata').name).toBe('Hyderabad')
   expect(cityForZone('Mars/Olympus').name).toBe('London')
+  // Chrome reports India as the old alias.
+  expect(cityForZone('Asia/Calcutta').name).toBe('Hyderabad')
   expect(CITIES).toHaveLength(9)
 })

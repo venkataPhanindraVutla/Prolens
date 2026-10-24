@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import Scene from '../../components/Scene'
 import { CITIES } from '../../lib/cities'
-import { bandText, dayFraction, daylight, phaseGradient } from '../../lib/daylight'
+import { bandText, dayFraction, daylight, phaseGradient, sunText } from '../../lib/daylight'
 import { useLocation } from '../../lib/location'
 import { lightPhase, sunPosition } from '../../lib/suncalc'
 import { formatTime, useNow } from '../../lib/time'
@@ -31,10 +31,13 @@ export function useLight(): Chapter {
     setStatus(r === 'ok' ? null : r === 'denied' ? 'Location is off, so pick a city instead.' : 'Couldn’t get your location. Pick a city instead.')
   }
 
+  const show = (text: () => string) => (ready ? text() : '—')
   const bands = [
-    { label: 'Morning golden hour', text: ready ? bandText(d, t.goldenMorningStart, t.goldenMorningEnd, place.tz) : '—' },
-    { label: 'Evening golden hour', text: ready ? bandText(d, t.goldenEveningStart, t.goldenEveningEnd, place.tz) : '—' },
-    { label: 'Evening blue hour', text: ready ? bandText(d, t.blueEveningStart, t.blueEveningEnd, place.tz) : '—' },
+    { label: 'Sunrise to sunset', text: show(() => sunText(d, place.tz)) },
+    { label: 'Morning blue hour', text: show(() => bandText(d, t.blueMorningStart, t.blueMorningEnd, place.tz, 'blue')) },
+    { label: 'Morning golden hour', text: show(() => bandText(d, t.goldenMorningStart, t.goldenMorningEnd, place.tz)) },
+    { label: 'Evening golden hour', text: show(() => bandText(d, t.goldenEveningStart, t.goldenEveningEnd, place.tz)) },
+    { label: 'Evening blue hour', text: show(() => bandText(d, t.blueEveningStart, t.blueEveningEnd, place.tz, 'blue')) },
   ]
 
   return {

@@ -46,3 +46,7 @@ test('rate limits and network failures fall back', async () => {
 test('size is decimal megabytes', () => {
   expect(formatSize(13353471)).toBe('13.4 MB')
 })
+
+test('the fallback downloads the exact file its checksum describes', () => {
+  expect(FALLBACK_RELEASE.url).toBe('https://github.com/venkataPhanindraVutla/Prolens/releases/download/v1.0/Prolens-1.0.apk')
+})

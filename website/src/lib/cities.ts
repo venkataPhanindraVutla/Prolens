@@ -18,6 +18,16 @@ export const CITIES: City[] = [
   { name: 'Tromsø', lat: 69.65, lon: 18.96, tz: 'Europe/Oslo' },
 ]
 
+/** The engine's own name for a zone, so aliases match: Chrome reports Asia/Kolkata as Asia/Calcutta. */
+function canonical(tz: string): string {
+  try {
+    return new Intl.DateTimeFormat('en', { timeZone: tz }).resolvedOptions().timeZone
+  } catch {
+    return tz
+  }
+}
+
 export function cityForZone(tz: string): City {
-  return CITIES.find((c) => c.tz === tz) ?? CITIES[0]
+  const want = canonical(tz)
+  return CITIES.find((c) => c.tz === tz || canonical(c.tz) === want) ?? CITIES[0]
 }

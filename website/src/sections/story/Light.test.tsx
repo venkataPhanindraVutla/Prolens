@@ -45,3 +45,10 @@ test('polar night says so instead of showing a broken time', async () => {
   expect(screen.getAllByText('Sun stays down today').length).toBeGreaterThan(0)
   expect(container.textContent).not.toMatch(/Invalid|NaN/)
 })
+
+test('both blue hours are listed', () => {
+  mockMedia()
+  renderStory()
+  expect(screen.getByText('Morning blue hour')).toBeInTheDocument()
+  expect(screen.getByText('Evening blue hour')).toBeInTheDocument()
+})

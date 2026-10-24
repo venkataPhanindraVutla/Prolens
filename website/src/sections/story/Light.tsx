@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import Scene from '../../components/Scene'
+import Photo from '../../components/Photo'
 import { CITIES } from '../../lib/cities'
 import { bandText, dayFraction, daylight, phaseGradient, sunText } from '../../lib/daylight'
 import { useLocation } from '../../lib/location'
@@ -7,6 +7,7 @@ import { lightPhase, sunPosition } from '../../lib/suncalc'
 import { formatTime, useNow } from '../../lib/time'
 import type { Chapter } from './chapter'
 import css from './story.module.css'
+import vf from './Viewfinder.module.css'
 import lt from './Light.module.css'
 
 const PHASE_NAMES = { Night: 'Night', Astro: 'Astronomical twilight', Nautical: 'Nautical twilight', Blue: 'Blue hour', Golden: 'Golden hour', Day: 'Daylight' }
@@ -42,18 +43,21 @@ export function useLight(): Chapter {
 
   return {
     id: 'light',
+    photoId: 'library',
+    hud: ready ? `PHOTO · ${PHASE_NAMES[phaseNow].toUpperCase()} · ${place.name.toUpperCase()} ${formatTime(now, place.tz)}` : 'PHOTO · READING THE SKY',
     title: (
       <>
         Know when the <span className="pink">light is good</span>.
       </>
     ),
     body: 'Golden hour, blue hour and the sun’s path for wherever you’re standing, worked out on the phone with no signal needed.',
-    screen: (
+    screen: () => (
       <>
-        <Scene kind="golden-coast" />
+        <Photo id="library" sizes="(min-width: 980px) 56vw, 100vw" />
+        <div className={lt.grade} data-phase={ready ? phaseNow : 'Golden'} aria-hidden="true" />
         {ready && (
           <>
-            <span className={`${css.screenTag} mono`}>
+            <span className={`${vf.tag} mono`}>
               {PHASE_NAMES[phaseNow]} · {formatTime(now, place.tz)}
             </span>
             <div className={lt.screenBar} style={{ background: phaseGradient(d.phases) }} aria-hidden="true">

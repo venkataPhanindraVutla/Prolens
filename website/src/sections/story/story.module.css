@@ -1,14 +1,14 @@
 .story {
   position: relative;
-  max-width: 1440px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 0 var(--gutter);
 }
 
 .wide {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-  gap: clamp(32px, 6vw, 96px);
+  grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
+  gap: clamp(40px, 5vw, 88px);
 }
 
 .pin {
@@ -17,18 +17,13 @@
   height: 100svh;
   display: flex;
   align-items: center;
-  justify-content: center;
-}
-
-.pin > div {
-  --phone-w: clamp(240px, 21vw, 310px);
 }
 
 .layer {
   position: absolute;
   inset: 0;
   opacity: 0;
-  transition: opacity 250ms var(--ease-out);
+  transition: opacity 300ms var(--ease-out);
 }
 
 .layer.on {
@@ -39,8 +34,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 22px;
-  padding: 72px 0;
+  gap: 20px;
+  padding: 64px 0;
 }
 
 .wide .chapter {
@@ -48,11 +43,11 @@
   min-height: 100svh;
 }
 
-/* The chapter on the phone gets a lime edge, like a selected frame. */
+/* The chapter on screen gets a lime edge, like a selected frame on a contact sheet. */
 .wide .chapter::before {
   content: '';
   position: absolute;
-  left: calc(var(--gutter) * -0.5);
+  left: calc(clamp(40px, 5vw, 88px) * -0.5);
   top: 50%;
   height: 0;
   width: 2px;
@@ -62,25 +57,47 @@
 }
 
 .wide .chapter.active::before {
-  height: 120px;
+  height: 140px;
 }
 
 .chapter h2 {
-  font-size: clamp(2.2rem, 4.6vw, 4.2rem);
+  font-size: clamp(2.3rem, 4.4vw, 4.4rem);
   line-height: 0.95;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.045em;
 }
 
 .body {
-  max-width: 46ch;
+  max-width: 44ch;
   color: var(--grey-4);
   font-size: 1.1rem;
 }
 
-.inlinePhone {
-  --phone-w: min(220px, 58vw);
-  align-self: center;
-  margin-bottom: 8px;
+.inline {
+  margin: 0 calc(var(--gutter) * -1) 8px;
+}
+
+.caption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--grey-2);
+  color: var(--grey-3);
+  font-size: 0.72rem;
+}
+
+.caption span:first-child {
+  color: var(--paper);
+}
+
+.caption a {
+  color: var(--grey-3);
+  text-decoration: none;
+}
+
+.caption a:hover {
+  color: var(--paper);
+  text-decoration: underline;
 }
 
 /* Shared controls */
@@ -114,21 +131,7 @@
 
 .note {
   max-width: 52ch;
-  color: var(--grey-3);
-  font-size: 0.95rem;
+  color: var(--grey-4);
+  font-size: 0.98rem;
   min-height: 3em;
-}
-
-.screenTag {
-  position: absolute;
-  left: 50%;
-  top: 9%;
-  transform: translateX(-50%);
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: rgb(0 0 0 / 0.55);
-  color: var(--lime);
-  font-size: 0.66rem;
-  white-space: nowrap;
-  z-index: 3;
 }

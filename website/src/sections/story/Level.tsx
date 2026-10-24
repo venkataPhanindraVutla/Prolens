@@ -1,7 +1,7 @@
 import { useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
-import Scene from '../../components/Scene'
+import Photo from '../../components/Photo'
 import type { Chapter } from './chapter'
-import css from './story.module.css'
+import vf from './Viewfinder.module.css'
 import lv from './Level.module.css'
 
 const MAX = 15
@@ -38,22 +38,25 @@ export function useLevel(): Chapter {
 
   return {
     id: 'level',
+    photoId: 'level',
+    hud: `PHOTO · LEVEL ${roll > 0 ? '+' : ''}${roll.toFixed(1)}° · 82 mm · f/8 · 1/1298 · ISO 200`,
     title: (
       <>
         Get the horizon <span className="pink">dead level</span>.
       </>
     ),
-    body: 'The level reads the phone’s sensors and turns green inside half a degree. Drag the bar to tilt the camera until the horizon settles.',
-    screen: (
+    body: 'The level reads the phone’s sensors and turns green inside half a degree. Drag the bar to tilt the camera until the fog line settles.',
+    screen: () => (
       <>
-        <div className={lv.tilted} style={{ transform: `rotate(${roll}deg) scale(1.32)` }}>
-          <Scene kind="panorama" />
+        <div className={lv.tilted} style={{ transform: `rotate(${roll}deg) scale(1.38)` }}>
+          <Photo id="level" sizes="(min-width: 980px) 56vw, 100vw" />
         </div>
         {/* The line follows the real horizon, as in the app's level overlay. */}
         <div data-horizon className={[lv.horizon, level ? lv.ok : ''].join(' ')} style={{ transform: `translateY(-50%) rotate(${roll}deg)` }} aria-hidden="true">
           <span />
         </div>
-        <span className={[css.screenTag, lv.rollTag, 'mono', level ? 'level' : ''].join(' ')}>{readout}</span>
+        <div className={lv.reference} aria-hidden="true" />
+        <span className={[vf.tag, lv.rollTag, 'mono', level ? 'level' : ''].join(' ')}>{readout}</span>
       </>
     ),
     controls: (

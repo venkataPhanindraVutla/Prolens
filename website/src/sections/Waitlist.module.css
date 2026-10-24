@@ -2,8 +2,8 @@
   display: grid;
   gap: 14px;
   max-width: 640px;
-  margin-top: 40px;
-  padding-top: 28px;
+  margin-top: 8px;
+  padding-top: 24px;
   border-top: 1px solid var(--grey-2);
 }
 

@@ -86,9 +86,9 @@
 
 .screenBar {
   position: absolute;
-  left: 8%;
-  right: 8%;
-  bottom: 7%;
+  left: 6%;
+  right: 18%;
+  bottom: 18%;
   height: 8px;
   border-radius: 2px;
   z-index: 2;
@@ -100,4 +100,27 @@
   bottom: -4px;
   width: 2px;
   background: var(--pink);
+}
+
+/* Grades the photo toward the light of the current phase. */
+.grade {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: soft-light;
+  transition: background-color 600ms var(--ease-out);
+  z-index: 1;
+}
+
+.grade[data-phase='Blue'],
+.grade[data-phase='Nautical'] {
+  background: rgb(40 80 200 / 0.75);
+}
+
+.grade[data-phase='Astro'],
+.grade[data-phase='Night'] {
+  background: rgb(10 20 70 / 0.9);
+}
+
+.grade[data-phase='Day'] {
+  background: rgb(200 220 255 / 0.35);
 }

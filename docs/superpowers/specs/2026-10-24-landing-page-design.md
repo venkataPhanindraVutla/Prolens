@@ -132,8 +132,16 @@ Get photographers to download the APK, try it, and help shape it in the open.
 
 ## Images
 
-- **No stock photography.** Every image is made for Prolens: the viewfinder scenes and phone mockups are drawn in code (canvas or SVG), and the app UI is recreated faithfully from the real app.
-- Generate a social/OG image (1200×630) and a favicon from the same system.
+**Changed by the user on 2026-10-24.** After the first build, the user found the code-drawn scenes cheap. They chose real, free-licensed photographs.
+
+- **Source:** Wikimedia Commons Featured Pictures under CC0, public domain or CC BY (no share-alike).
+- **Credits:** each photo is credited under its chapter and in the footer, with author, licence link and source page.
+- **Honesty:** captions show each photo's real camera EXIF. The footer states that none of the photos was taken with Prolens.
+- **Pipeline:**
+  - `website/scripts/photos.json` is the manifest: source, author, licence, EXIF, alt text and focal point for each photo.
+  - `npm run photos <originals folder>` renders the responsive WebP sizes and `src/lib/photos.data.json`.
+- **App UI:** still recreated from the real app, as the viewfinder chrome around the photographs.
+- **Social image and favicon:** the OG image (1200×630) is rendered over the hero photograph, and the favicon is still drawn in code.
 
 ## Stack and hosting (decided by the user)
 

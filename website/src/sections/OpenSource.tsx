@@ -3,6 +3,14 @@ import ShutterButton from '../components/ShutterButton'
 import { issueUrl, releasesUrl, repoUrl } from '../lib/issues'
 import css from './OpenSource.module.css'
 
+/** Counted from the app's source: core/grids, core/model/Modes.kt, features/viewfinder/Analysis.kt, core/model/Recipes.kt. */
+const STATS: [string, string][] = [
+  ['23', 'composition grids'],
+  ['7', 'capture modes'],
+  ['6', 'exposure tools'],
+  ['15', 'shot recipes'],
+]
+
 export default function OpenSource() {
   return (
     <section className={`section ${css.open}`} aria-labelledby="open-title">
@@ -21,6 +29,14 @@ export default function OpenSource() {
           github.com/venkataPhanindraVutla/Prolens
         </a>
       </div>
+      <dl className={css.stats}>
+        {STATS.map(([n, label]) => (
+          <div key={label}>
+            <dt className="mono">{n}</dt>
+            <dd>{label}</dd>
+          </div>
+        ))}
+      </dl>
       <div className={css.actions}>
         <ShutterButton variant="primary" href={issueUrl('feature')} external>
           Request a feature

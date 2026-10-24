@@ -68,3 +68,6 @@ export const MODE_LABELS = ['Night', 'Micro', 'Macro', 'Photo', 'Slo-mo', 'Pano'
 export function modesFor(p: PhoneProfile): string[] {
   return MODE_LABELS.filter((m) => m !== 'Slo-mo' || p.sloMoFps.length > 0)
 }
+
+/** How far the photo zooms in for a lens, relative to the widest lens on offer. */
+export const zoomScale = (zoom: number, widest: number) => zoom / widest

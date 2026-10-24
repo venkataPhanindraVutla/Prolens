@@ -22,3 +22,29 @@
   flex-wrap: wrap;
   gap: 12px;
 }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  margin: 8px 0;
+  background: var(--grey-2);
+  border: 1px solid var(--grey-2);
+}
+
+.stats > div {
+  padding: 22px 20px;
+  background: var(--ink);
+}
+
+.stats dt {
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--lime);
+}
+
+.stats dd {
+  margin: 8px 0 0;
+  color: var(--grey-4);
+}

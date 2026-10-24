@@ -1,13 +1,17 @@
 .every {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
-  gap: clamp(40px, 6vw, 96px);
-  align-items: center;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  grid-template-areas:
+    'head head'
+    'view card';
+  gap: 32px clamp(28px, 4vw, 64px);
+  align-items: start;
 }
 
-.intro {
+.head {
+  grid-area: head;
   display: grid;
-  gap: 24px;
+  gap: 22px;
 }
 
 .switch {
@@ -31,11 +35,86 @@
   border-color: var(--paper);
 }
 
+.view {
+  grid-area: view;
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.view figcaption {
+  color: var(--grey-3);
+  font-size: 0.72rem;
+}
+
+.view figcaption a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.zoomBox {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--grey-1);
+}
+
+.zoom {
+  position: absolute;
+  inset: 0;
+  transition: transform 700ms cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+
+.readout {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: rgb(0 0 0 / 0.55);
+  backdrop-filter: blur(6px);
+  color: var(--lime);
+  font-size: 0.74rem;
+}
+
+/* Zoom pills like a phone camera's, over the photo. */
+.pills {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.55);
+  backdrop-filter: blur(8px);
+}
+
+.pill {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--paper);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.pill[aria-checked='true'] {
+  background: rgb(244 244 239 / 0.16);
+  color: var(--lime);
+  font-weight: 600;
+}
+
 .card {
+  grid-area: card;
   position: relative;
   display: grid;
   gap: 14px;
-  padding: clamp(22px, 3vw, 36px);
+  padding: clamp(22px, 3vw, 32px);
   border-radius: 14px;
   background: var(--grey-1);
   border: 1px solid var(--grey-2);
@@ -53,11 +132,10 @@
 
 .rows {
   display: grid;
-  padding: 0;
-  list-style: none;
+  margin: 0;
 }
 
-.rows li {
+.rows > div {
   display: flex;
   justify-content: space-between;
   gap: 16px;
@@ -66,9 +144,10 @@
   font-size: 0.95rem;
 }
 
-.rows li span:last-child {
+.rows dd {
+  margin: 0;
   color: var(--grey-4);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   text-align: right;
 }
 
@@ -91,8 +170,33 @@
   font-weight: 600;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 980px) {
   .every {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      'head'
+      'view'
+      'card';
+  }
+
+  .view {
+    margin: 0 calc(var(--gutter) * -1);
+  }
+
+  .view figcaption {
+    padding: 0 var(--gutter);
+  }
+
+  .zoomBox {
+    border-radius: 0;
+  }
+
+  .rows > div {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .rows dd {
+    text-align: left;
   }
 }

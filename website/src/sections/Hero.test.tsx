@@ -33,3 +33,17 @@ test('the proof strip carries the release size', () => {
   expect(container.textContent).toContain('Android 7+ · 13.4 MB')
   expect(container.textContent).toContain('free · open source · no ads · no account · works offline')
 })
+
+test('the hero is a real photograph with its credit', () => {
+  render(<Hero />)
+  expect(screen.getByRole('img', { name: /torii gate/i })).toHaveAttribute('srcset')
+  expect(screen.getByText(/Jakub Hałun, CC BY 4.0/)).toBeInTheDocument()
+})
+
+test('pressing the shutter captures a frame onto the strip', async () => {
+  const { default: userEvent } = await import('@testing-library/user-event')
+  render(<Hero />)
+  await userEvent.click(screen.getByRole('button', { name: 'Take a photo' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Take a photo' }))
+  expect(screen.getByText('2 frames')).toBeInTheDocument()
+})

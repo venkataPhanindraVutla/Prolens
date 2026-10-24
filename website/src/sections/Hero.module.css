@@ -1,112 +1,182 @@
 .hero {
+  --fx: 50%;
+  --fy: 58%;
+  --rail: 46px;
   position: relative;
-  min-height: max(640px, 100svh);
+  height: max(640px, 100svh);
   overflow: hidden;
-  padding: 0 calc(46px + var(--gutter)) 0 var(--gutter);
   isolation: isolate;
+  color: var(--paper);
 }
 
-/* The pink light leak: a soft blob screened over everything below the rail. */
+.photo {
+  position: absolute;
+  inset: 0;
+  transform: scale(1.03);
+}
+
+.shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgb(11 11 11 / 0.55) 0%, transparent 18%),
+    linear-gradient(0deg, rgb(11 11 11 / 0.92) 0%, rgb(11 11 11 / 0.35) 42%, transparent 64%),
+    linear-gradient(90deg, rgb(11 11 11 / 0.55) 0%, transparent 55%);
+}
+
+.grid {
+  opacity: 0.45;
+}
+
+/* Pink light leak screened over the photograph, like a real leak on film. */
 .leak {
-  --x: 64%;
-  --y: 38%;
+  --x: 50%;
+  --y: 58%;
   position: absolute;
   left: var(--x);
   top: var(--y);
-  width: min(560px, 80vw);
+  width: min(620px, 90vw);
   aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(255 45 171 / 0.8) 0%, rgb(255 45 171 / 0.2) 40%, transparent 70%);
-  filter: blur(10px);
+  background: radial-gradient(circle, rgb(255 45 171 / 0.55) 0%, rgb(255 45 171 / 0.16) 42%, transparent 70%);
   mix-blend-mode: screen;
   transform: translate(-50%, -50%);
   pointer-events: none;
-  z-index: 1;
 }
 
 .drifting {
-  animation: drift 20s ease-in-out infinite alternate;
+  animation: drift 22s ease-in-out infinite alternate;
 }
 
 .still {
-  --x: 70%;
-  --y: 22%;
+  --x: 78%;
+  --y: 26%;
 }
 
-/* Drift with transform only, so the blurred leak is moved by the compositor instead of repainted. */
 @keyframes drift {
-  0% { transform: translate(-50%, -50%) translate(6vw, -14vh); }
-  35% { transform: translate(-50%, -50%) translate(-16vw, 8vh); }
-  70% { transform: translate(-50%, -50%) translate(14vw, 24vh); }
-  100% { transform: translate(-50%, -50%) translate(-6vw, -8vh); }
+  0% { transform: translate(-50%, -50%) translate(18vw, -20vh); }
+  50% { transform: translate(-50%, -50%) translate(-8vw, 6vh); }
+  100% { transform: translate(-50%, -50%) translate(22vw, 10vh); }
+}
+
+.flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 8;
+  animation: flash 220ms ease-out;
+}
+
+@keyframes flash {
+  0% { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
+.frame {
+  position: absolute;
+  inset: 20px calc(var(--rail) + 20px) 20px 20px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.frame span {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border: 0 solid rgb(244 244 239 / 0.85);
+}
+
+.frame span:nth-child(1) { top: 0; left: 0; border-width: 2px 0 0 2px; }
+.frame span:nth-child(2) { top: 0; right: 0; border-width: 2px 2px 0 0; }
+.frame span:nth-child(3) { bottom: 0; left: 0; border-width: 0 0 2px 2px; }
+.frame span:nth-child(4) { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+
+.hud {
+  position: absolute;
+  top: 34px;
+  left: 44px;
+  right: calc(var(--rail) + 44px);
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+  color: rgb(244 244 239 / 0.85);
+  z-index: 3;
+}
+
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--lime);
+  vertical-align: 1px;
+}
+
+.exposure {
+  color: var(--lime);
+  white-space: pre;
+}
+
+.focus {
+  position: absolute;
+  left: var(--fx);
+  top: var(--fy);
+  width: 64px;
+  height: 64px;
+  transform: translate(-50%, -50%);
+  border: 1.5px solid var(--lime);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.focus b {
+  position: absolute;
+  top: -20px;
+  left: -1px;
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: var(--lime);
 }
 
 .word {
   position: absolute;
-  left: var(--gutter);
-  top: 7vh;
-  z-index: 2;
-  font-size: clamp(120px, 21vw, 330px);
+  left: 40px;
+  bottom: calc(7vh + 150px);
+  z-index: 4;
+  font-size: clamp(110px, 17vw, 280px);
   font-weight: 700;
-  line-height: 0.78;
+  line-height: 0.8;
   letter-spacing: -0.07em;
+  text-shadow: 0 4px 40px rgb(0 0 0 / 0.25);
 }
 
 .outline {
   color: transparent;
   -webkit-text-stroke: 2px var(--paper);
-}
-
-.phoneWrap {
-  position: absolute;
-  right: calc(46px + 14vw);
-  top: 13vh;
-  z-index: 3;
-  transform: rotateZ(5deg);
-  transform-style: preserve-3d;
-}
-
-.phone {
-  --phone-w: clamp(220px, 19vw, 300px);
-}
-
-.focus {
-  position: absolute;
-  left: 33.3%;
-  top: 67.5%;
-  width: 46px;
-  height: 46px;
-  transform: translate(-50%, -50%);
-  border: 1.5px solid var(--lime);
-  z-index: 2;
-}
-
-.screenHud {
-  position: absolute;
-  inset: auto 0 0 0;
-  padding: 36px 14px 18px;
-  background: linear-gradient(transparent, rgb(0 0 0 / 0.7));
-  z-index: 2;
-}
-
-.screenHud dl {
-  font-size: 0.62rem;
-  gap: 2px 10px;
+  text-shadow: none;
 }
 
 .copy {
   position: absolute;
-  left: var(--gutter);
+  left: 44px;
   bottom: 7vh;
-  z-index: 3;
-  display: grid;
-  gap: 22px;
-  max-width: 460px;
+  z-index: 4;
+  display: flex;
+  align-items: end;
+  gap: 32px;
+  flex-wrap: wrap;
+  max-width: min(980px, calc(100% - var(--rail) - 260px));
 }
 
 .sub {
-  color: #cfcfc8;
-  font-size: clamp(1.05rem, 1.4vw, 1.2rem);
+  max-width: 400px;
+  color: rgb(244 244 239 / 0.88);
+  font-size: clamp(1rem, 1.3vw, 1.15rem);
   line-height: 1.45;
 }
 
@@ -116,16 +186,110 @@
   gap: 12px;
 }
 
+.ghost {
+  background: rgb(11 11 11 / 0.35);
+  backdrop-filter: blur(8px);
+  border-color: rgb(244 244 239 / 0.35);
+}
+
+/* Landscape camera controls: shutter and the roll of frames taken. */
+.camera {
+  position: absolute;
+  right: calc(var(--rail) + 44px);
+  bottom: 7vh;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.shutter {
+  width: 78px;
+  height: 78px;
+  padding: 6px;
+  border-radius: 50%;
+  border: 3px solid var(--paper);
+  background: transparent;
+  cursor: pointer;
+}
+
+.shutter span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--paper);
+  transition: transform 120ms var(--ease-out), background-color 120ms;
+}
+
+.shutter:hover span {
+  background: var(--lime);
+}
+
+.shutter:active span {
+  transform: scale(0.88);
+}
+
+.roll {
+  display: grid;
+  gap: 6px;
+  justify-items: end;
+  order: -1;
+}
+
+.roll ol {
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.roll li {
+  width: 44px;
+  height: 30px;
+  border: 1.5px solid var(--paper);
+  background-size: 360%;
+  animation: drop 260ms var(--ease-out);
+}
+
+@keyframes drop {
+  from { transform: translateY(-24px) scale(1.6); opacity: 0; }
+}
+
+.roll > span {
+  white-space: nowrap;
+  font-size: 0.7rem;
+  color: rgb(244 244 239 / 0.75);
+}
+
+.credit {
+  position: absolute;
+  right: calc(var(--rail) + 44px);
+  top: 58px;
+  z-index: 3;
+  font-size: 0.66rem;
+  color: rgb(244 244 239 / 0.6);
+}
+
+.credit a {
+  text-decoration: none;
+}
+
+.credit a:hover {
+  text-decoration: underline;
+}
+
 .rail {
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
-  width: 46px;
+  width: var(--rail);
   overflow: hidden;
   background: var(--lime);
   color: var(--ink);
-  z-index: 4;
+  z-index: 6;
 }
 
 .rail span {
@@ -148,42 +312,77 @@
   to { transform: translateY(-50%); }
 }
 
-/* Phones and narrow windows: everything in one column, the rail runs across. */
-@media (max-width: 720px) {
+/* Phones: the photo stays full-bleed; the wordmark and controls stack at the bottom, the rail runs across the top. */
+@media (max-width: 760px) {
   .hero {
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
-    min-height: auto;
-    padding: 40px var(--gutter) 0;
+    --rail: 0px;
+    height: max(620px, 100svh);
   }
 
-  .word,
-  .copy,
-  .phoneWrap {
-    position: static;
+  .frame {
+    inset: 54px 12px 12px;
+  }
+
+  .hud {
+    top: 66px;
+    left: 26px;
+    right: 26px;
+    font-size: 0.64rem;
+  }
+
+  .hud > span:first-child {
+    display: none;
+  }
+
+  .credit {
+    top: auto;
+    bottom: 22px;
+    right: 26px;
+    left: 26px;
+    text-align: right;
   }
 
   .word {
-    font-size: clamp(96px, 30vw, 180px);
+    left: 22px;
+    bottom: 300px;
+    font-size: clamp(88px, 29vw, 160px);
   }
 
-  .phoneWrap {
-    align-self: center;
-    transform: rotateZ(3deg);
-    margin: 8px 0 32px;
+  .copy {
+    left: 22px;
+    right: 22px;
+    bottom: 54px;
+    max-width: none;
+    gap: 18px;
   }
 
-  .phone {
-    --phone-w: min(240px, 64vw);
+  .hero {
+    --fx: 62%;
+    --fy: 34%;
+  }
+
+  .camera {
+    right: 22px;
+    bottom: auto;
+    top: 96px;
+    flex-direction: column;
+    align-items: end;
+    gap: 8px;
+  }
+
+  .roll {
+    order: 0;
+  }
+
+  .shutter {
+    width: 60px;
+    height: 60px;
   }
 
   .rail {
-    position: relative;
-    inset: auto;
+    inset: 0 0 auto 0;
     width: auto;
     height: 40px;
-    margin: 0 calc(var(--gutter) * -1);
   }
 
   .rail span {

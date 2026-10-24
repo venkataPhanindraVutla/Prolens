@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { falseColor, histogram, luma, peaking, zebra } from '../../lib/analysis'
-import type { Chapter } from './chapter'
+import { photo, src } from '../../lib/photos'
+import type { Chapter, Frame } from './chapter'
 import css from './story.module.css'
 import ex from './Expose.module.css'
 
-const W = 270
-const H = 480
 type Tool = 'histogram' | 'zebras' | 'falseColour' | 'peaking'
 const TOOLS: { id: Tool; label: string }[] = [
   { id: 'histogram', label: 'Histogram' },
@@ -13,83 +12,55 @@ const TOOLS: { id: Tool; label: string }[] = [
   { id: 'falseColour', label: 'False colour' },
   { id: 'peaking', label: 'Peaking' },
 ]
+const PHOTO = photo('expose')
+/** Analysis runs at a fraction of the frame, like the app's downsampled preview. */
+const SCALE = 2.5
 
-/** A backlit portrait: blown sky, a hard rim and a dark foreground, so every tool has something to show. */
-function drawPhoto(g: CanvasRenderingContext2D) {
-  const sky = g.createLinearGradient(0, 0, 0, H * 0.62)
-  sky.addColorStop(0, '#9fb6d6')
-  sky.addColorStop(0.55, '#f6efe0')
-  sky.addColorStop(1, '#fffaf0')
-  g.fillStyle = sky
-  g.fillRect(0, 0, W, H)
-  const sun = g.createRadialGradient(196, 120, 4, 196, 120, 120)
-  sun.addColorStop(0, '#ffffff')
-  sun.addColorStop(0.3, '#fff8e6')
-  sun.addColorStop(1, 'rgba(255,240,210,0)')
-  g.fillStyle = sun
-  g.fillRect(0, 0, W, H)
-  g.fillStyle = '#6d6a72'
-  g.beginPath()
-  g.moveTo(0, 300)
-  g.lineTo(60, 268)
-  g.lineTo(120, 290)
-  g.lineTo(190, 262)
-  g.lineTo(W, 296)
-  g.lineTo(W, H)
-  g.lineTo(0, H)
-  g.fill()
-  const ground = g.createLinearGradient(0, 300, 0, H)
-  ground.addColorStop(0, '#3b3530')
-  ground.addColorStop(1, '#070606')
-  g.fillStyle = ground
-  g.fillRect(0, 318, W, H)
-  // Head and shoulders against the light.
-  g.fillStyle = '#1a1414'
-  g.beginPath()
-  g.ellipse(118, 238, 42, 52, 0, 0, Math.PI * 2)
-  g.fill()
-  g.beginPath()
-  g.moveTo(20, H)
-  g.bezierCurveTo(30, 360, 70, 318, 118, 316)
-  g.bezierCurveTo(166, 318, 206, 360, 216, H)
-  g.fill()
-  g.fillRect(100, 280, 36, 44)
-  g.strokeStyle = '#fffaf0'
-  g.lineWidth = 4
-  g.beginPath()
-  g.ellipse(118, 238, 43, 53, 0, -2.5, -0.2)
-  g.stroke()
+/** Draws img into a w × h canvas the way object-fit: cover would, keeping the photo's focus point. */
+function drawCover(g: CanvasRenderingContext2D, img: HTMLImageElement, w: number, h: number) {
+  const s = Math.max(w / img.naturalWidth, h / img.naturalHeight)
+  const dw = img.naturalWidth * s
+  const dh = img.naturalHeight * s
+  const [fx, fy] = PHOTO.focus.split(' ').map((v) => parseFloat(v) / 100)
+  g.drawImage(img, (w - dw) * fx, (h - dh) * fy, dw, dh)
 }
 
-function Screen({ tools }: { tools: Set<Tool> }) {
+function Screen({ tools, frame }: { tools: Set<Tool>; frame: Frame }) {
+  const w = Math.round(frame.w / SCALE)
+  const h = Math.round(frame.h / SCALE)
   const base = useRef<HTMLCanvasElement>(null)
   const over = useRef<HTMLCanvasElement>(null)
-  const [frame, setFrame] = useState<Uint8Array | null>(null)
+  const [l, setL] = useState<Uint8Array | null>(null)
 
-  // Draw the photo once and keep its luma for the tools, when the browser is idle so page load stays quick.
+  // Load the photo once, draw it, and keep its luma for the tools, when the browser is idle.
   useEffect(() => {
     const g = base.current?.getContext('2d', { willReadFrequently: true })
     if (!g) return
-    const run = () => {
-      drawPhoto(g)
-      setFrame(luma(g.getImageData(0, 0, W, H).data))
+    let cancelled = false
+    const img = new Image()
+    img.decoding = 'async'
+    img.onload = () => {
+      const run = () => {
+        if (cancelled) return
+        drawCover(g, img, w, h)
+        setL(luma(g.getImageData(0, 0, w, h).data))
+      }
+      if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(run, { timeout: 1500 })
+      else setTimeout(run, 100)
     }
-    // Safari has no requestIdleCallback.
-    if (typeof window.requestIdleCallback === 'function') {
-      const id = window.requestIdleCallback(run, { timeout: 2000 })
-      return () => window.cancelIdleCallback(id)
+    img.src = src(PHOTO, 1280)
+    return () => {
+      cancelled = true
     }
-    const id = setTimeout(run, 200)
-    return () => clearTimeout(id)
-  }, [])
+  }, [w, h])
 
   useEffect(() => {
     const o = over.current?.getContext('2d')
-    if (!o || !frame) return
-    const img = o.createImageData(W, H)
+    if (!o || !l) return
+    const img = o.createImageData(w, h)
     if (tools.has('falseColour'))
-      for (let i = 0; i < frame.length; i++) {
-        const [r, g, b] = falseColor(frame[i])
+      for (let i = 0; i < l.length; i++) {
+        const [r, g, b] = falseColor(l[i])
         img.data.set([r, g, b, 255], i * 4)
       }
     const layer = (px: Uint8ClampedArray) => {
@@ -100,17 +71,17 @@ function Screen({ tools }: { tools: Set<Tool> }) {
           img.data[i + 3] = Math.max(img.data[i + 3], px[i + 3])
         }
     }
-    if (tools.has('zebras')) layer(zebra(frame, W, H))
-    if (tools.has('peaking')) layer(peaking(frame, W, H))
+    if (tools.has('zebras')) layer(zebra(l, w, h))
+    if (tools.has('peaking')) layer(peaking(l, w, h))
     o.putImageData(img, 0, 0)
-  }, [tools, frame])
+  }, [tools, l, w, h])
 
-  const hist = useMemo(() => (frame ? histogram(frame) : null), [frame])
+  const hist = useMemo(() => (l ? histogram(l) : null), [l])
   const max = hist ? Math.max(...hist) : 1
   return (
     <>
-      <canvas ref={base} width={W} height={H} className={ex.canvas} />
-      <canvas ref={over} width={W} height={H} className={ex.canvas} />
+      <canvas ref={base} width={w} height={h} className={ex.canvas} role="img" aria-label={PHOTO.alt} />
+      <canvas ref={over} width={w} height={h} className={ex.canvas} />
       {tools.has('histogram') && hist && (
         <svg className={ex.hist} viewBox="0 0 64 32" preserveAspectRatio="none" aria-hidden="true">
           {hist.map((v, i) => (
@@ -123,7 +94,7 @@ function Screen({ tools }: { tools: Set<Tool> }) {
 }
 
 export function useExpose(): Chapter {
-  const [tools, setTools] = useState<Set<Tool>>(() => new Set<Tool>(['zebras']))
+  const [tools, setTools] = useState<Set<Tool>>(() => new Set<Tool>(['zebras', 'histogram']))
   const toggle = (t: Tool) =>
     setTools((prev) => {
       const next = new Set(prev)
@@ -131,15 +102,18 @@ export function useExpose(): Chapter {
       else next.add(t)
       return next
     })
+  const on = TOOLS.filter((t) => tools.has(t.id)).map((t) => t.label.toUpperCase())
   return {
     id: 'expose',
+    photoId: 'expose',
+    hud: `PHOTO · ${on.length ? on.join(' + ') : 'NO OVERLAYS'} · 50 mm · f/6.3 · 1/400 · ISO 100`,
     title: (
       <>
         See exposure. <span className="pink">Don’t guess it.</span>
       </>
     ),
-    body: 'Zebras stripe what’s about to clip, false colour maps brightness like a cinema monitor, peaking outlines what’s in focus, and the histogram shows the whole frame at once.',
-    screen: <Screen tools={tools} />,
+    body: 'This is the real photo, measured pixel by pixel. Zebras stripe what’s about to clip, false colour maps brightness like a cinema monitor, peaking outlines what’s sharp, and the histogram shows the whole frame at once.',
+    screen: (f) => <Screen tools={tools} frame={f} />,
     controls: (
       <div className={css.chips}>
         {TOOLS.map((t) => (

@@ -1,18 +1,29 @@
 import { useState } from 'react'
 import GridOverlay from '../../components/GridOverlay'
-import Scene from '../../components/Scene'
+import Photo from '../../components/Photo'
+import { creditLine, photo } from '../../lib/photos'
 import { GRIDS, GRID_GROUPS, gridSpec } from '../../lib/grids'
 import tk from './Toolkit.module.css'
+
+const HERO = photo('hero')
 
 export default function GridLibrary() {
   const [id, setId] = useState('spiral')
   const spec = gridSpec(id)!
   return (
     <div className={`${tk.tool} ${tk.library}`}>
-      <div className={tk.frame}>
-        <Scene kind="golden-coast" />
-        <GridOverlay id={id} width={600} height={400} />
-      </div>
+      <figure className={tk.libraryPhoto}>
+        <div className={tk.frame}>
+          <Photo id="hero" sizes="(min-width: 980px) 50vw, 100vw" />
+          <GridOverlay id={id} width={600} height={400} color="rgb(244 244 239 / 0.95)" />
+        </div>
+        <figcaption className="mono">
+          {HERO.place} ·{' '}
+          <a href={HERO.page} target="_blank" rel="noopener">
+            Photo: {creditLine(HERO)}
+          </a>
+        </figcaption>
+      </figure>
       <div className={tk.libraryText}>
         <h3 className={tk.title}>All 23 grids</h3>
         <div role="radiogroup" aria-label="Grid library" className={tk.groups}>

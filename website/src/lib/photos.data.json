@@ -1,0 +1,392 @@
+[
+ {
+  "id": "hero",
+  "alt": "A red torii gate standing in the sea at sunset, Itsukushima Shrine, Japan",
+  "focus": "50% 60%",
+  "place": "Miyajima, Japan",
+  "title": "Itsukushima-jinja torii at sunset, Miyajima, Japan, 20240816 1812 4144.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Itsukushima-jinja_torii_at_sunset,_Miyajima,_Japan,_20240816_1812_4144.jpg",
+  "artist": "Jakub Hałun",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "exif": {
+   "Make": "NIKON CORPORATION",
+   "Model": "NIKON D750",
+   "FNumber": "80/10",
+   "ExposureTime": "10/3200",
+   "ISOSpeedRatings": 100,
+   "FocalLength": "300/10",
+   "FocalLengthIn35mmFilm": 30
+  },
+  "width": 3840,
+  "height": 2563,
+  "widths": [
+   640,
+   960,
+   1280,
+   2000,
+   2400
+  ],
+  "color": "#b8a898"
+ },
+ {
+  "id": "compose",
+  "alt": "A lone pine and its reflection on a still lake in Swedish Lapland",
+  "focus": "45% 55%",
+  "place": "Kungsleden, Sweden",
+  "title": "Stuor Dáhtá lake along the Kungsleden trail during golden hour in Kvikkjokk-Kabla fjällurskog (DSCF2557).jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Stuor_D%C3%A1ht%C3%A1_lake_along_the_Kungsleden_trail_during_golden_hour_in_Kvikkjokk-Kabla_fj%C3%A4llurskog_(DSCF2557).jpg",
+  "artist": "Trougnouf (Benoit Brummer)",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "exif": {
+   "Make": "FUJIFILM",
+   "Model": "X-T1",
+   "FNumber": "1100/100",
+   "ExposureTime": "10/450",
+   "ISOSpeedRatings": 200,
+   "FocalLength": "2430/100",
+   "FocalLengthIn35mmFilm": 36
+  },
+  "width": 3840,
+  "height": 2251,
+  "widths": [
+   640,
+   960,
+   1280,
+   2000,
+   2400
+  ],
+  "color": "#98b8d8"
+ },
+ {
+  "id": "level",
+  "alt": "Wooded hills rising out of a sea of fog at dawn",
+  "focus": "50% 50%",
+  "place": "Vosges, France",
+  "title": "Vallee-brouillard.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Vallee-brouillard.jpg",
+  "artist": "Thomas Bresson",
+  "license": "CC BY 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+  "exif": {
+   "Make": null,
+   "Model": "NIKON D300",
+   "FNumber": "800/100",
+   "ExposureTime": "100/1298",
+   "ISOSpeedRatings": 200,
+   "FocalLength": "8200/100",
+   "FocalLengthIn35mmFilm": null
+  },
+  "width": 3840,
+  "height": 2508,
+  "widths": [
+   640,
+   960,
+   1280,
+   2000,
+   2400
+  ],
+  "color": "#383848"
+ },
+ {
+  "id": "expose",
+  "alt": "The sun setting over layers of fog and forested hills",
+  "focus": "50% 40%",
+  "place": "Baden-Württemberg, Germany",
+  "title": "Foggy sunset view from Moos mountain, Baden-Württemberg, Germany.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Foggy_sunset_view_from_Moos_mountain,_Baden-W%C3%BCrttemberg,_Germany.jpg",
+  "artist": "Thomas Heins from Friesenheim, Deutschland",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "exif": {
+   "Make": "Canon",
+   "Model": "Canon EOS R5m2",
+   "FNumber": "63/10",
+   "ExposureTime": "1/400",
+   "ISOSpeedRatings": 100,
+   "FocalLength": "50/1",
+   "FocalLengthIn35mmFilm": null
+  },
+  "width": 3840,
+  "height": 2561,
+  "widths": [
+   640,
+   960,
+   1280,
+   2000,
+   2400
+  ],
+  "color": "#786848"
+ },
+ {
+  "id": "night",
+  "alt": "The Chain Bridge lit up at night over the Danube, Budapest",
+  "focus": "50% 55%",
+  "place": "Budapest, Hungary",
+  "title": "Széchenyi Chain Bridge in Budapest at night.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Sz%C3%A9chenyi_Chain_Bridge_in_Budapest_at_night.jpg",
+  "artist": "Wilfredor",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "exif": {
+   "Make": "NIKON CORPORATION",
+   "Model": "NIKON D300",
+   "FNumber": "5/1",
+   "ExposureTime": "13/10",
+   "ISOSpeedRatings": 125,
+   "FocalLength": "380/10",
+   "FocalLengthIn35mmFilm": 57
+  },
+  "width": 3580,
+  "height": 2000,
+  "widths": [
+   640,
+   960,
+   1280,
+   2000,
+   2400
+  ],
+  "color": "#281808"
+ },
+ {
+  "id": "macro",
+  "alt": "A bee feeding on an orange flower, close up",
+  "focus": "50% 50%",
+  "place": "Portugal",
+  "title": "Halictus bee on flower-2.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Halictus_bee_on_flower-2.jpg",
+  "artist": "Alvesgaspar",
+  "license": "CC BY 2.5",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
+  "exif": {
+   "Make": "KONICA MINOLTA",
+   "Model": "DiMAGE A200",
+   "FNumber": "71/10",
+   "ExposureTime": "10/2500",
+   "ISOSpeedRatings": 50,
+   "FocalLength": "508/10",
+   "FocalLengthIn35mmFilm": 200
+  },
+  "width": 2448,
+  "height": 1836,
+  "widths": [
+   640,
+   960,
+   1280,
+   2000,
+   2400
+  ],
+  "color": "#e86808"
+ },
+ {
+  "id": "micro",
+  "alt": "A drop of water bouncing off a blue surface",
+  "focus": "50% 45%",
+  "place": "Spain",
+  "title": "Water drop 001.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Water_drop_001.jpg",
+  "artist": "José Manuel Suárez from Spain",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "exif": {
+   "Make": "Canon",
+   "Model": "Canon EOS 450D",
+   "FNumber": "5/1",
+   "ExposureTime": "1/200",
+   "ISOSpeedRatings": 100,
+   "FocalLength": "60/1",
+   "FocalLengthIn35mmFilm": null
+  },
+  "width": 3714,
+  "height": 2475,
+  "widths": [
+   640,
+   960,
+   1280,
+   2000,
+   2400
+  ],
+  "color": "#383858"
+ },
+ {
+  "id": "slomo",
+  "alt": "A marathon runner and a wheelchair racer on a Paris street",
+  "focus": "72% 45%",
+  "place": "Paris, France",
+  "title": "David Bizet - Marathon de Paris 2014.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:David_Bizet_-_Marathon_de_Paris_2014.jpg",
+  "artist": "Marie-Lan Nguyen",
+  "license": "CC BY 3.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+  "exif": {
+   "Make": "NIKON CORPORATION",
+   "Model": "NIKON D800E",
+   "FNumber": "16/5",
+   "ExposureTime": "1/1250",
+   "ISOSpeedRatings": 100,
+   "FocalLength": "300/1",
+   "FocalLengthIn35mmFilm": 300
+  },
+  "width": 3840,
+  "height": 2356,
+  "widths": [
+   640,
+   960,
+   1280,
+   2000,
+   2400
+  ],
+  "color": "#080808"
+ },
+ {
+  "id": "pano",
+  "alt": "The snow-covered Annapurna range, Nepal",
+  "focus": "50% 50%",
+  "place": "Annapurna, Nepal",
+  "title": "Snowy Annapurna Range - panorama.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Snowy_Annapurna_Range_-_panorama.jpg",
+  "artist": "Ali Sabbagh",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "exif": {
+   "Make": "Canon",
+   "Model": "Canon EOS 7D",
+   "FNumber": "16/1",
+   "ExposureTime": "1/60",
+   "ISOSpeedRatings": 100,
+   "FocalLength": "22/1",
+   "FocalLengthIn35mmFilm": null
+  },
+  "width": 3840,
+  "height": 1465,
+  "widths": [
+   640,
+   960,
+   1280,
+   2000,
+   2400
+  ],
+  "color": "#f8f8f8"
+ },
+ {
+  "id": "templates",
+  "alt": "Place Royale and its church at night, Québec City",
+  "focus": "60% 50%",
+  "place": "Québec City, Canada",
+  "title": "Place Royale and Notre-Dame-des-Victoires at night.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Place_Royale_and_Notre-Dame-des-Victoires_at_night.jpg",
+  "artist": "Wilfredor",
+  "license": "CC0",
+  "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+  "exif": {
+   "Make": "NIKON CORPORATION",
+   "Model": "NIKON D7200",
+   "FNumber": "18/10",
+   "ExposureTime": "1/10",
+   "ISOSpeedRatings": 100,
+   "FocalLength": "180/10",
+   "FocalLengthIn35mmFilm": 27
+  },
+  "width": 3840,
+  "height": 2714,
+  "widths": [
+   640,
+   960,
+   1280,
+   2000,
+   2400
+  ],
+  "color": "#081828"
+ },
+ {
+  "id": "lenses",
+  "alt": "A person sitting among granite boulders above Hampi, India",
+  "focus": "18% 66%",
+  "place": "Hampi, India",
+  "title": "Hampi, India, Rocky landscape of Hampi, Granite rocks of Matanga Hill.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Hampi,_India,_Rocky_landscape_of_Hampi,_Granite_rocks_of_Matanga_Hill.jpg",
+  "artist": "Vyacheslav Argenberg",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "exif": {
+   "Make": "OLYMPUS IMAGING CORP.",
+   "Model": "E-P1",
+   "FNumber": "56/10",
+   "ExposureTime": "1/160",
+   "ISOSpeedRatings": 200,
+   "FocalLength": "14/1",
+   "FocalLengthIn35mmFilm": 28
+  },
+  "width": 3840,
+  "height": 2560,
+  "widths": [
+   640,
+   960,
+   1280,
+   2000,
+   2400
+  ],
+  "color": "#483838"
+ },
+ {
+  "id": "dof",
+  "alt": "A road running straight towards the coast, Iceland",
+  "focus": "50% 60%",
+  "place": "Dyrhólaey, Iceland",
+  "title": "Dyrhólaey Peninsula - view from Road number 215, Iceland, 20240720 0820 2819.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Dyrh%C3%B3laey_Peninsula_-_view_from_Road_number_215,_Iceland,_20240720_0820_2819.jpg",
+  "artist": "Jakub Hałun",
+  "license": "CC BY 4.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+  "exif": {
+   "Make": "NIKON CORPORATION",
+   "Model": "NIKON D750",
+   "FNumber": "80/10",
+   "ExposureTime": "10/5000",
+   "ISOSpeedRatings": 100,
+   "FocalLength": "480/10",
+   "FocalLengthIn35mmFilm": 48
+  },
+  "width": 3840,
+  "height": 2563,
+  "widths": [
+   640,
+   960,
+   1280,
+   2000,
+   2400
+  ],
+  "color": "#88a8c8"
+ },
+ {
+  "id": "library",
+  "alt": "Trees on grassland at sunset near Great Sand Dunes, Colorado",
+  "focus": "50% 55%",
+  "place": "Colorado, USA",
+  "title": "Sunset near Great Sand Dunes National Park.jpg",
+  "page": "https://commons.wikimedia.org/wiki/File:Sunset_near_Great_Sand_Dunes_National_Park.jpg",
+  "artist": "Andrew Russell",
+  "license": "CC BY 2.0",
+  "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+  "exif": {
+   "Make": "NIKON CORPORATION",
+   "Model": "NIKON D810",
+   "FNumber": "8/1",
+   "ExposureTime": "1/125",
+   "ISOSpeedRatings": 64,
+   "FocalLength": "350/10",
+   "FocalLengthIn35mmFilm": 35
+  },
+  "width": 3840,
+  "height": 1322,
+  "widths": [
+   640,
+   960,
+   1280,
+   2000,
+   2400
+  ],
+  "color": "#281808"
+ }
+]

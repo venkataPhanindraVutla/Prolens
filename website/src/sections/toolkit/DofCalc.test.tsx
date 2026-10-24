@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { expect, test } from 'vitest'
 import { distance } from '../../lib/format'
 import { SENSORS, coc, dof } from '../../lib/photomath'
+import { focusBand } from '../../lib/focusband'
 import DofCalc from './DofCalc'
 
 const value = (label: string) => screen.getByText(label).nextElementSibling!.textContent
@@ -20,4 +21,13 @@ test('focusing past the hyperfocal distance makes the far limit infinite', () =>
   const slider = screen.getByLabelText(/Focus distance/)
   fireEvent.change(slider, { target: { value: slider.getAttribute('max') } })
   expect(value('Far')).toBe('∞')
+})
+
+test('the photo is sharp only across the depth-of-field band', () => {
+  render(<DofCalc />)
+  const d = dof(50, 8, coc(SENSORS[0]), 3000)
+  const blur = document.querySelector('[data-blur]') as HTMLElement
+  const band = focusBand(d.near, d.far)
+  expect(Number(blur.dataset.top)).toBeCloseTo(band.top, 3)
+  expect(Number(blur.dataset.bottom)).toBeCloseTo(band.bottom, 3)
 })

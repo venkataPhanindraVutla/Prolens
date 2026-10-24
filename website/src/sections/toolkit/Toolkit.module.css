@@ -65,42 +65,101 @@
   accent-color: var(--lime);
 }
 
-.zone {
-  position: relative;
-  height: 10px;
-  border-radius: 999px;
-  background: var(--grey-2);
-}
 
-.sharp {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  border-radius: 999px;
-  background: var(--lime);
-}
-
-.subject {
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  width: 2px;
-  background: var(--pink);
-}
-
-.library {
+.library,
+.dof {
   grid-column: 1 / -1;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
   gap: clamp(20px, 3vw, 40px);
 }
 
-.frame {
+.libraryPhoto,
+.dofPhoto {
   position: sticky;
   top: 24px;
+  align-self: start;
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.libraryPhoto figcaption,
+.dofPhoto figcaption {
+  color: var(--grey-3);
+  font-size: 0.72rem;
+}
+
+.libraryPhoto figcaption a,
+.dofPhoto figcaption a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.frame {
+  position: relative;
   aspect-ratio: 3 / 2;
   overflow: hidden;
   border-radius: 6px;
-  align-self: start;
+}
+
+.blurLayer {
+  position: absolute;
+  inset: -16px;
+  transition: filter 200ms;
+}
+
+.blurLayer img {
+  inset: 16px !important;
+  width: calc(100% - 32px) !important;
+  height: calc(100% - 32px) !important;
+}
+
+/* Where focus sits on the road: a lime line with the distance. */
+.subject {
+  position: absolute;
+  left: 30%;
+  right: 30%;
+  height: 0;
+  border-top: 1.5px dashed var(--lime);
+  z-index: 2;
+}
+
+.subject b {
+  position: absolute;
+  right: 0;
+  top: -22px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 0.6);
+  color: var(--lime);
+  font-size: 0.72rem;
+}
+
+.dofControls {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.hint {
+  color: var(--grey-4);
+  font-size: 0.95rem;
+}
+
+.more dl {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+.more dt {
+  font-weight: 500;
+}
+
+.more dd {
+  margin: 2px 0 0;
+  color: var(--grey-4);
+  font-size: 0.9rem;
 }
 
 .libraryText {
@@ -179,8 +238,14 @@
 
 @media (max-width: 900px) {
   .grid,
-  .library {
+  .library,
+  .dof {
     grid-template-columns: 1fr;
+  }
+
+  .libraryPhoto,
+  .dofPhoto {
+    position: static;
   }
 }
 

@@ -1,32 +1,32 @@
-.strip {
+.swap {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 17%;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  font-size: 0.56rem;
-  color: rgb(244 244 239 / 0.7);
-  z-index: 2;
-  white-space: nowrap;
+  inset: 0;
+  animation: develop 420ms var(--ease-out);
 }
 
-.current {
+@keyframes develop {
+  from {
+    opacity: 0;
+    filter: brightness(1.6) saturate(0.3);
+  }
+}
+
+/* Pano: the sweep guide the app shows while stitching. */
+.pano {
+  position: absolute;
+  left: 8%;
+  right: 20%;
+  top: 50%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--lime) 0 40%, rgb(244 244 239 / 0.5) 40%);
+  z-index: 2;
+}
+
+.pano::after {
+  content: '→';
+  position: absolute;
+  left: 40%;
+  top: -11px;
   color: var(--lime);
-  font-weight: 600;
-}
-
-.shutter {
-  position: absolute;
-  left: 50%;
-  bottom: 5.5%;
-  width: 54px;
-  height: 54px;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  border: 3px solid var(--paper);
-  box-shadow: inset 0 0 0 4px rgb(0 0 0 / 0.4);
-  background: rgb(244 244 239 / 0.9);
-  z-index: 2;
+  font-size: 18px;
 }

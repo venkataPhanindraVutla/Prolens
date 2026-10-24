@@ -1,6 +1,11 @@
+/* A strip of film: sprocket holes along both edges, the facts printed between them. */
 .strip {
-  padding: 18px var(--gutter);
-  border-block: 1px solid var(--grey-2);
+  position: relative;
+  padding: 26px var(--gutter);
+  background:
+    radial-gradient(circle at 50% 50%, var(--ink) 0 3.5px, transparent 4px) 0 4px / 22px 10px repeat-x,
+    radial-gradient(circle at 50% 50%, var(--ink) 0 3.5px, transparent 4px) 0 calc(100% - 4px) / 22px 10px repeat-x,
+    #141414;
   color: var(--grey-4);
   font-size: clamp(0.72rem, 1.1vw, 0.85rem);
   text-align: center;

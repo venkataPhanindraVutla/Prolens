@@ -3,6 +3,7 @@ import CropMarks from '../components/CropMarks'
 import SectionHeading from '../components/SectionHeading'
 import ShutterButton from '../components/ShutterButton'
 import { formatSize, useRelease } from '../lib/release'
+import Waitlist from './Waitlist'
 import css from './Download.module.css'
 
 export default function Download() {
@@ -53,6 +54,7 @@ export default function Download() {
           <li>Open Prolens and grant camera access.</li>
         </ol>
       </div>
+      <Waitlist />
     </section>
   )
 }

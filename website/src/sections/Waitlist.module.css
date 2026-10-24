@@ -1,0 +1,90 @@
+.waitlist {
+  display: grid;
+  gap: 14px;
+  max-width: 640px;
+  margin-top: 40px;
+  padding-top: 28px;
+  border-top: 1px solid var(--grey-2);
+}
+
+.title {
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+  font-weight: 500;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: end;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  flex: 1 1 240px;
+  font-size: 0.85rem;
+  color: var(--grey-4);
+}
+
+.field input {
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--grey-2);
+  border-radius: 999px;
+  background: var(--grey-1);
+  font-size: 1rem;
+}
+
+.field input:focus-visible {
+  border-color: var(--lime);
+}
+
+.stores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 0.9rem;
+  color: var(--grey-4);
+}
+
+.stores legend {
+  float: left;
+  margin-right: 8px;
+  padding: 0;
+  color: var(--grey-3);
+}
+
+.store {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.store input {
+  accent-color: var(--lime);
+}
+
+.quiet {
+  color: var(--grey-3);
+  font-size: 0.9rem;
+}
+
+.quiet a {
+  color: var(--paper);
+}
+
+.done {
+  color: var(--lime);
+  font-weight: 500;
+}
+
+.error {
+  color: var(--pink);
+}
